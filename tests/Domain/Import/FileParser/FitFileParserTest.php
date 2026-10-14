@@ -210,6 +210,88 @@ class FitFileParserTest extends ActivityFileParserTestCase
         );
     }
 
+    public function testParseWithPedalingDynamics(): void
+    {
+        // The record balances are bit fields: the first sample is referenced to
+        // the left side, the second one carries the right flag and holds the
+        // right side's share.
+        $this->givenFitToolReturns(Json::encode([
+            'files' => [[
+                'profileVersion' => 2132,
+                'messages' => [
+                    ['name' => 'file_id', 'fields' => []],
+                    ['name' => 'session', 'fields' => [
+                        ['name' => 'sport', 'value' => 2], // cycling
+                        ['name' => 'start_time', 'value' => self::START_FIT_SECONDS],
+                        ['name' => 'left_right_balance', 'value' => 4600],
+                        ['name' => 'total_training_effect', 'value' => 2.6],
+                        ['name' => 'total_anaerobic_training_effect', 'value' => 0.1],
+                        ['name' => 'jump_count', 'value' => 12],
+                        ['name' => 'avg_left_torque_effectiveness', 'value' => 95],
+                        ['name' => 'avg_right_torque_effectiveness', 'value' => 93],
+                        ['name' => 'avg_left_pedal_smoothness', 'value' => 74],
+                        ['name' => 'avg_right_pedal_smoothness', 'value' => 72],
+                        ['name' => 'avg_combined_pedal_smoothness', 'value' => 73],
+                        ['name' => 'avg_left_power_phase', 'value' => [28.4]],
+                        ['name' => 'avg_left_power_phase_peak', 'value' => [96.5]],
+                        ['name' => 'avg_right_power_phase', 'value' => [30.2]],
+                        ['name' => 'avg_right_power_phase_peak', 'value' => [98.1]],
+                    ]],
+                    ['name' => 'record', 'fields' => [
+                        ['name' => 'timestamp', 'value' => self::START_FIT_SECONDS],
+                        ['name' => 'left_right_balance', 'value' => 52],
+                        ['name' => 'left_torque_effectiveness', 'value' => 95],
+                        ['name' => 'right_torque_effectiveness', 'value' => 93],
+                        ['name' => 'left_pedal_smoothness', 'value' => 74],
+                        ['name' => 'right_pedal_smoothness', 'value' => 72],
+                    ]],
+                    ['name' => 'record', 'fields' => [
+                        ['name' => 'timestamp', 'value' => self::START_FIT_SECONDS + 1],
+                        ['name' => 'left_right_balance', 'value' => 0x80 | 46],
+                        ['name' => 'left_torque_effectiveness', 'value' => 96],
+                        ['name' => 'right_torque_effectiveness', 'value' => 94],
+                        ['name' => 'combined_pedal_smoothness', 'value' => 90],
+                    ]],
+                ],
+            ]],
+        ]));
+
+        $parsed = $this->parser->parse(RawActivityFile::from(Path::fromString('/tmp/activity.fit'), ''));
+        $dynamics = $parsed->getActivity()->getDynamics();
+
+        $this->assertNotNull($dynamics);
+        $this->assertSame(46.0, $dynamics->getLeftRightBalanceInPercent());
+        $this->assertSame(54.0, $dynamics->getRightSideBalanceInPercent());
+        $this->assertSame(2.6, $dynamics->getAerobicTrainingEffect());
+        $this->assertSame(0.1, $dynamics->getAnaerobicTrainingEffect());
+        $this->assertSame(12, $dynamics->getJumpCount());
+        $this->assertTrue($dynamics->hasPedalingDynamics());
+        $this->assertSame(96.5, $dynamics->getLeftPowerPhasePeakInDegrees());
+
+        $streams = $parsed->getStreams();
+        $this->assertEquals([52.0, 54.0], array_values(array_filter(
+            $streams->filterOnType(StreamType::LEFT_RIGHT_BALANCE)?->getData() ?? [],
+        )));
+        $this->assertEquals([94.0, 95.0], array_values(array_filter(
+            $streams->filterOnType(StreamType::TORQUE_EFFECTIVENESS)?->getData() ?? [],
+        )));
+        $this->assertEquals([73.0, 90.0], array_values(array_filter(
+            $streams->filterOnType(StreamType::PEDAL_SMOOTHNESS)?->getData() ?? [],
+        )));
+    }
+
+    public function testParseWithoutPedalingDynamics(): void
+    {
+        $this->givenFitToolReturns((string) file_get_contents(__DIR__.'/fixtures/fit-document.json'));
+
+        $parsed = $this->parser->parse(RawActivityFile::from(Path::fromString('/tmp/activity.fit'), ''));
+
+        $this->assertNull($parsed->getActivity()->getDynamics());
+        $this->assertNull($parsed->getStreams()->filterOnType(StreamType::LEFT_RIGHT_BALANCE));
+        $this->assertNull($parsed->getStreams()->filterOnType(StreamType::TORQUE_EFFECTIVENESS));
+        $this->assertNull($parsed->getStreams()->filterOnType(StreamType::PEDAL_SMOOTHNESS));
+    }
+
     public function testParsePrefersProductNameWhenManufacturerHasNoProductEnum(): void
     {
         $document = $this->minimalFitDocument(fileIdFields: [

@@ -18,6 +18,7 @@ use App\Domain\Gear\Sensor\ConnectedSensors;
 use App\Domain\Import\FileParser\Fit\FitDeviceType;
 use App\Domain\Import\FileParser\Fit\FitDrivetrainUsageExtractor;
 use App\Domain\Import\FileParser\Fit\FitManufacturer;
+use App\Domain\Import\FileParser\Fit\FitPedalingDynamics;
 use App\Domain\Import\FileParser\Fit\FitProduct;
 use App\Domain\Import\FileParser\Fit\FitSportType;
 use App\Domain\Import\FileParser\Fit\FitStrapHeartRate;
@@ -232,6 +233,7 @@ final readonly class FitFileParser implements ActivityFileParser
             isCommute: false,
             isGroupActivity: false,
             workoutType: null,
+            dynamics: FitPedalingDynamics::fromSession($session),
         );
 
         return ParsedActivityFile::create(
@@ -417,6 +419,9 @@ final readonly class FitFileParser implements ActivityFileParser
             StreamType::CADENCE->value => [],
             StreamType::WATTS->value => [],
             StreamType::TEMP->value => [],
+            StreamType::LEFT_RIGHT_BALANCE->value => [],
+            StreamType::TORQUE_EFFECTIVENESS->value => [],
+            StreamType::PEDAL_SMOOTHNESS->value => [],
         ];
 
         foreach ($records as $record) {
@@ -436,6 +441,9 @@ final readonly class FitFileParser implements ActivityFileParser
             $streams[StreamType::CADENCE->value][] = is_numeric($record['cadence'] ?? null) ? (int) round((float) $record['cadence']) : null;
             $streams[StreamType::WATTS->value][] = is_numeric($record['power'] ?? null) ? (int) round((float) $record['power']) : null;
             $streams[StreamType::TEMP->value][] = is_numeric($record['temperature'] ?? null) ? (int) round((float) $record['temperature']) : null;
+            $streams[StreamType::LEFT_RIGHT_BALANCE->value][] = FitPedalingDynamics::recordLeftBalanceInPercent($record);
+            $streams[StreamType::TORQUE_EFFECTIVENESS->value][] = FitPedalingDynamics::recordTorqueEffectivenessInPercent($record);
+            $streams[StreamType::PEDAL_SMOOTHNESS->value][] = FitPedalingDynamics::recordPedalSmoothnessInPercent($record);
         }
 
         return $streams;

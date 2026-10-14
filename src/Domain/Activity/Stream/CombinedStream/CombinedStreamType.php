@@ -24,6 +24,9 @@ enum CombinedStreamType: string implements TranslatableInterface
     case TIME = 'time';
     case GRADE = 'grade';
     case TEMP = 'temp';
+    case LEFT_RIGHT_BALANCE = 'left_right_balance';
+    case TORQUE_EFFECTIVENESS = 'torque_effectiveness';
+    case PEDAL_SMOOTHNESS = 'pedal_smoothness';
 
     public function getStreamType(): StreamType
     {
@@ -47,6 +50,9 @@ enum CombinedStreamType: string implements TranslatableInterface
             CombinedStreamType::PACE => $translator->trans('Pace'),
             CombinedStreamType::VELOCITY => $translator->trans('Speed'),
             CombinedStreamType::TEMP => $translator->trans('Temperature'),
+            CombinedStreamType::LEFT_RIGHT_BALANCE => $translator->trans('Left/Right balance'),
+            CombinedStreamType::TORQUE_EFFECTIVENESS => $translator->trans('Torque effectiveness'),
+            CombinedStreamType::PEDAL_SMOOTHNESS => $translator->trans('Pedal smoothness'),
             default => throw new \RuntimeException(sprintf('Cannot translate CombinedStreamType "%s"', $this->value)),
         };
     }
@@ -62,6 +68,9 @@ enum CombinedStreamType: string implements TranslatableInterface
             CombinedStreamType::ALTITUDE => $unitSystem->elevationSymbol(),
             CombinedStreamType::VELOCITY => $sportType->speedSymbol($unitSystem),
             CombinedStreamType::TEMP => $unitSystem->temperatureSymbol(),
+            CombinedStreamType::LEFT_RIGHT_BALANCE,
+            CombinedStreamType::TORQUE_EFFECTIVENESS,
+            CombinedStreamType::PEDAL_SMOOTHNESS => '%',
             default => throw new \RuntimeException('Suffix not supported for '.$this->value),
         };
     }
@@ -77,6 +86,9 @@ enum CombinedStreamType: string implements TranslatableInterface
             CombinedStreamType::PACE,
             CombinedStreamType::VELOCITY => '#fac858',
             CombinedStreamType::TEMP => '#fc8452',
+            CombinedStreamType::LEFT_RIGHT_BALANCE => '#3ba272',
+            CombinedStreamType::TORQUE_EFFECTIVENESS => '#5470c6',
+            CombinedStreamType::PEDAL_SMOOTHNESS => '#9a60b4',
             default => '#cccccc',
         };
     }

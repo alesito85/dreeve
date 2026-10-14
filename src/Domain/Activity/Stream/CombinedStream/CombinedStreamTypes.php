@@ -35,6 +35,9 @@ final class CombinedStreamTypes extends Collection
             CombinedStreamType::WATTS,
             CombinedStreamType::CADENCE,
             CombinedStreamType::VELOCITY,
+            CombinedStreamType::LEFT_RIGHT_BALANCE,
+            CombinedStreamType::TORQUE_EFFECTIVENESS,
+            CombinedStreamType::PEDAL_SMOOTHNESS,
         ]);
     }
 }

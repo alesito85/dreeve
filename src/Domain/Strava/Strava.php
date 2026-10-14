@@ -262,7 +262,7 @@ class Strava
     {
         return Json::decode($this->request('api/v3/activities/'.$activityId->toUnprefixedString().'/streams', 'GET', [
             RequestOptions::QUERY => [
-                'keys' => implode(',', array_map(fn (StreamType $streamType) => $streamType->value, StreamType::cases())),
+                'keys' => implode(',', array_map(fn (StreamType $streamType) => $streamType->value, StreamType::thatCanBeRequestedFromStravaApi())),
             ],
             RequestOptions::HEADERS => [
                 'Authorization' => 'Bearer '.$this->getAccessToken(),

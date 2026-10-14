@@ -17,6 +17,9 @@ enum StreamType: string
     case TEMP = 'temp';
     case MOVING = 'moving';
     case GRADE = 'grade_smooth';
+    case LEFT_RIGHT_BALANCE = 'left_right_balance';
+    case TORQUE_EFFECTIVENESS = 'torque_effectiveness';
+    case PEDAL_SMOOTHNESS = 'pedal_smoothness';
 
     /**
      * @return StreamType[]
@@ -26,5 +29,31 @@ enum StreamType: string
         return [
             self::WATTS, self::HEART_RATE, self::VELOCITY, self::CADENCE,
         ];
+    }
+
+    /**
+     * The pedaling dynamics streams only exist for files that carry them,
+     * Strava does not know them and rejects requests that ask for them.
+     *
+     * @return StreamType[]
+     */
+    public static function thatCanBeRequestedFromStravaApi(): array
+    {
+        $cannotBeRequested = [
+            self::LEFT_RIGHT_BALANCE,
+            self::TORQUE_EFFECTIVENESS,
+            self::PEDAL_SMOOTHNESS,
+        ];
+
+        $requestable = [];
+        foreach (self::cases() as $streamType) {
+            if (in_array($streamType, $cannotBeRequested, true)) {
+                continue;
+            }
+
+            $requestable[] = $streamType;
+        }
+
+        return $requestable;
     }
 }

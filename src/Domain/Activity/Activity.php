@@ -126,6 +126,8 @@ final class Activity
         private readonly bool $isGroupActivity,
         #[ORM\Column(type: 'string', nullable: true)]
         private readonly ?WorkoutType $workoutType,
+        #[ORM\Column(type: 'json', nullable: true)]
+        private readonly ?ActivityDynamics $dynamics = null,
     ) {
     }
 
@@ -219,6 +221,7 @@ final class Activity
         bool $isCommute,
         bool $isGroupActivity,
         ?WorkoutType $workoutType,
+        ?ActivityDynamics $dynamics = null,
     ): self {
         $activity = self::fromState(
             activityId: $activityId,
@@ -254,6 +257,7 @@ final class Activity
             isCommute: $isCommute,
             isGroupActivity: $isGroupActivity,
             workoutType: $workoutType,
+            dynamics: $dynamics,
         );
         $activity->recordThat(new ActivityWasAdded($activity->getStartDate()));
         if ($activity->hasMappableRoute()) {
@@ -300,6 +304,7 @@ final class Activity
         bool $isCommute,
         bool $isGroupActivity,
         ?WorkoutType $workoutType,
+        ?ActivityDynamics $dynamics = null,
     ): self {
         return new self(
             activityId: $activityId,
@@ -334,7 +339,8 @@ final class Activity
             gearId: $gearId,
             isCommute: $isCommute,
             isGroupActivity: $isGroupActivity,
-            workoutType: $workoutType
+            workoutType: $workoutType,
+            dynamics: $dynamics
         );
     }
 
@@ -750,6 +756,11 @@ final class Activity
     public function getWorkoutType(): ?WorkoutType
     {
         return $this->workoutType;
+    }
+
+    public function getDynamics(): ?ActivityDynamics
+    {
+        return $this->dynamics;
     }
 
     public function withWorkoutType(?WorkoutType $workoutType): self

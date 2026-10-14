@@ -35,6 +35,7 @@
         "isCommute": 0,
         "isGroupActivity": 0,
         "workoutType": null,
+        "dynamics": "{\"aerobicTrainingEffect\":2.6,\"anaerobicTrainingEffect\":0.1}",
         "startingCoordinateLatitude": null,
         "startingCoordinateLongitude": null
     }

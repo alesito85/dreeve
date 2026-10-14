@@ -3,6 +3,7 @@
 namespace App\Tests\Domain\Activity;
 
 use App\Domain\Activity\Activity;
+use App\Domain\Activity\ActivityDynamics;
 use App\Domain\Activity\ActivityId;
 use App\Domain\Activity\ActivityName;
 use App\Domain\Activity\ActivityRepository;
@@ -149,6 +150,42 @@ class DbalActivityRepositoryTest extends ContainerTestCase
         yield 'known, but none connected' => [ConnectedSensors::fromSensors()];
         yield 'known' => [ConnectedSensors::fromSensors(
             ConnectedSensor::create(1, 3592, 3485049140, 'Garmin Varia', SensorType::BIKE_RADAR, SensorType::BIKE_LIGHT),
+        )];
+    }
+
+    #[DataProvider(methodName: 'provideDynamics')]
+    public function testAddAndFindPreservesTheDynamics(?ActivityDynamics $dynamics): void
+    {
+        $builder = ActivityBuilder::fromDefaults();
+        $activity = ($dynamics instanceof ActivityDynamics ? $builder->withDynamics($dynamics) : $builder)->build();
+
+        $this->activityRepository->add(ActivityWithRawData::fromState($activity, []));
+
+        $this->assertEquals(
+            $dynamics,
+            $this->activityRepository->find($activity->getId())->getDynamics()
+        );
+    }
+
+    public static function provideDynamics(): iterable
+    {
+        yield 'unknown' => [null];
+        yield 'effort scalars only' => [new ActivityDynamics(
+            leftRightBalanceInPercent: 46,
+            aerobicTrainingEffect: 2.6,
+            anaerobicTrainingEffect: 0.1,
+            jumpCount: 12,
+        )];
+        yield 'pedaling dynamics' => [new ActivityDynamics(
+            leftTorqueEffectivenessInPercent: 95,
+            rightTorqueEffectivenessInPercent: 93,
+            leftPedalSmoothnessInPercent: 74,
+            rightPedalSmoothnessInPercent: 72,
+            combinedPedalSmoothnessInPercent: 73,
+            leftPowerPhaseInDegrees: 28.4,
+            leftPowerPhasePeakInDegrees: 96.5,
+            rightPowerPhaseInDegrees: 30.2,
+            rightPowerPhasePeakInDegrees: 98.1,
         )];
     }
 

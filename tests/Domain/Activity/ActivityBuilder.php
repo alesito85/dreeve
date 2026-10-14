@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Domain\Activity;
 
 use App\Domain\Activity\Activity;
+use App\Domain\Activity\ActivityDynamics;
 use App\Domain\Activity\ActivityId;
 use App\Domain\Activity\ActivityName;
 use App\Domain\Activity\ImportSource;
@@ -57,6 +58,7 @@ final class ActivityBuilder
     private bool $isCommute;
     private bool $isGroupActivity;
     private ?WorkoutType $workoutType;
+    private ?ActivityDynamics $dynamics = null;
 
     private function __construct()
     {
@@ -121,6 +123,7 @@ final class ActivityBuilder
             isCommute: $this->isCommute,
             isGroupActivity: $this->isGroupActivity,
             workoutType: $this->workoutType,
+            dynamics: $this->dynamics,
         );
     }
 
@@ -160,6 +163,7 @@ final class ActivityBuilder
             isCommute: $this->isCommute,
             isGroupActivity: $this->isGroupActivity,
             workoutType: $this->workoutType,
+            dynamics: $this->dynamics,
         );
     }
 
@@ -404,6 +408,13 @@ final class ActivityBuilder
     public function withWorkoutType(WorkoutType $workoutType): self
     {
         $this->workoutType = $workoutType;
+
+        return $this;
+    }
+
+    public function withDynamics(ActivityDynamics $dynamics): self
+    {
+        $this->dynamics = $dynamics;
 
         return $this;
     }

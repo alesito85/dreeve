@@ -23,10 +23,12 @@ Activity: Activiteit
 'Adaptive & Inclusive Sports': 'Aangepaste & inclusieve sporten'
 'Admin panel': Beheerpaneel
 'Aero sensor': Aerosensor
+'Aerobic effect': 'Aeroob effect'
 Afternoon: Namiddag
 All: Alle
 'All time': 'Sinds het begin'
 'Alpine Ski': Alpineskiën
+'Anaerobic effect': 'Anaeroob effect'
 'Analyze with WindAhead': 'Analyseren met WindAhead'
 Apr: Apr
 'Ask Mark something...': 'Vraag Mark iets...'
@@ -65,6 +67,7 @@ Challenges: Uitdagingen
 'Clear all filters': 'Alle filters wissen'
 'Clear chat': 'Chat wissen'
 Columns: Kolommen
+'Combined pedal smoothness': 'Combinerde trapsoepelheid'
 Commute: Woon-werk
 Commutes: Woon-werkritten
 'Commutes only': 'Enkel woon-werk'
@@ -209,6 +212,7 @@ Imperial: Imperiaal
 Intensity: Intensiteit
 Jan: Jan
 Jul: Jul
+Jumps: Sprongen
 Jun: Jun
 KOM: KOM
 Kayaking: Kajakken
@@ -223,6 +227,8 @@ Lap: Ronde
 'Last month': 'Vorige maand'
 'Last week': 'Vorige week'
 'Last {numberOfDays} days': 'Laatste {numberOfDays} dagen'
+Left: Links
+'Left/Right balance': Links/rechts-balans
 Lifetime: 'Sinds het begin'
 'Light fatigue with good readiness. A great balance for quality training or longer efforts': 'Lichte vermoeidheid met goede paraatheid. Een mooi evenwicht voor kwaliteitstrainingen of langere inspanningen'
 Load: Belasting
@@ -309,6 +315,8 @@ Pace: Tempo
 Padel: Padel
 'Peak fresh': 'Maximaal fris'
 'Peak power outputs': Piekvermogens
+'Pedal smoothness': Trapsoepelheid
+'Pedaling dynamics': Trapdynamiek
 'Per {unit}': 'Per {unit}'
 'Personal bests': 'Persoonlijke records'
 Photo: Foto
@@ -321,6 +329,8 @@ Pilates: Pilates
 'Pool Swim': Zwembadzwemmen
 Power: Kracht
 'Power meter': Vermogensmeter
+'Power phase': Krachtfase
+'Power phase peak': 'Piek krachtfase'
 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.': 'Aangedreven door naar schatting {caloriesBurned} calorieën, of ongeveer {numberOfPizzaSlices} pizzapunten 🍕.'
 'Prev year': 'Vorig jaar'
 Previous: Vorige
@@ -354,6 +364,7 @@ Rewind: Terugblik
 'Rewind comparisons are only available on larger screens.': 'Terugblikvergelijkingen zijn enkel beschikbaar op grotere schermen.'
 Ride: Rit
 Rides: Ritten
+Right: Rechts
 'Risk of detraining': 'Risico op conditieverlies'
 'Rock Climbing': Bergbeklimmen
 'Roller Ski': Rolski
@@ -515,6 +526,7 @@ Title: Titel
 'To enable it, configure this in the admin panel': 'Schakel dit in via het beheerpaneel'
 'Toggle sidebar': 'Zijbalk in-/uitklappen'
 'Top 10': 'Top 10'
+'Torque effectiveness': Koppelefficiëntie
 'Total distance per month': 'Totale afstand per maand'
 'Total elevation per month': 'Totale hoogtemeters per maand'
 'Total hours spent per gear': 'Totaal aantal uren per uitrusting'

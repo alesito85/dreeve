@@ -23,10 +23,12 @@ Activity: 活动
 'Adaptive & Inclusive Sports': 适应性和包容性运动
 'Admin panel': 'Admin panel'
 'Aero sensor': 'Aero sensor'
+'Aerobic effect': 有氧效果
 Afternoon: 下午
 All: All
 'All time': 所有时间
 'Alpine Ski': 高山滑雪
+'Anaerobic effect': 无氧效果
 'Analyze with WindAhead': 'Analyze with WindAhead'
 Apr: 四月
 'Ask Mark something...': 问问Mark...
@@ -65,6 +67,7 @@ Challenges: 挑战
 'Clear all filters': 'Clear all filters'
 'Clear chat': 'Clear chat'
 Columns: Columns
+'Combined pedal smoothness': 综合踩踏顺畅度
 Commute: Commute
 Commutes: 通勤
 'Commutes only': 仅通勤
@@ -209,6 +212,7 @@ Imperial: Imperial
 Intensity: Intensity
 Jan: 一月
 Jul: 七月
+Jumps: 跳跃次数
 Jun: 六月
 KOM: 赛段王
 Kayaking: 皮划艇
@@ -223,6 +227,8 @@ Lap: 圈
 'Last month': 'Last month'
 'Last week': 'Last week'
 'Last {numberOfDays} days': '最近{numberOfDays}天'
+Left: 左
+'Left/Right balance': 左右平衡
 Lifetime: Lifetime
 'Light fatigue with good readiness. A great balance for quality training or longer efforts': 'Light fatigue with good readiness. A great balance for quality training or longer efforts'
 Load: Load
@@ -309,6 +315,8 @@ Pace: 步速
 Padel: Padel
 'Peak fresh': 'Peak fresh'
 'Peak power outputs': 峰值功率输出
+'Pedal smoothness': 踩踏顺畅度
+'Pedaling dynamics': 踩踏动态
 'Per {unit}': 'Per {unit}'
 'Personal bests': 'Personal bests'
 Photo: 照片
@@ -321,6 +329,8 @@ Pilates: 普拉提
 'Pool Swim': 'Pool Swim'
 Power: 功率
 'Power meter': 'Power meter'
+'Power phase': 功率相位
+'Power phase peak': 功率相位峰值
 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.': '消耗了约{caloriesBurned}卡路里，或大约{numberOfPizzaSlices}片披萨🍕。'
 'Prev year': 去年
 Previous: Previous
@@ -354,6 +364,7 @@ Rewind: 回顾
 'Rewind comparisons are only available on larger screens.': 回顾对比仅适用于大屏幕。
 Ride: Ride
 Rides: 骑行
+Right: 右
 'Risk of detraining': 'Risk of detraining'
 'Rock Climbing': 攀岩
 'Roller Ski': 轮滑
@@ -515,6 +526,7 @@ Title: Title
 'To enable it, configure this in the admin panel': 'To enable it, configure this in the admin panel'
 'Toggle sidebar': 切换侧边栏
 'Top 10': 前10名
+'Torque effectiveness': 扭矩效率
 'Total distance per month': 每月总距离
 'Total elevation per month': 每月总海拔
 'Total hours spent per gear': 每种装备总时长

@@ -23,10 +23,12 @@ Activity: Aktivitet
 'Adaptive & Inclusive Sports': 'Adaptiva & Inkluderande Sporter'
 'Admin panel': 'Admin panel'
 'Aero sensor': 'Aero sensor'
+'Aerobic effect': 'Aerob effekt'
 Afternoon: Eftermiddag
 All: Alla
 'All time': 'Från start'
 'Alpine Ski': Alpint
+'Anaerobic effect': 'Anaerob effekt'
 'Analyze with WindAhead': 'Analyze with WindAhead'
 Apr: Apr
 'Ask Mark something...': 'Fråga Mark någonting...'
@@ -65,6 +67,7 @@ Challenges: Utmaningar
 'Clear all filters': 'Clear all filters'
 'Clear chat': 'Clear chat'
 Columns: Columns
+'Combined pedal smoothness': 'Kombinerad trampjämnhet'
 Commute: Commute
 Commutes: Pendling
 'Commutes only': 'Endast pendling'
@@ -209,6 +212,7 @@ Imperial: Imperial
 Intensity: Intensity
 Jan: Jan
 Jul: Jul
+Jumps: Hopp
 Jun: Jun
 KOM: KOM
 Kayaking: Kayak
@@ -223,6 +227,8 @@ Lap: Varv
 'Last month': 'Last month'
 'Last week': 'Last week'
 'Last {numberOfDays} days': 'Senaste {numberOfDays} dagarna'
+Left: Vänster
+'Left/Right balance': 'Vänster/höger balans'
 Lifetime: Lifetime
 'Light fatigue with good readiness. A great balance for quality training or longer efforts': 'Light fatigue with good readiness. A great balance for quality training or longer efforts'
 Load: Load
@@ -309,6 +315,8 @@ Pace: Tempo
 Padel: Padel
 'Peak fresh': 'Peak fresh'
 'Peak power outputs': Toppeffekt
+'Pedal smoothness': Trampjämnhet
+'Pedaling dynamics': Trampdynamik
 'Per {unit}': 'Per {unit}'
 'Personal bests': 'Personal bests'
 Photo: Bild
@@ -321,6 +329,8 @@ Pilates: Pilates
 'Pool Swim': 'Pool Swim'
 Power: Effekt
 'Power meter': 'Power meter'
+'Power phase': Kraftfas
+'Power phase peak': 'Topp av kraftfas'
 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.': 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.'
 'Prev year': 'Tidigare år'
 Previous: Previous
@@ -354,6 +364,7 @@ Rewind: Tillbakablick
 'Rewind comparisons are only available on larger screens.': 'Tillbakablickar är endast tillgängliga på större skärmar.'
 Ride: Ride
 Rides: Cykling
+Right: Höger
 'Risk of detraining': 'Risk of detraining'
 'Rock Climbing': Klättring
 'Roller Ski': Rullskidor
@@ -515,6 +526,7 @@ Title: Title
 'To enable it, configure this in the admin panel': 'To enable it, configure this in the admin panel'
 'Toggle sidebar': 'Visa/Dölj sidofält'
 'Top 10': '10 bästa'
+'Torque effectiveness': Vridelseffektivitet
 'Total distance per month': 'Total distans per månad'
 'Total elevation per month': 'Totala antalet höjdmeter per månad'
 'Total hours spent per gear': 'Totala antalet timmar spenderat per utrustning'

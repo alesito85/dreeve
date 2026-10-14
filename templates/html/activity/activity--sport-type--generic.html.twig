@@ -15,6 +15,7 @@
     } %}
 </div>
 {% autoescape false %}
+    {% set dynamics = activity.getDynamics() %}
     <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-xs space-y-6">
         <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
@@ -164,6 +165,33 @@
                             {% endif %}
                         </span>
                     </div>
+                    {% if dynamics and dynamics.getLeftRightBalanceInPercent() is not null %}
+                        <div class="bg-gray-50 rounded-lg p-3 flex gap-x-2 items-center justify-between">
+                            <span class="text-xs text-gray-500">{{ "Left/Right balance"|trans }}</span>
+                            <span class="text-sm font-bold text-gray-900 tabular-nums">
+                                {{ dynamics.getLeftRightBalanceInPercent()|round(0) }} / {{ dynamics.getRightSideBalanceInPercent()|round(0) }}
+                                <span class="text-xxs font-medium text-gray-400">%</span>
+                            </span>
+                        </div>
+                    {% endif %}
+                    {% if dynamics and dynamics.getAerobicTrainingEffect() is not null %}
+                        <div class="bg-gray-50 rounded-lg p-3 flex gap-x-2 items-center justify-between">
+                            <span class="text-xs text-gray-500">{{ "Aerobic effect"|trans }}</span>
+                            <span class="text-sm font-bold text-gray-900 tabular-nums">{{ dynamics.getAerobicTrainingEffect()|round(1) }}</span>
+                        </div>
+                    {% endif %}
+                    {% if dynamics and dynamics.getAnaerobicTrainingEffect() is not null %}
+                        <div class="bg-gray-50 rounded-lg p-3 flex gap-x-2 items-center justify-between">
+                            <span class="text-xs text-gray-500">{{ "Anaerobic effect"|trans }}</span>
+                            <span class="text-sm font-bold text-gray-900 tabular-nums">{{ dynamics.getAnaerobicTrainingEffect()|round(1) }}</span>
+                        </div>
+                    {% endif %}
+                    {% if dynamics and dynamics.getJumpCount() is not null %}
+                        <div class="bg-gray-50 rounded-lg p-3 flex gap-x-2 items-center justify-between">
+                            <span class="text-xs text-gray-500">{{ "Jumps"|trans }}</span>
+                            <span class="text-sm font-bold text-gray-900 tabular-nums">{{ dynamics.getJumpCount() }}</span>
+                        </div>
+                    {% endif %}
                     <a href="{{ filteredUrl(path('activities'), {gear: activity.getGearIdIncludingNone()}) }}" class="bg-gray-50 rounded-lg p-3 gap-x-2 flex items-center justify-between group">
                         <span class="text-xs text-gray-500 shrink-0">{{ "Gear"|trans }}</span>
                         <span class="text-xs font-bold text-gray-900 group-hover:text-primary truncate" title="{{ enrichedActivity.getGearName() }}">
@@ -328,6 +356,58 @@
                                 <div class="text-xxs uppercase text-primary font-semibold tracking-wider">{{ "Normalized power"|trans }}</div>
                                 <div class="text-lg font-bold text-primary">{{ normalizedPower }}<span class="text-sm font-medium ml-0.5">w</span></div>
                             </div>
+                        {% endif %}
+                        {% if dynamics and dynamics.hasPedalingDynamics() %}
+                            {% set pedalingRows = [] %}
+                            {% if dynamics.getLeftTorqueEffectivenessInPercent() is not null or dynamics.getRightTorqueEffectivenessInPercent() is not null %}
+                                {% set pedalingRows = pedalingRows|merge([{
+                                    'label': "Torque effectiveness"|trans,
+                                    'left': dynamics.getLeftTorqueEffectivenessInPercent(),
+                                    'right': dynamics.getRightTorqueEffectivenessInPercent(),
+                                    'suffix': '%'
+                                }]) %}
+                            {% endif %}
+                            {% if dynamics.getLeftPedalSmoothnessInPercent() is not null or dynamics.getRightPedalSmoothnessInPercent() is not null %}
+                                {% set pedalingRows = pedalingRows|merge([{
+                                    'label': "Pedal smoothness"|trans,
+                                    'left': dynamics.getLeftPedalSmoothnessInPercent(),
+                                    'right': dynamics.getRightPedalSmoothnessInPercent(),
+                                    'suffix': '%'
+                                }]) %}
+                            {% endif %}
+                            {% if dynamics.getLeftPowerPhaseInDegrees() is not null or dynamics.getRightPowerPhaseInDegrees() is not null %}
+                                {% set pedalingRows = pedalingRows|merge([{
+                                    'label': "Power phase"|trans,
+                                    'left': dynamics.getLeftPowerPhaseInDegrees(),
+                                    'right': dynamics.getRightPowerPhaseInDegrees(),
+                                    'suffix': '°'
+                                }]) %}
+                            {% endif %}
+                            {% if dynamics.getLeftPowerPhasePeakInDegrees() is not null or dynamics.getRightPowerPhasePeakInDegrees() is not null %}
+                                {% set pedalingRows = pedalingRows|merge([{
+                                    'label': "Power phase peak"|trans,
+                                    'left': dynamics.getLeftPowerPhasePeakInDegrees(),
+                                    'right': dynamics.getRightPowerPhasePeakInDegrees(),
+                                    'suffix': '°'
+                                }]) %}
+                            {% endif %}
+                            <div class="text-xxs uppercase text-gray-500 font-semibold tracking-wider mb-1.5">{{ "Pedaling dynamics"|trans }}</div>
+                            <div class="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-1 mb-3 text-xs tabular-nums">
+                                <div></div>
+                                <div class="w-12 text-right text-xxs uppercase text-gray-400 tracking-wider">{{ "Left"|trans }}</div>
+                                <div class="w-12 text-right text-xxs uppercase text-gray-400 tracking-wider">{{ "Right"|trans }}</div>
+                                {% for row in pedalingRows %}
+                                    <div class="text-gray-500">{{ row.label }}</div>
+                                    <div class="w-12 text-right font-medium text-gray-900">{{ row.left is not null ? row.left|round(1) ~ row.suffix : 'n/a'|trans }}</div>
+                                    <div class="w-12 text-right font-medium text-gray-900">{{ row.right is not null ? row.right|round(1) ~ row.suffix : 'n/a'|trans }}</div>
+                                {% endfor %}
+                            </div>
+                            {% if dynamics.getCombinedPedalSmoothnessInPercent() is not null %}
+                                <div class="flex items-center justify-between text-xxs text-gray-500 mb-3">
+                                    <span>{{ "Combined pedal smoothness"|trans }}</span>
+                                    <span class="font-medium text-gray-700 tabular-nums">{{ dynamics.getCombinedPedalSmoothnessInPercent()|round(1) }}%</span>
+                                </div>
+                            {% endif %}
                         {% endif %}
                         {% if enrichedActivity.hasDetailedPowerData() %}
                             {% set timeIntervals =  [5, 60, 300, 1200, 3600] %}

@@ -23,10 +23,12 @@ Activity: Aktivität
 'Adaptive & Inclusive Sports': 'Adaptive & inklusive Sportarten'
 'Admin panel': Adminbereich
 'Aero sensor': Aerodynamiksensor
+'Aerobic effect': 'Aerober Effekt'
 Afternoon: Nachmittag
 All: Alle
 'All time': Gesamtzeit
 'Alpine Ski': 'Ski Alpin'
+'Anaerobic effect': 'Anaerober Effekt'
 'Analyze with WindAhead': 'Analysiere mit WindAhead'
 Apr: Apr
 'Ask Mark something...': 'Frag Mark etwas...'
@@ -65,6 +67,7 @@ Challenges: Herausforderungen
 'Clear all filters': 'Alle Filter entfernen'
 'Clear chat': 'Chat löschen'
 Columns: Spalten
+'Combined pedal smoothness': 'Trittgleichmäßigkeit gesamt'
 Commute: Pendelfahrt
 Commutes: Pendelfahrten
 'Commutes only': 'Nur Pendelfahrten'
@@ -209,6 +212,7 @@ Imperial: Imperial
 Intensity: Intensität
 Jan: Jan
 Jul: Jul
+Jumps: Sprünge
 Jun: Jun
 KOM: KOM
 Kayaking: Kajakfahren
@@ -223,6 +227,8 @@ Lap: Runde
 'Last month': 'Letzter Monat'
 'Last week': 'Letzte Woche'
 'Last {numberOfDays} days': 'Letzten {numberOfDays} Tage'
+Left: Links
+'Left/Right balance': L/R-Balance
 Lifetime: Gesamtzeitraum
 'Light fatigue with good readiness. A great balance for quality training or longer efforts': 'Leichte Ermüdung bei guter Bereitschaft. Eine super Balance für Qualitätstraining oder längere Einheiten'
 Load: Belastung
@@ -309,6 +315,8 @@ Pace: Tempo
 Padel: Padel
 'Peak fresh': Topfit
 'Peak power outputs': Spitzenleistungen
+'Pedal smoothness': Trittgleichmäßigkeit
+'Pedaling dynamics': Trittdynamik
 'Per {unit}': 'Pro {unit}'
 'Personal bests': 'Persönliche Bestleistungen'
 Photo: Foto
@@ -321,6 +329,8 @@ Pilates: Pilates
 'Pool Swim': Beckenschwimmen
 Power: Leistung
 'Power meter': Leistungsmesser
+'Power phase': Kraftphase
+'Power phase peak': 'Kraftphase (Spitze)'
 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.': 'Dabei wurden geschätzte {caloriesBurned} Kalorien verbraucht, was ungefähr {numberOfPizzaSlices} Pizzastücken entspricht 🍕.'
 'Prev year': Vorjahr
 Previous: Vorherige
@@ -354,6 +364,7 @@ Rewind: Rückblick
 'Rewind comparisons are only available on larger screens.': 'Rückblick-Vergleiche sind nur auf großen Bildschirmen verfügbar.'
 Ride: Radfahrt
 Rides: Radfahren
+Right: Rechts
 'Risk of detraining': 'Risiko für Leistungsabfall'
 'Rock Climbing': Klettern
 'Roller Ski': Rollski
@@ -515,6 +526,7 @@ Title: Titel
 'To enable it, configure this in the admin panel': 'Aktiviere die Funktion über den Adminbereich.'
 'Toggle sidebar': 'Seitenleiste umschalten'
 'Top 10': 'Top 10'
+'Torque effectiveness': Drehmomenteffizienz
 'Total distance per month': 'Gesamtdistanz pro Monat'
 'Total elevation per month': 'Gesamthöhenmeter pro Monat'
 'Total hours spent per gear': 'Gesamtstunden pro Ausrüstung'

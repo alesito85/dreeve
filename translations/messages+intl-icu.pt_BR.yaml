@@ -23,10 +23,12 @@ Activity: Atividade
 'Adaptive & Inclusive Sports': 'Esportes Adaptados e Inclusivos'
 'Admin panel': 'Painel de administração'
 'Aero sensor': 'Sensor aerodinâmico'
+'Aerobic effect': 'Efeito aeróbico'
 Afternoon: Tarde
 All: Todos
 'All time': 'Desde o início'
 'Alpine Ski': 'Esqui Alpino'
+'Anaerobic effect': 'Efeito anaeróbico'
 'Analyze with WindAhead': 'Analisar com WindAhead'
 Apr: Abr
 'Ask Mark something...': 'Pergunte algo ao Mark...'
@@ -65,6 +67,7 @@ Challenges: Desafios
 'Clear all filters': 'Limpar todos os filtros'
 'Clear chat': 'Limpar conversa'
 Columns: Colunas
+'Combined pedal smoothness': 'Suavidade da pedalada combinada'
 Commute: Deslocamento
 Commutes: Deslocamentos
 'Commutes only': 'Apenas deslocamentos'
@@ -209,6 +212,7 @@ Imperial: Imperial
 Intensity: Intensidade
 Jan: Jan
 Jul: Jul
+Jumps: Saltos
 Jun: Jun
 KOM: KOM
 Kayaking: Caiaque
@@ -223,6 +227,8 @@ Lap: Volta
 'Last month': 'Último mês'
 'Last week': 'Última semana'
 'Last {numberOfDays} days': 'Últimos {numberOfDays} dias'
+Left: Esquerda
+'Left/Right balance': 'Equilíbrio esquerda/direita'
 Lifetime: Vitalício
 'Light fatigue with good readiness. A great balance for quality training or longer efforts': 'Fadiga leve com boa prontidão. Um ótimo equilíbrio para treinos de qualidade ou esforços mais longos'
 Load: Carga
@@ -309,6 +315,8 @@ Pace: Ritmo
 Padel: Padel
 'Peak fresh': 'Prontidão máxima'
 'Peak power outputs': 'Picos de potência'
+'Pedal smoothness': 'Suavidade da pedalada'
+'Pedaling dynamics': 'Dinâmica da pedalada'
 'Per {unit}': 'Por {unit}'
 'Personal bests': 'Recordes pessoais'
 Photo: Foto
@@ -321,6 +329,8 @@ Pilates: Pilates
 'Pool Swim': 'Natação em Piscina'
 Power: Potência
 'Power meter': 'Medidor de potência'
+'Power phase': 'Fase de potência'
+'Power phase peak': 'Pico da fase de potência'
 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.': 'Alimentado por cerca de {caloriesBurned} calorias estimadas, ou aproximadamente {numberOfPizzaSlices} fatias de pizza 🍕.'
 'Prev year': 'Ano anterior'
 Previous: Anterior
@@ -354,6 +364,7 @@ Rewind: Retrospectiva
 'Rewind comparisons are only available on larger screens.': 'Comparações da retrospectiva só estão disponíveis em telas maiores.'
 Ride: Pedal
 Rides: Pedais
+Right: Direita
 'Risk of detraining': 'Risco de perda de condicionamento'
 'Rock Climbing': Escalada
 'Roller Ski': 'Esqui de Rodas'
@@ -515,6 +526,7 @@ Title: Título
 'To enable it, configure this in the admin panel': 'Para ativá-la, configure no painel de administração'
 'Toggle sidebar': 'Alternar barra lateral'
 'Top 10': 'Top 10'
+'Torque effectiveness': 'Eficiência de torque'
 'Total distance per month': 'Distância total por mês'
 'Total elevation per month': 'Elevação total por mês'
 'Total hours spent per gear': 'Horas totais por equipamento'

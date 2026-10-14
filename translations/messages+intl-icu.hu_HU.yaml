@@ -23,10 +23,12 @@ Activity: Tevékenység
 'Adaptive & Inclusive Sports': 'Adaptív és inkluzív sportok'
 'Admin panel': Adminfelület
 'Aero sensor': 'Aero szenzor'
+'Aerobic effect': 'Aerob hatás'
 Afternoon: Délután
 All: Mind
 'All time': Összesített
 'Alpine Ski': 'Alpesi sí'
+'Anaerobic effect': 'Anaerob hatás'
 'Analyze with WindAhead': 'Analyze with WindAhead'
 Apr: Ápr
 'Ask Mark something...': 'Kérdezz Marktól...'
@@ -65,6 +67,7 @@ Challenges: Kihívások
 'Clear all filters': 'Összes szűrő törlése'
 'Clear chat': 'Chat törlése'
 Columns: Oszlopok
+'Combined pedal smoothness': 'Kombinált tekerési simaság'
 Commute: Ingázás
 Commutes: Ingázások
 'Commutes only': 'Csak ingázások'
@@ -209,6 +212,7 @@ Imperial: Angolszász
 Intensity: Intenzitás
 Jan: Jan
 Jul: Júl
+Jumps: Ugrások
 Jun: Jún
 KOM: KOM
 Kayaking: Kajak
@@ -223,6 +227,8 @@ Lap: Kör
 'Last month': 'Előző hónap'
 'Last week': 'Előző hét'
 'Last {numberOfDays} days': 'Utolsó {numberOfDays} nap'
+Left: Bal
+'Left/Right balance': 'Bal/jobb egyensúly'
 Lifetime: 'Teljes időszak'
 'Light fatigue with good readiness. A great balance for quality training or longer efforts': 'Enyhe fáradtság jó készenléti állapottal. Kiváló egyensúly a minőségi edzéshez vagy hosszabb erőfeszítésekhez'
 Load: Terhelés
@@ -309,6 +315,8 @@ Pace: Tempó
 Padel: Padel
 'Peak fresh': Csúcsfriss
 'Peak power outputs': 'Csúcsteljesítmény értékek'
+'Pedal smoothness': 'Tekerés simasága'
+'Pedaling dynamics': 'Tekerés dinamikája'
 'Per {unit}': 'Per {unit}'
 'Personal bests': 'Személyes csúcsok'
 Photo: Fotó
@@ -321,6 +329,8 @@ Pilates: Pilates
 'Pool Swim': 'Medencés úszás'
 Power: Teljesítmény
 'Power meter': Teljesítménymérő
+'Power phase': Erőfázis
+'Power phase peak': 'Erőfázis csúcsa'
 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.': 'Ezt becsült {caloriesBurned} kalória hajtotta, ami nagyjából {numberOfPizzaSlices} szelet pizza.'
 'Prev year': 'Előző év'
 Previous: Előző
@@ -354,6 +364,7 @@ Rewind: Visszatekintő
 'Rewind comparisons are only available on larger screens.': 'A visszatekintő összehasonlítások csak nagyobb képernyőkön érhetők el.'
 Ride: Kerékpározás
 Rides: 'Kerékpáros túrák'
+Right: Jobb
 'Risk of detraining': 'Edzettség elvesztésének kockázata'
 'Rock Climbing': Sziklamászás
 'Roller Ski': 'Görkorcsolyás sí'
@@ -515,6 +526,7 @@ Title: Cím
 'To enable it, configure this in the admin panel': 'Az engedélyezéséhez állítsd be az adminfelületen'
 'Toggle sidebar': 'Oldalsáv ki/be'
 'Top 10': 'Top 10'
+'Torque effectiveness': Nyomatékhatékonyság
 'Total distance per month': 'Havi össztávolság'
 'Total elevation per month': 'Havi össz szintemelkedés'
 'Total hours spent per gear': 'Összes óra felszerelésenkén'

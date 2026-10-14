@@ -23,10 +23,12 @@ Activity: Activity
 'Adaptive & Inclusive Sports': 'Adaptive & Inclusive Sports'
 'Admin panel': 'Admin panel'
 'Aero sensor': 'Aero sensor'
+'Aerobic effect': 'Aerobic effect'
 Afternoon: Afternoon
 All: All
 'All time': 'All time'
 'Alpine Ski': 'Alpine Ski'
+'Anaerobic effect': 'Anaerobic effect'
 'Analyze with WindAhead': 'Analyze with WindAhead'
 Apr: Apr
 'Ask Mark something...': 'Ask Mark something...'
@@ -65,6 +67,7 @@ Challenges: Challenges
 'Clear all filters': 'Clear all filters'
 'Clear chat': 'Clear chat'
 Columns: Columns
+'Combined pedal smoothness': 'Combined pedal smoothness'
 Commute: Commute
 Commutes: Commutes
 'Commutes only': 'Commutes only'
@@ -209,6 +212,7 @@ Imperial: Imperial
 Intensity: Intensity
 Jan: Jan
 Jul: Jul
+Jumps: Jumps
 Jun: Jun
 KOM: KOM
 Kayaking: Kayaking
@@ -223,6 +227,8 @@ Lap: Lap
 'Last month': 'Last month'
 'Last week': 'Last week'
 'Last {numberOfDays} days': 'Last {numberOfDays} days'
+Left: Left
+'Left/Right balance': 'Left/Right balance'
 Lifetime: Lifetime
 'Light fatigue with good readiness. A great balance for quality training or longer efforts': 'Light fatigue with good readiness. A great balance for quality training or longer efforts'
 Load: Load
@@ -309,6 +315,8 @@ Pace: Pace
 Padel: Padel
 'Peak fresh': 'Peak fresh'
 'Peak power outputs': 'Peak power outputs'
+'Pedal smoothness': 'Pedal smoothness'
+'Pedaling dynamics': 'Pedaling dynamics'
 'Per {unit}': 'Per {unit}'
 'Personal bests': 'Personal bests'
 Photo: Photo
@@ -321,6 +329,8 @@ Pilates: Pilates
 'Pool Swim': 'Pool Swim'
 Power: Power
 'Power meter': 'Power meter'
+'Power phase': 'Power phase'
+'Power phase peak': 'Power phase peak'
 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.': 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.'
 'Prev year': 'Prev year'
 Previous: Previous
@@ -354,6 +364,7 @@ Rewind: Rewind
 'Rewind comparisons are only available on larger screens.': 'Rewind comparisons are only available on larger screens.'
 Ride: Ride
 Rides: Rides
+Right: Right
 'Risk of detraining': 'Risk of detraining'
 'Rock Climbing': 'Rock Climbing'
 'Roller Ski': 'Roller Ski'
@@ -515,6 +526,7 @@ Title: Title
 'To enable it, configure this in the admin panel': 'To enable it, configure this in the admin panel'
 'Toggle sidebar': 'Toggle sidebar'
 'Top 10': 'Top 10'
+'Torque effectiveness': 'Torque effectiveness'
 'Total distance per month': 'Total distance per month'
 'Total elevation per month': 'Total elevation per month'
 'Total hours spent per gear': 'Total hours spent per gear'

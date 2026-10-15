@@ -2,27 +2,38 @@
 
 namespace App\Tests\Controller\Page\Activity;
 
+use App\Application\Activity\Revision\SwitchActivityRevision\SwitchActivityRevision;
+use App\Controller\Admin\DispatchCommandRequestHandler;
 use App\Domain\Activity\ActivityId;
 use App\Domain\Activity\ActivityRepository;
 use App\Domain\Activity\ActivityWithRawData;
 use App\Domain\Activity\ImportSource;
 use App\Domain\Activity\Lap\ActivityLapId;
 use App\Domain\Activity\Lap\ActivityLapRepository;
+use App\Domain\Activity\Revision\ActivityRevision;
+use App\Domain\Activity\Revision\ActivityRevisionSummary;
+use App\Domain\Activity\Revision\DbalActivityRevisionRepository;
 use App\Domain\Activity\Split\ActivitySplitRepository;
 use App\Domain\Activity\SportType\SportType;
 use App\Domain\Activity\Stream\Metric\ActivityStreamMetric;
 use App\Domain\Activity\Stream\Metric\ActivityStreamMetricRepository;
 use App\Domain\Activity\Stream\Metric\ActivityStreamMetricType;
 use App\Domain\Activity\Stream\StreamType;
+use App\Domain\Import\DbalFileImportRepository;
+use App\Domain\Import\FileImportId;
+use App\Domain\Import\FileImportStatus;
 use App\Infrastructure\Config\DemoMode;
 use App\Infrastructure\Measurement\Velocity\SecPerKm;
+use App\Infrastructure\ValueObject\Time\SerializableDateTime;
 use App\Tests\Controller\Admin\AdminWebTestCase;
 use App\Tests\Domain\Activity\ActivityBuilder;
 use App\Tests\Domain\Activity\Lap\ActivityLapBuilder;
 use App\Tests\Domain\Activity\Split\ActivitySplitBuilder;
+use App\Tests\Domain\Import\FileImportBuilder;
 use App\Tests\ProvideTestData;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Snapshots\MatchesSnapshots;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class ActivityRequestHandlerTest extends AdminWebTestCase
 {
@@ -121,6 +132,89 @@ class ActivityRequestHandlerTest extends AdminWebTestCase
         $this->assertStringContainsString('>141</div>', $content);
         $this->assertStringContainsString('173', $content);
         $this->assertStringNotContainsString('Time in zone', $content);
+    }
+
+    public function testItListsTheVersionsOfAnActivityThatWasImportedMoreThanOnce(): void
+    {
+        $this->provideFullTestSet();
+
+        $activityId = ActivityId::fromUnprefixed('9756441741');
+        $this->getContainer()->get(DbalFileImportRepository::class)->add(
+            FileImportBuilder::fromDefaults()
+                ->withFileImportId(FileImportId::fromUnprefixed('the-first-import'))
+                ->withOriginalFilename('Afternoon_Ride.fit')
+                ->withFileContents('the bytes that made it')
+                ->withStatus(FileImportStatus::SUCCESS)
+                ->withActivityId($activityId)
+                ->build()
+        );
+        $this->getContainer()->get(DbalActivityRevisionRepository::class)->add(ActivityRevision::create(
+            activityId: $activityId,
+            revisionNumber: 1,
+            summary: ActivityRevisionSummary::fromArray([
+                'startedOn' => '2023-08-31 16:35:00',
+                'distanceInMetres' => 1200,
+                'elapsedTimeInSeconds' => 300,
+                'movingTimeInSeconds' => 290,
+                'averagePower' => 187,
+                'streamSamples' => [StreamType::TIME->value => 300, StreamType::HEART_RATE->value => 300],
+            ]),
+            generatedByFileImportId: FileImportId::fromUnprefixed('the-first-import'),
+            createdOn: SerializableDateTime::fromString('2023-10-17 14:00:00'),
+        ));
+
+        $crawler = $this->client->request('GET', '/activities/activity-9756441741');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertCount(1, $crawler->filter('#activity-versions'));
+        $this->assertCount(1, $crawler->filter('#activity-versions .pill'));
+        $this->assertStringContainsString('Afternoon_Ride.fit', $crawler->filter('#activity-versions')->text());
+        // An anonymous visitor can read the history but has nothing to switch with.
+        $this->assertCount(0, $crawler->filter('#activity-versions form'));
+
+        $this->client->loginUser($this->adminUser());
+        $crawler = $this->client->request('GET', '/activities/activity-9756441741');
+
+        $this->assertResponseIsSuccessful();
+        $form = $crawler->filter('#activity-versions form');
+        $this->assertCount(1, $form);
+        $this->assertSame(
+            SwitchActivityRevision::getCommandName(),
+            $form->attr('data-dispatch-command'),
+        );
+        $this->assertStringEndsWith(
+            'auth=auth.trust=trusted',
+            (string) $this->client->getResponse()->headers->get('X-Dreeve-Cache-Key'),
+        );
+        $this->assertSame('activity-9756441741', $form->filter('input[name="activityId"]')->attr('value'));
+        $this->assertSame('1', $form->filter('input[name="revisionNumber"]')->attr('value'));
+        // A page outside /admin has no command metas in its head, so the form carries
+        // the endpoint and the token the script needs.
+        $this->assertStringEndsWith(
+            '/admin/dispatch-command',
+            (string) $form->attr('data-dispatch-url'),
+        );
+
+        // The token is the stateless one the command endpoint validates against, which
+        // is the same value for every visitor. A per-session token would put session
+        // data into a page that is cached for everyone.
+        $this->assertSame(
+            $this->getContainer()->get(CsrfTokenManagerInterface::class)
+                ->getToken(DispatchCommandRequestHandler::CSRF_TOKEN_ID)
+                ->getValue(),
+            (string) $form->attr('data-csrf-token'),
+        );
+    }
+
+    public function testItDoesNotListVersionsForAnActivityThatWasImportedOnce(): void
+    {
+        $this->provideFullTestSet();
+
+        $this->client->loginUser($this->adminUser());
+        $crawler = $this->client->request('GET', '/activities/activity-9756441741');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertCount(0, $crawler->filter('#activity-versions'));
     }
 
     public function testItLabelsTheVelocityDistributionOfARunAsPace(): void

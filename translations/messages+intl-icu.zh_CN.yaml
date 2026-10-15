@@ -1,9 +1,11 @@
 '# completed': '# completed'
+'+{count} data series': '+{count} 个数据序列'
 '42-day fitness trend': 42天健身趋势
 '7-day fatigue level': 7天疲劳水平
 '< 1.5: Good variety in training': '< 1.5: 训练多样性良好'
 '> 2.0: High monotony, increased risk': '> 2.0: 单调性高，风险增加'
 'A 6-hour week scores higher than a 5-hour week.': 'A 6-hour week scores higher than a 5-hour week.'
+'A file that belongs to this activity was imported more than once, so the data it replaced is kept here. Switching to a version replays the file it came from and keeps what it replaces as a new version.': '属于此活动的文件被导入了多次，因此它替换掉的数据会保留在这里。切换到某个版本会重新处理它来自的文件，并把被替换的数据保存为新版本。'
 'A high intensity score means a larger share of your training is hard rather than easy.': 'A high intensity score means a larger share of your training is hard rather than easy.'
 'A high score means you concentrate more training into fewer, heavier days.': 'A high score means you concentrate more training into fewer, heavier days.'
 'A:C Ratio': 'A:C 比值'
@@ -18,6 +20,7 @@ Activity: 活动
 'Activity heatmap': 活动热图
 'Activity locations': 活动地点
 'Activity start times': 活动开始时间
+'Activity versions': '活动版本'
 'Acute Training Load (Fatigue) - 7-day exponentially weighted average of your daily training load. Represents short-term fatigue.': '短期训练负荷（疲劳）– 7天每日训练负荷的指数加权平均值。代表短期疲劳。'
 'Acute:Chronic Ratio - Ratio of ATL to CTL. Indicates injury risk.': '短期/长期疲劳比率 – ATL与CTL的比值。表示受伤风险。'
 'Adaptive & Inclusive Sports': 适应性和包容性运动
@@ -36,6 +39,7 @@ Apr: 四月
 Aug: 八月
 Average: Average
 'Average gradient': 'Average gradient'
+'Average power': '平均功率'
 'Avg gradient': 'Avg gradient'
 'Avg pace': 'Avg pace'
 'Avg speed': 'Avg speed'
@@ -91,6 +95,7 @@ Cycling: 骑行
 Dance: Dance
 'Dark mode': 'Dark mode'
 Dashboard: 仪表板
+'Data this version has that the one before it does not': '此版本拥有而上一版本没有的数据'
 Date: 日期
 Day: Day
 'Days needed': 所需天数
@@ -355,6 +360,7 @@ Recent: Recent
 'Reduced carbon emission by commuting': 通勤减少的碳排放
 'Register maintenance': 'Register maintenance'
 'Relative cost': 相对成本
+'Replaced on': '替换于'
 'Rest Days': 休息日
 'Rest days': 休息日
 'Rest days in last 7 days': 最近7天的休息日
@@ -412,6 +418,7 @@ Streaks: 连续记录
 Sun: 周日
 Sun.: Sun.
 Surfing: 冲浪
+'Switch to this version': '切换到此版本'
 'TSB (Form)': 'TSB (状态)'
 'TSB positive in': 'TSB positive in'
 'Table Tennis': 乒乓球
@@ -549,6 +556,7 @@ Unspecified: 未指定
 'User badge': 用户徽章
 'Velo Mobile': 'Velo Mobile'
 'Velo Mobiles': 躺车
+'Version {number}': '版本 {number}'
 'Very high': 非常高
 'View all': 查看全部
 'View details': 查看详情

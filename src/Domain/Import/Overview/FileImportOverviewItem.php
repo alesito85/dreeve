@@ -23,6 +23,7 @@ final readonly class FileImportOverviewItem implements Item
         private ?ActivityId $activityId,
         private ?string $activityName,
         private bool $hasFileContents,
+        private int $revisionCount,
     ) {
     }
 
@@ -36,6 +37,7 @@ final readonly class FileImportOverviewItem implements Item
         ?ActivityId $activityId,
         ?string $activityName,
         bool $hasFileContents,
+        int $revisionCount,
     ): self {
         return new self(
             fileImportId: $fileImportId,
@@ -47,6 +49,7 @@ final readonly class FileImportOverviewItem implements Item
             activityId: $activityId,
             activityName: $activityName,
             hasFileContents: $hasFileContents,
+            revisionCount: $revisionCount,
         );
     }
 
@@ -64,6 +67,7 @@ final readonly class FileImportOverviewItem implements Item
             activityId: null,
             activityName: null,
             hasFileContents: false,
+            revisionCount: 0,
         );
     }
 
@@ -105,6 +109,16 @@ final readonly class FileImportOverviewItem implements Item
     public function hasFileContents(): bool
     {
         return $this->hasFileContents;
+    }
+
+    /**
+     * How many versions the activity this row points at has. Zero for a row that
+     * did not produce an activity, and for the files still waiting in the watch
+     * folder, which have no activity to have versions of.
+     */
+    public function getRevisionCount(): int
+    {
+        return $this->revisionCount;
     }
 
     public function getErrorMessage(): ?string

@@ -5,10 +5,14 @@ namespace App\Tests\Controller\Admin\FileImport;
 use App\Domain\Activity\ActivityId;
 use App\Domain\Activity\ActivityRepository;
 use App\Domain\Activity\ActivityWithRawData;
+use App\Domain\Activity\Revision\ActivityRevision;
+use App\Domain\Activity\Revision\ActivityRevisionSummary;
+use App\Domain\Activity\Revision\DbalActivityRevisionRepository;
 use App\Domain\Import\FileImportId;
 use App\Domain\Import\FileImportRepository;
 use App\Domain\Import\FileImportStatus;
 use App\Domain\Import\ImportMode;
+use App\Domain\Import\ReimportFileImport\ReimportFileImport;
 use App\Infrastructure\ValueObject\Time\SerializableDateTime;
 use App\Tests\Controller\Admin\AdminWebTestCase;
 use App\Tests\Domain\Activity\ActivityBuilder;
@@ -277,6 +281,110 @@ class ManageFileImportOverviewRequestHandlerTest extends AdminWebTestCase
             $detailLinks->first()->attr('href')
         );
         $this->assertSame('Activity 1', trim($detailLinks->first()->text()));
+    }
+
+    public function testShowsHowManyVersionsOfAnActivityTheLogHasToOffer(): void
+    {
+        $this->withImportMode(ImportMode::FILES);
+
+        $activityId = ActivityId::fromUnprefixed('1');
+        static::getContainer()->get(ActivityRepository::class)->add(ActivityWithRawData::fromState(
+            ActivityBuilder::fromDefaults()
+                ->withActivityId($activityId)
+                ->withName('Activity 1')
+                ->build(),
+            [],
+        ));
+        static::getContainer()->get(FileImportRepository::class)->add(
+            FileImportBuilder::fromDefaults()
+                ->withFileImportId(FileImportId::fromUnprefixed('1'))
+                ->withOriginalFilename('activity-1.fit')
+                ->withActivityId($activityId)
+                ->build()
+        );
+        $revisionRepository = static::getContainer()->get(DbalActivityRevisionRepository::class);
+        foreach ([1, 2] as $revisionNumber) {
+            $revisionRepository->add(ActivityRevision::create(
+                activityId: $activityId,
+                revisionNumber: $revisionNumber,
+                summary: ActivityRevisionSummary::fromArray(['startedOn' => '2026-06-01 08:00:00']),
+                generatedByFileImportId: null,
+                createdOn: SerializableDateTime::fromString('2026-06-01 09:00:00'),
+            ));
+        }
+
+        $this->client->loginUser($this->adminUser());
+        $crawler = $this->client->request('GET', '/admin/file-imports');
+
+        $this->assertResponseIsSuccessful();
+        $chip = $crawler->filter('table.data-table tbody a.pill');
+        $this->assertCount(1, $chip);
+        $this->assertSame('2 versions', trim($chip->text()));
+        $this->assertStringEndsWith(
+            '/activities/'.ActivityId::fromUnprefixed('1').'#activity-versions',
+            (string) $chip->attr('href')
+        );
+    }
+
+    public function testOffersToReimportOnlyTheArchivedFilesThatNeverMadeItIn(): void
+    {
+        $this->withImportMode(ImportMode::FILES);
+
+        $fileImportRepository = static::getContainer()->get(FileImportRepository::class);
+        // Archived bytes that failed, so putting the file back is the whole point.
+        $fileImportRepository->add(
+            FileImportBuilder::fromDefaults()
+                ->withFileImportId(FileImportId::fromUnprefixed('failed'))
+                ->withOriginalFilename('failed.fit')
+                ->withFileContents('raw fit bytes')
+                ->withStatus(FileImportStatus::FAILED)
+                ->withErrorMessage('Could not parse failed.fit')
+                ->withImportedOn(SerializableDateTime::fromString('2026-06-01 10:00:00'))
+                ->build()
+        );
+        // Skipped because the match was ambiguous, so a second look is warranted.
+        $fileImportRepository->add(
+            FileImportBuilder::fromDefaults()
+                ->withFileImportId(FileImportId::fromUnprefixed('skipped'))
+                ->withOriginalFilename('skipped.fit')
+                ->withFileContents('raw fit bytes')
+                ->withStatus(FileImportStatus::SKIPPED)
+                ->withErrorMessage('Could not tell which activity this belongs to')
+                ->withImportedOn(SerializableDateTime::fromString('2026-06-01 09:00:00'))
+                ->build()
+        );
+        // Imported successfully: replaying these bytes would only skip again.
+        $fileImportRepository->add(
+            FileImportBuilder::fromDefaults()
+                ->withFileImportId(FileImportId::fromUnprefixed('success'))
+                ->withOriginalFilename('success.fit')
+                ->withFileContents('raw fit bytes')
+                ->withStatus(FileImportStatus::SUCCESS)
+                ->withImportedOn(SerializableDateTime::fromString('2026-06-01 08:00:00'))
+                ->build()
+        );
+        // Failed before its bytes were archived, so there is nothing to put back.
+        $fileImportRepository->add(
+            FileImportBuilder::fromDefaults()
+                ->withFileImportId(FileImportId::fromUnprefixed('no-bytes'))
+                ->withOriginalFilename('no-bytes.fit')
+                ->withStatus(FileImportStatus::FAILED)
+                ->withErrorMessage('Could not parse no-bytes.fit')
+                ->withImportedOn(SerializableDateTime::fromString('2026-06-01 07:00:00'))
+                ->build()
+        );
+
+        $this->client->loginUser($this->adminUser());
+        $crawler = $this->client->request('GET', '/admin/file-imports');
+
+        $this->assertResponseIsSuccessful();
+        $forms = $crawler->filter('form[data-dispatch-command="'.ReimportFileImport::getCommandName().'"]');
+        $this->assertCount(2, $forms);
+        $this->assertSame(
+            (string) FileImportId::fromUnprefixed('failed'),
+            $forms->first()->filter('input[name="fileImportId"]')->attr('value')
+        );
+        $this->assertCount(2, $crawler->filter('table.data-table tbody button[title="Import this file again"]'));
     }
 
     private function seedFileImports(int $count): void

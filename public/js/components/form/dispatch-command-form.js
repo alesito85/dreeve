@@ -222,7 +222,10 @@ export default function initDispatchCommandForm(rootNode = document) {
                 assign(payload, pathOf(key), value);
             });
 
-            await dispatchCommand(commandName, payload);
+            await dispatchCommand(commandName, payload, {
+                url: form.getAttribute('data-dispatch-url'),
+                csrfToken: form.getAttribute('data-csrf-token'),
+            });
 
             const redirectUrl = form.getAttribute('data-redirect');
             if (redirectUrl) {

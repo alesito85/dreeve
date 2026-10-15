@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Page\Activity;
 
+use App\Application\Activity\Revision\SwitchActivityRevision\SwitchActivityRevision;
 use App\Application\Navigation\NavigationSection;
 use App\Application\OpenGraph\OpenGraph;
 use App\Application\PageRenderer;
@@ -15,6 +16,8 @@ use App\Domain\Activity\EnrichedActivityRepository;
 use App\Domain\Activity\GpxFileName;
 use App\Domain\Activity\Lap\ActivityLapRepository;
 use App\Domain\Activity\LeafletMap;
+use App\Domain\Activity\Revision\ActivityRevisionRepository;
+use App\Domain\Activity\Revision\ActivityRevisions;
 use App\Domain\Activity\Split\ActivitySplitRepository;
 use App\Domain\Activity\Stream\ActivityHeartRateRepository;
 use App\Domain\Activity\Stream\ActivityStreamRepository;
@@ -22,6 +25,8 @@ use App\Domain\Activity\Stream\CombinedStream\CombinedActivityStreamRepository;
 use App\Domain\Activity\Stream\CombinedStream\CombinedStreamProfileCharts;
 use App\Domain\Activity\Stream\CombinedStream\CombinedStreamType;
 use App\Domain\Activity\Stream\StreamType;
+use App\Domain\Import\FileImportId;
+use App\Domain\Import\FileImportRepository;
 use App\Domain\Settings\SettingsRepository;
 use App\Infrastructure\Cache\Cacheability;
 use App\Infrastructure\Cache\Context\AuthenticatedCacheContext;
@@ -54,6 +59,8 @@ final readonly class ActivityRequestHandler
         private CombinedActivityStreamRepository $combinedActivityStreamRepository,
         private ActivitySplitRepository $activitySplitRepository,
         private ActivityLapRepository $activityLapRepository,
+        private ActivityRevisionRepository $activityRevisionRepository,
+        private FileImportRepository $fileImportRepository,
         private SettingsRepository $settingsRepository,
         private TranslatorInterface $translator,
         private PageRenderer $pageRenderer,
@@ -127,6 +134,7 @@ final readonly class ActivityRequestHandler
         } catch (EntityNotFound) {
         }
 
+        $revisions = $this->activityRevisionRepository->findForActivity($activityId);
         $templateName = sprintf('html/activity/%s.html.twig', $activity->getSportType()->getTemplateName());
 
         return $this->twig->load($templateName)->render(context: [
@@ -151,6 +159,41 @@ final readonly class ActivityRequestHandler
             'hasProfileChart' => $numberOfProfileChartLanes > 0,
             'heartRateZones' => $timeInHeartRateZones,
             'showStartTime' => $this->trustedVisitor->isTrusted(),
+            'revisions' => $revisions,
+            'revisionFiles' => $this->describeRevisionFiles($revisions),
+            'switchActivityRevisionCommand' => SwitchActivityRevision::getCommandName(),
         ]);
+    }
+
+    /**
+     * Which file each version came from, keyed by revision number. A version with
+     * no entry has no file behind it, which is the one kind that can be read but
+     * not restored.
+     *
+     * @return array<int, array{fileName: string, restorable: bool}>
+     */
+    private function describeRevisionFiles(ActivityRevisions $revisions): array
+    {
+        $files = [];
+        foreach ($revisions as $revision) {
+            $fileImportId = $revision->getGeneratedByFileImportId();
+            if (!$fileImportId instanceof FileImportId) {
+                continue;
+            }
+
+            try {
+                $fileImport = $this->fileImportRepository->find($fileImportId);
+            } catch (EntityNotFound) {
+                continue;
+            }
+
+            $contents = $fileImport->getFileContents();
+            $files[$revision->getRevisionNumber()] = [
+                'fileName' => $fileImport->getOriginalFilename(),
+                'restorable' => null !== $contents && '' !== $contents,
+            ];
+        }
+
+        return $files;
     }
 }

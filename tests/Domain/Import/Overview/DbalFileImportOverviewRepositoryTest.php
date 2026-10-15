@@ -74,6 +74,7 @@ class DbalFileImportOverviewRepositoryTest extends ContainerTestCase
                     activityId: ActivityId::fromUnprefixed('42'),
                     activityName: 'Morning Run',
                     hasFileContents: true,
+                    revisionCount: 0,
                 ),
             ],
             $overview->getItems()

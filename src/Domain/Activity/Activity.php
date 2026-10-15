@@ -883,7 +883,7 @@ final class Activity
                 ->withRouteGeography($incoming->routeGeography);
         }
 
-        if ($incoming->dynamics instanceof \App\Domain\Activity\ActivityDynamics) {
+        if ($incoming->dynamics instanceof ActivityDynamics) {
             $merged = $merged->withDynamics($incoming->dynamics->mergeWith($this->dynamics));
         }
 
@@ -902,6 +902,49 @@ final class Activity
         }
 
         return $merged->withWorkoutType($incoming->workoutType ?? $this->workoutType);
+    }
+
+    /**
+     * Takes the measurements of the file a stored version was made of.
+     *
+     * Restoring a version is not a merge: the file being replayed is the whole
+     * truth about that ride, so its totals replace the live ones instead of
+     * being folded into them, and an older version restored after a newer import
+     * actually gets smaller again. What a file cannot say keeps what is stored
+     * rather than going blank, and a version does not own the things that are
+     * not measurements: identity, gear, weather, the name, and the geography the
+     * reverse geocoder added all stay as they are.
+     */
+    public function replacedWith(self $incoming): self
+    {
+        $replaced = $this
+            ->withSportType($incoming->getSportType())
+            ->withWorldType($incoming->getWorldType())
+            ->withDistance($incoming->distance)
+            ->withElevation($incoming->elevation)
+            ->withMovingTimeInSeconds($incoming->movingTimeInSeconds)
+            ->withElapsedTimeInSeconds($incoming->elapsedTimeInSeconds)
+            ->withAverageSpeed($incoming->averageSpeed)
+            ->withMaxSpeed($incoming->maxSpeed)
+            ->withCalories($incoming->calories ?? $this->calories)
+            ->withKilojoules($incoming->kilojoules ?? $this->kilojoules)
+            ->withAveragePower($incoming->averagePower ?? $this->averagePower)
+            ->withMaxPower($incoming->maxPower ?? $this->maxPower)
+            ->withAverageHeartRate($incoming->averageHeartRate ?? $this->averageHeartRate)
+            ->withMaxHeartRate($incoming->maxHeartRate ?? $this->maxHeartRate)
+            ->withAverageCadence($incoming->averageCadence ?? $this->averageCadence)
+            ->withPolyline($incoming->polyline ?? $this->polyline)
+            ->withDeviceName($incoming->deviceName ?? $this->deviceName)
+            ->withStartingCoordinate($incoming->startingCoordinate ?? $this->startingCoordinate);
+
+        if ($incoming->dynamics instanceof ActivityDynamics) {
+            // The same rule as a merge: per value the replayed file wins, and a
+            // value it never reported keeps what is stored instead of blanking
+            // a column a newer file happened to fill.
+            return $replaced->withDynamics($incoming->dynamics->mergeWith($this->dynamics));
+        }
+
+        return $replaced;
     }
 
     private function largestOf(?int ...$values): ?int

@@ -191,9 +191,42 @@ put a version in the history and leave the user a list to read for no reason.
 
 Restoring a version replays the bytes that `FileImport` already stores compressed, forced to win
 regardless of timestamps, and appends the state it replaced as a new revision so history stays
-linear. Two consequences worth stating: a version whose source was the Strava API has no bytes, so
-it can be listed but not restored, and a parser change can make a replay differ slightly from the
-original import.
+linear. It deliberately replays rather than re-imports: no automation rules, no weather lookup, no
+new row in the import log, because switching to a version of a ride from five years ago must not
+re-decide its name, its sport type or its gear, and must not reach out to the network. Two
+consequences worth stating: a version whose source was the Strava API has no bytes, so it can be
+listed but not restored, and a parser change can make a replay differ slightly from the original
+import.
+
+### Where this shows up
+
+The activity page grows an "Activity versions" panel as soon as an activity has history: one row per
+version, newest first, with the moment it was made, the file it came from, its distance, time and
+average power, and a chip for the data series this version has and the one before it does not. Each
+row can be switched to. Switching posts a command to the same `/admin/dispatch-command` endpoint the
+admin pages use. That endpoint and its token are metas in the head of an admin page, and the activity
+page is not an admin page, so the form carries both itself and the command helper reads them from the
+form when the head does not offer them. The token is one of the stateless ones listed in
+`config/packages/csrf.yaml`, so it is the same value for every visitor and rendering it into a page
+that is cached for all of them puts no session data into shared HTML. The app shell is untouched,
+which keeps every public page rendering byte-identically for logged out and logged in visitors; an
+earlier attempt that put the metas there made every cached page depend on whether you were logged in,
+and `tests/Controller/CacheContextGuardTest.php` caught it. `public/js/dist/app.min.js` and
+`admin.min.js` are rebuilt for the helper change.
+
+The admin import log shows how many versions the activity a row wrote has, linked to that panel, and
+offers a Re-import on the rows where the file is archived and did not make it in: failed, or skipped
+because the match was ambiguous and a human has to decide. A successful row has no Re-import button
+on purpose, replaying bytes that already produced this activity would only hit the checksum skip.
+
+Two places where the code ended up elsewhere than the plan:
+
+- the panel has no download link per version. Downloading an archived file is an admin route, so a
+  link on a page that is also readable while logged out would either leak the original file or
+  return a 404. The file name is shown instead, and the download stays where it already works.
+- the include went in the generic sport template only, which turned out to need no extra work: the
+  run and swim templates extend it and override narrow blocks (`mainStatsOnTop`, `splitsAndLaps`)
+  around it, so one include gives every sport type its history.
 
 ## `.fit.gz`
 

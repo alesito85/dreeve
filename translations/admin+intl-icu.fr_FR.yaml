@@ -211,6 +211,7 @@ Import: Import
 'Import segment details': 'Importer les détails des segments'
 'Import segment details so segment maps can be displayed. This needs an extra Strava API call per segment and increases import time significantly.': "Importe les détails des segments afin de pouvoir afficher leurs cartes. Cela nécessite un appel supplémentaire à l'API Strava par segment et augmente considérablement la durée de l'import."
 'Import source': "Source d'import"
+'Import this file again': 'Importer à nouveau ce fichier'
 'Imported files will appear here once you upload them.': 'Les fichiers importés apparaîtront ici une fois téléversés.'
 'Imported from Strava': 'Importé depuis Strava'
 'Imports new Strava activities.': 'Importe les nouvelles activités Strava.'
@@ -431,6 +432,7 @@ Tasks: Tâches
 'Test automation rules': "Tester les règles d'automatisation"
 'Test rules': 'Tester les règles'
 'The URL the app is hosted on.': "L'URL sur laquelle l'application est hébergée."
+'The activity has been switched to the selected version.': 'L''activité a été basculée vers la version sélectionnée.'
 'The activity started': "L'activité a commencé"
 'The activity will be marked as a commute.': "L'activité sera marquée comme trajet domicile-travail."
 'The activity will be marked as a group activity.': "L'activité sera marquée comme activité de groupe."
@@ -447,6 +449,7 @@ Tasks: Tâches
 'The distance': 'La distance'
 'The elapsed time': 'Le temps écoulé'
 'The elevation gain': 'Le dénivelé positif'
+'The file has been put back in the watch folder and will be imported again.': 'Le fichier a été remis dans le dossier watch et sera importé à nouveau.'
 'The formula used to calculate your max heart rate. The default is Fox (220 − age).': 'La formule utilisée pour calculer votre fréquence cardiaque maximale. Par défaut : Fox (220 − âge).'
 'The formula used to calculate your resting heart rate. The default is an age-based estimate.': "La formule utilisée pour calculer votre fréquence cardiaque au repos. Par défaut : une estimation basée sur l'âge."
 'The key lets an external client upload activity files over HTTP. It is the only thing guarding that endpoint, so treat it like a password.': "La clé permet à un client externe de téléverser des fichiers d'activité via HTTP. C'est la seule protection de ce point d'accès, traitez-la donc comme un mot de passe."
@@ -505,6 +508,7 @@ Uploading...: 'Téléversement en cours'
 'Used to calculate the training load of this activity': "Utilisé pour calculer la charge d'entraînement de cette activité"
 Username: "Nom d'utilisateur"
 'Verify token': 'Vérifier le jeton'
+'Version history for this activity': 'Historique des versions de cette activité'
 Warning: Avertissement
 'Weather and reverse geocoding have been retrieved.': 'La météo et le géocodage inversé ont été récupérés.'
 'Weather and/or reverse geocoding could not be retrieved when this activity was imported.': "La météo et/ou le géocodage inversé n'ont pas pu être récupérés lors de l'import de cette activité."
@@ -574,6 +578,7 @@ then: alors
 '{count} files uploaded': '{count} fichiers téléversés'
 '{count} images selected': '{count} images sélectionnées'
 '{count} rules apply': "{count} règles s'appliquent"
+'{count} versions': '{count} versions'
 '{envVar} is set, but it is not a key this app generated, so the API stays closed. Generate a new one and replace it.': "{envVar} est défini, mais ce n'est pas une clé générée par cette application, l'API reste donc fermée. Générez-en une nouvelle et remplacez-la."
 '{label} (copy)': '{label} (copie)'
 "{name} can't be deleted because it is still linked to activities, maintenance or automation rules.": "{name} ne peut pas être supprimé car il est encore lié à des activités, à de la maintenance ou à des règles d'automatisation."

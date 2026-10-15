@@ -8,6 +8,9 @@ use App\Domain\Activity\Activity;
 use App\Domain\Activity\Stream\ActivityStream;
 use App\Domain\Activity\Stream\ActivityStreams;
 use App\Domain\Activity\Stream\StreamType;
+use App\Infrastructure\Measurement\Length\Kilometer;
+use App\Infrastructure\Measurement\Length\Meter;
+use App\Infrastructure\Measurement\Time\Seconds;
 use App\Infrastructure\Serialization\Json;
 use App\Infrastructure\ValueObject\Time\SerializableDateTime;
 
@@ -130,9 +133,19 @@ final readonly class ActivityRevisionSummary implements \JsonSerializable
         return $this->startedOn;
     }
 
+    public function getDistance(): Kilometer
+    {
+        return Kilometer::from($this->distanceInMetres / 1000);
+    }
+
     public function getDistanceInMetres(): int
     {
         return $this->distanceInMetres;
+    }
+
+    public function getElevation(): Meter
+    {
+        return Meter::from($this->elevationInMetres);
     }
 
     public function getElevationInMetres(): int
@@ -140,9 +153,19 @@ final readonly class ActivityRevisionSummary implements \JsonSerializable
         return $this->elevationInMetres;
     }
 
+    public function getElapsedTime(): Seconds
+    {
+        return Seconds::from($this->elapsedTimeInSeconds);
+    }
+
     public function getElapsedTimeInSeconds(): int
     {
         return $this->elapsedTimeInSeconds;
+    }
+
+    public function getMovingTime(): Seconds
+    {
+        return Seconds::from($this->movingTimeInSeconds);
     }
 
     public function getMovingTimeInSeconds(): int

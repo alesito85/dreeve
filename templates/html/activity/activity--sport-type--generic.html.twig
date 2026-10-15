@@ -440,6 +440,11 @@
                 <div data-async-content-url="{{ relativeUrl(path('activity_shifting', {'activityId': activity.getId()})) }}"></div>
             {% endif %}
         </section>
+        {% include 'html/activity/activity-revisions.html.twig' with {
+            'revisions': revisions,
+            'revisionFiles': revisionFiles,
+            'switchActivityRevisionCommand': switchActivityRevisionCommand,
+        } %}
         {% if distributionCharts is not empty %}
             <section>
                 <h3 class="font-bold text-gray-900 mb-3">Distribution</h3>

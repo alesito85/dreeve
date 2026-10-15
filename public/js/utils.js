@@ -65,12 +65,15 @@ export const fetchJson = async (url) => {
     return response.json();
 }
 
-export const dispatchCommand = async (commandName, payload = {}) => {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+// The command endpoint and its token sit in the head of every admin page, which is
+// what an admin form reads. A form on a page outside /admin passes them in itself,
+// since the head of such a page does not know about the command endpoint.
+export const dispatchCommand = async (commandName, payload = {}, options = {}) => {
+    const csrfToken = options.csrfToken ?? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     if (!csrfToken) {
         throw new Error('csrf-token expected to be found');
     }
-    const url = document.querySelector('meta[name="dispatch-command-url"]')?.getAttribute('content');
+    const url = options.url ?? document.querySelector('meta[name="dispatch-command-url"]')?.getAttribute('content');
     if (!url) {
         throw new Error('dispatch-command-url expected to be found');
     }

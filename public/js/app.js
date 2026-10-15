@@ -16,6 +16,8 @@ import ScrollTo from "./components/scroll-to";
 import MilestoneFilter from "./features/milestones/milestone-filter";
 import DarkModeManager from "./components/dark-mode";
 import initDropdowns from "./components/dropdown";
+import initFormLoadingState from "./components/form/form-loading-state";
+import initDispatchCommandForm from "./components/form/dispatch-command-form";
 import {initAccordions, initPopovers, initDrawers} from "flowbite";
 
 registerEchartsCallbacks();
@@ -49,6 +51,10 @@ const initElements = (rootNode) => {
 }
 
 initSidebar();
+// A command action is not an admin page exclusive, so the forms that send one work
+// here too. Both self-gate on the markup being present.
+initFormLoadingState();
+initDispatchCommandForm();
 darkModeManager.attachEventListeners();
 
 eventBus.on(Events.DARK_MODE_TOGGLED, ({darkModeEnabled}) => {

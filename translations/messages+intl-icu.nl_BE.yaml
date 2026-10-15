@@ -1,9 +1,11 @@
 '# completed': '# voltooid'
+'+{count} data series': '+{count} gegevensreeksen'
 '42-day fitness trend': 'Fitheidstrend over 42 dagen'
 '7-day fatigue level': 'Vermoeidheidsniveau over 7 dagen'
 '< 1.5: Good variety in training': '< 1.5: Goede variatie in training'
 '> 2.0: High monotony, increased risk': '> 2.0: Hoge monotonie, verhoogd risico'
 'A 6-hour week scores higher than a 5-hour week.': 'Een week van 6 uur scoort hoger dan een week van 5 uur.'
+'A file that belongs to this activity was imported more than once, so the data it replaced is kept here. Switching to a version replays the file it came from and keeps what it replaces as a new version.': 'Een bestand dat bij deze activiteit hoort, werd meer dan één keer geïmporteerd, dus de gegevens die het verving, blijven hier bewaard. Naar een versie gaan speelt het bestand waaruit ze komt opnieuw af en bewaart wat ze vervangt als een nieuwe versie.'
 'A high intensity score means a larger share of your training is hard rather than easy.': 'Een hoge intensiteitsscore betekent dat een groter deel van je training zwaar is in plaats van licht.'
 'A high score means you concentrate more training into fewer, heavier days.': 'Een hoge score betekent dat je meer training concentreert in minder, zwaardere dagen.'
 'A:C Ratio': 'A:C-ratio'
@@ -18,6 +20,7 @@ Activity: Activiteit
 'Activity heatmap': Activiteitenheatmap
 'Activity locations': Activiteitslocaties
 'Activity start times': 'Starttijden van activiteiten'
+'Activity versions': 'Activiteitsversies'
 'Acute Training Load (Fatigue) - 7-day exponentially weighted average of your daily training load. Represents short-term fatigue.': 'Acute Training Load (Vermoeidheid) - exponentieel gewogen gemiddelde over 7 dagen van je dagelijkse trainingsbelasting. Geeft de vermoeidheid op korte termijn weer.'
 'Acute:Chronic Ratio - Ratio of ATL to CTL. Indicates injury risk.': 'Acute:Chronic-ratio - Verhouding tussen ATL en CTL. Geeft het blessurerisico aan.'
 'Adaptive & Inclusive Sports': 'Aangepaste & inclusieve sporten'
@@ -36,6 +39,7 @@ Apr: Apr
 Aug: Aug
 Average: Gemiddeld
 'Average gradient': 'Gemiddelde helling'
+'Average power': 'Gemiddeld vermogen'
 'Avg gradient': 'Gem. helling'
 'Avg pace': 'Gem. tempo'
 'Avg speed': 'Gem. snelheid'
@@ -91,6 +95,7 @@ Cycling: Fietsen
 Dance: Dansen
 'Dark mode': 'Donkere modus'
 Dashboard: Dashboard
+'Data this version has that the one before it does not': 'Gegevens die deze versie heeft en de vorige niet'
 Date: Datum
 Day: Dag
 'Days needed': 'Dagen nodig'
@@ -355,6 +360,7 @@ Recent: Recent
 'Reduced carbon emission by commuting': 'Verminderde CO₂-uitstoot door woon-werkverkeer'
 'Register maintenance': 'Onderhoud registreren'
 'Relative cost': 'Relatieve kost'
+'Replaced on': 'Vervangen op'
 'Rest Days': Rustdagen
 'Rest days': Rustdagen
 'Rest days in last 7 days': 'Rustdagen in de laatste 7 dagen'
@@ -412,6 +418,7 @@ Streaks: Reeksen
 Sun: Zon
 Sun.: Zo.
 Surfing: Surfen
+'Switch to this version': 'Naar deze versie gaan'
 'TSB (Form)': 'TSB (Vorm)'
 'TSB positive in': 'TSB positief binnen'
 'Table Tennis': Tafeltennis
@@ -549,6 +556,7 @@ Unspecified: 'Niet gespecificeerd'
 'User badge': Gebruikersbadge
 'Velo Mobile': Velomobiel
 'Velo Mobiles': Velomobielen
+'Version {number}': 'Versie {number}'
 'Very high': 'Heel hoog'
 'View all': 'Bekijk alles'
 'View details': 'Details bekijken'

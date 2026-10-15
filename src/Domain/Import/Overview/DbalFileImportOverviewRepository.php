@@ -31,7 +31,7 @@ final readonly class DbalFileImportOverviewRepository extends DbalRepository imp
     public function find(Pagination $pagination, FileImportOverviewFilters $filters): Overview
     {
         $queryBuilder = $this->connection->createQueryBuilder()
-            ->select('fi.fileImportId', 'fi.originalFilename', 'fi.source', 'fi.status', 'fi.errorMessage', 'fi.activityId', 'fi.importedOn', 'fi.fileContents IS NOT NULL AS hasFileContents', 'a.name AS activityName')
+            ->select('fi.fileImportId', 'fi.originalFilename', 'fi.source', 'fi.status', 'fi.errorMessage', 'fi.activityId', 'fi.importedOn', 'fi.fileContents IS NOT NULL AS hasFileContents', 'a.name AS activityName', '(SELECT COUNT(*) FROM ActivityRevision ar WHERE ar.activityId = fi.activityId) AS revisionCount')
             ->from('FileImport', 'fi')
             ->leftJoin('fi', 'Activity', 'a', 'a.activityId = fi.activityId')
             ->orderBy('fi.importedOn', 'DESC');
@@ -100,7 +100,7 @@ final readonly class DbalFileImportOverviewRepository extends DbalRepository imp
     public function findOneByFileImportId(FileImportId $fileImportId): FileImportOverviewItem
     {
         $result = $this->connection->createQueryBuilder()
-            ->select('fi.fileImportId', 'fi.originalFilename', 'fi.source', 'fi.status', 'fi.errorMessage', 'fi.activityId', 'fi.importedOn', 'fi.fileContents IS NOT NULL AS hasFileContents', 'a.name AS activityName')
+            ->select('fi.fileImportId', 'fi.originalFilename', 'fi.source', 'fi.status', 'fi.errorMessage', 'fi.activityId', 'fi.importedOn', 'fi.fileContents IS NOT NULL AS hasFileContents', 'a.name AS activityName', '(SELECT COUNT(*) FROM ActivityRevision ar WHERE ar.activityId = fi.activityId) AS revisionCount')
             ->from('FileImport', 'fi')
             ->leftJoin('fi', 'Activity', 'a', 'a.activityId = fi.activityId')
             ->andWhere('fi.fileImportId = :fileImportId')
@@ -130,6 +130,7 @@ final readonly class DbalFileImportOverviewRepository extends DbalRepository imp
             activityId: ActivityId::fromOptionalString($result['activityId']),
             activityName: $result['activityName'],
             hasFileContents: (bool) $result['hasFileContents'],
+            revisionCount: (int) $result['revisionCount'],
         );
     }
 }

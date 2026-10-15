@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Import\FileImport\ImportActivityFiles\Pipeline;
 
-use App\Domain\Activity\ActivityId;
 use App\Domain\Activity\ActivityRepository;
-use App\Domain\Activity\ActivityWithRawData;
 use App\Domain\Import\ActivityIdentityMatcher;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 

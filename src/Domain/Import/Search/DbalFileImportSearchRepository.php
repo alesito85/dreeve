@@ -32,7 +32,7 @@ final readonly class DbalFileImportSearchRepository extends DbalRepository imple
     public function find(Pagination $pagination, FileImportSearchFilters $filters): Overview
     {
         $queryBuilder = $this->connection->createQueryBuilder()
-            ->select('fi.fileImportId', 'fi.originalFilename', 'fi.source', 'fi.status', 'fi.errorMessage', 'fi.activityId', 'fi.importedOn', 'fi.fileContents IS NOT NULL AS hasFileContents', 'a.name AS activityName')
+            ->select('fi.fileImportId', 'fi.originalFilename', 'fi.source', 'fi.status', 'fi.errorMessage', 'fi.activityId', 'fi.importedOn', 'fi.fileContents IS NOT NULL AS hasFileContents', 'a.name AS activityName', '(SELECT COUNT(*) FROM ActivityRevision ar WHERE ar.activityId = fi.activityId) AS revisionCount')
             ->from('FileImport', 'fi')
             ->leftJoin('fi', 'Activity', 'a', 'a.activityId = fi.activityId')
             ->orderBy('fi.importedOn', 'DESC');
@@ -115,6 +115,7 @@ final readonly class DbalFileImportSearchRepository extends DbalRepository imple
             activityId: ActivityId::fromOptionalString($result['activityId']),
             activityName: $result['activityName'],
             hasFileContents: (bool) $result['hasFileContents'],
+            revisionCount: (int) $result['revisionCount'],
         );
     }
 }

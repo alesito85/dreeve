@@ -128,10 +128,30 @@
                                            href="{{ relativeUrl(path('activity', {'activityId': activityId})) }}">
                                             {{ fileImport.getActivityName() }}
                                         </a>
+                                        {% if fileImport.getRevisionCount() > 0 %}
+                                            <a href="{{ relativeUrl(path('activity', {'activityId': activityId})) }}#activity-versions"
+                                               class="pill pill--info text-xs"
+                                               title="{{ "Version history for this activity"|trans({}, 'admin') }}">
+                                                {{ "{count} versions"|trans({'{count}': fileImport.getRevisionCount()}, 'admin') }}
+                                            </a>
+                                        {% endif %}
                                     {% endif %}
                                 </td>
                                 <td class="narrow whitespace-nowrap sticky-actions">
                                     <div class="inline-flex items-center gap-2">
+                                        {% if fileImport.getFileImportId() and fileImport.hasFileContents() and (fileImport.isFailed() or fileImport.wasSkipped()) %}
+                                            <form data-dispatch-command="{{ reimportCommand }}" class="inline-flex">
+                                                <input type="hidden" name="fileImportId" value="{{ fileImport.getFileImportId() }}">
+                                                <button type="submit" data-has-loading-state
+                                                        class="group unstyled cursor-pointer inline-flex items-center justify-center text-gray-500 transition-colors hover:text-primary"
+                                                        title="{{ "Import this file again"|trans({}, 'admin') }}">
+                                                    <span class="sr-only">{{ "Import this file again"|trans({}, 'admin') }}</span>
+                                                    <svg class="size-5 group-[.is-loading]:animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4"/>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        {% endif %}
                                         {% if fileImport.hasFileContents() %}
                                             <a href="{{ relativeUrl(path('admin_download_file_import', {fileImportId: fileImport.getFileImportId()})) }}"
                                                download="{{ fileImport.getOriginalFilename()|e('html_attr') }}"

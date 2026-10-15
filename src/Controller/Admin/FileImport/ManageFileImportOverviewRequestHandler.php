@@ -8,6 +8,7 @@ use App\Domain\Activity\ImportSource;
 use App\Domain\Import\FileImportStatus;
 use App\Domain\Import\Overview\FileImportOverviewFilters;
 use App\Domain\Import\Overview\FileImportOverviewRepository;
+use App\Domain\Import\ReimportFileImport\ReimportFileImport;
 use App\Infrastructure\Http\HtmlResponse;
 use App\Infrastructure\Http\Request\PaginationFromRequest;
 use Symfony\Component\HttpFoundation\Request;
@@ -42,6 +43,7 @@ final readonly class ManageFileImportOverviewRequestHandler
                 static fn (FileImportStatus $status): bool => FileImportStatus::QUEUED !== $status,
             ),
             'sourceOptions' => ImportSource::fileBasedSources(),
+            'reimportCommand' => ReimportFileImport::getCommandName(),
         ]));
     }
 }

@@ -1,9 +1,11 @@
 '# completed': '# completed'
+'+{count} data series': '+{count} dataserier'
 '42-day fitness trend': '42-dagars träningstendens'
 '7-day fatigue level': '7-dagars utmattningsnivå'
 '< 1.5: Good variety in training': '< 1.5: Bra variation av träningsformer'
 '> 2.0: High monotony, increased risk': '> 2.0: Hög enformighet, ökad risk'
 'A 6-hour week scores higher than a 5-hour week.': 'A 6-hour week scores higher than a 5-hour week.'
+'A file that belongs to this activity was imported more than once, so the data it replaced is kept here. Switching to a version replays the file it came from and keeps what it replaces as a new version.': 'En fil som hör till aktiviteten importerades mer än en gång, så den data den ersatte sparas här. Att byta till en version kör filen den kommer från igen och sparar det den ersätter som en ny version.'
 'A high intensity score means a larger share of your training is hard rather than easy.': 'A high intensity score means a larger share of your training is hard rather than easy.'
 'A high score means you concentrate more training into fewer, heavier days.': 'A high score means you concentrate more training into fewer, heavier days.'
 'A:C Ratio': 'A:C Förhållande'
@@ -18,6 +20,7 @@ Activity: Aktivitet
 'Activity heatmap': Aktivitskarta
 'Activity locations': 'Aktivitet platser'
 'Activity start times': 'Aktivitet starttider'
+'Activity versions': 'Aktivitetsversioner'
 'Acute Training Load (Fatigue) - 7-day exponentially weighted average of your daily training load. Represents short-term fatigue.': 'Akut träningsbelastning (trötthet) – 7 dagars exponentiellt viktat medelvärde av din dagliga träningsbelastning. Representerar kortvarig utmattning.'
 'Acute:Chronic Ratio - Ratio of ATL to CTL. Indicates injury risk.': 'Akut:Kronisk Ratio - Ratio av ATL till CTL. Indikerar skaderisk.'
 'Adaptive & Inclusive Sports': 'Adaptiva & Inkluderande Sporter'
@@ -36,6 +39,7 @@ Apr: Apr
 Aug: Aug
 Average: Average
 'Average gradient': 'Average gradient'
+'Average power': 'Genomsnittlig effekt'
 'Avg gradient': 'Avg gradient'
 'Avg pace': 'Avg pace'
 'Avg speed': 'Avg speed'
@@ -91,6 +95,7 @@ Cycling: Cykling
 Dance: Dance
 'Dark mode': 'Dark mode'
 Dashboard: Översikt
+'Data this version has that the one before it does not': 'Data den här versionen har och föregående inte har'
 Date: Datum
 Day: Day
 'Days needed': 'Dagar saknade'
@@ -355,6 +360,7 @@ Recent: Recent
 'Reduced carbon emission by commuting': 'Minskade koldioxidutsläpp tack vare pendling'
 'Register maintenance': 'Register maintenance'
 'Relative cost': 'Relativ kostnad'
+'Replaced on': 'Ersattes den'
 'Rest Days': Vilodagar
 'Rest days': Vilodagar
 'Rest days in last 7 days': 'Vilodagar de senaste 7 dagarna'
@@ -412,6 +418,7 @@ Streaks: Serie
 Sun: Sön
 Sun.: Sun.
 Surfing: Surfning
+'Switch to this version': 'Byt till den här versionen'
 'TSB (Form)': 'TSB (Form)'
 'TSB positive in': 'TSB positive in'
 'Table Tennis': Bordtennis
@@ -549,6 +556,7 @@ Unspecified: Ospecificerad
 'User badge': Användarmärke
 'Velo Mobile': 'Velo Mobile'
 'Velo Mobiles': Velomobil
+'Version {number}': 'Version {number}'
 'Very high': 'Väldigt hög'
 'View all': 'Visa alla'
 'View details': 'Visa detaljer'

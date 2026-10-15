@@ -1,9 +1,11 @@
 '# completed': '# completado'
+'+{count} data series': '+{count} series de datos'
 '42-day fitness trend': 'Tendencia de forma física de 42 días'
 '7-day fatigue level': 'Nivel de fatiga de 7 días'
 '< 1.5: Good variety in training': '< 1.5: Buena variedad en el entrenamiento'
 '> 2.0: High monotony, increased risk': '> 2.0: Alta monotonía, mayor riesgo'
 'A 6-hour week scores higher than a 5-hour week.': 'Una semana de 6 horas puntúa más alto que una semana de 5 horas.'
+'A file that belongs to this activity was imported more than once, so the data it replaced is kept here. Switching to a version replays the file it came from and keeps what it replaces as a new version.': 'Un archivo de esta actividad se importó más de una vez, así que los datos que reemplazó se conservan aquí. Cambiar a una versión vuelve a procesar el archivo del que procede y guarda como nueva versión lo que reemplaza.'
 'A high intensity score means a larger share of your training is hard rather than easy.': 'Una puntuación de alta intensidad significa que una mayor parte de tu entrenamiento es dura en lugar de suave.'
 'A high score means you concentrate more training into fewer, heavier days.': 'Una puntuación alta significa que concentras más entrenamiento en menos días, más intensos.'
 'A:C Ratio': 'Ratio A:C'
@@ -18,6 +20,7 @@ Activity: Actividad
 'Activity heatmap': 'Mapa de calor de actividades'
 'Activity locations': 'Ubicaciones de actividades'
 'Activity start times': 'Horas de inicio de actividades'
+'Activity versions': 'Versiones de la actividad'
 'Acute Training Load (Fatigue) - 7-day exponentially weighted average of your daily training load. Represents short-term fatigue.': 'Carga de entrenamiento aguda (Fatiga) - Media móvil ponderada exponencialmente a 7 días de tu carga de entrenamiento diaria. Representa la fatiga a corto plazo.'
 'Acute:Chronic Ratio - Ratio of ATL to CTL. Indicates injury risk.': 'Ratio Aguda:Crónica - Ratio de ATL a CTL. Indica el riesgo de lesión.'
 'Adaptive & Inclusive Sports': 'Deportes adaptados e inclusivos'
@@ -36,6 +39,7 @@ Apr: Abr
 Aug: Ago
 Average: Media
 'Average gradient': 'Pendiente media'
+'Average power': 'Potencia media'
 'Avg gradient': 'Pendiente media'
 'Avg pace': 'Ritmo medio'
 'Avg speed': 'Velocidad media'
@@ -91,6 +95,7 @@ Cycling: Ciclismo
 Dance: Baile
 'Dark mode': 'Modo oscuro'
 Dashboard: 'Panel de control'
+'Data this version has that the one before it does not': 'Datos que esta versión tiene y la anterior no'
 Date: Fecha
 Day: Día
 'Days needed': 'Días necesarios'
@@ -355,6 +360,7 @@ Recent: Reciente
 'Reduced carbon emission by commuting': 'Emisiones de carbono reducidas por desplazamientos'
 'Register maintenance': 'Registrar mantenimiento'
 'Relative cost': 'Coste relativo'
+'Replaced on': 'Reemplazado el'
 'Rest Days': 'Días de descanso'
 'Rest days': 'Días de descanso'
 'Rest days in last 7 days': 'Días de descanso en los últimos 7 días'
@@ -412,6 +418,7 @@ Streaks: Rachas
 Sun: Dom
 Sun.: Dom.
 Surfing: Surf
+'Switch to this version': 'Cambiar a esta versión'
 'TSB (Form)': 'TSB (Estado de forma)'
 'TSB positive in': 'TSB positivo en'
 'Table Tennis': 'Tenis de mesa'
@@ -549,6 +556,7 @@ Unspecified: 'No especificado'
 'User badge': 'Insignia de usuario'
 'Velo Mobile': Velomóvil
 'Velo Mobiles': Velomóviles
+'Version {number}': 'Versión {number}'
 'Very high': 'Muy alto'
 'View all': 'Ver todo'
 'View details': 'Ver detalles'

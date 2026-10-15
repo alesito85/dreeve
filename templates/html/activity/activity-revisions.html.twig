@@ -1,0 +1,87 @@
+{% if not revisions.isEmpty() %}
+    {# Build the rows oldest first, so each one can be compared to the version it
+       replaced, and show them newest first, which is how a history is read. #}
+    {% set rows = [] %}
+    {% set summaries = {} %}
+    {% for revision in revisions %}
+        {% set summary = revision.getSummary() %}
+        {% set file = revisionFiles[revision.getRevisionNumber()] ?? null %}
+        {% set previous = summaries[revision.getRevisionNumber() - 1] ?? null %}
+        {% set rows = rows|merge([{
+            'number': revision.getRevisionNumber(),
+            'createdOn': revision.getCreatedOn(),
+            'summary': summary,
+            'fileName': file is null ? null : file.fileName,
+            'restorable': file is null ? false : file.restorable,
+            'gained': previous is null ? [] : summary.streamTypesGainedComparedTo(previous),
+        }]) %}
+        {% set summaries = summaries|merge({(revision.getRevisionNumber()): summary}) %}
+    {% endfor %}
+    <section id="activity-versions">
+        <div class="bg-white border border-gray-200 shadow-xs rounded-lg p-4">
+            <div class="flex items-start gap-2.5 mb-3">
+                <span class="grid place-items-center size-7 shrink-0 rounded-lg bg-gray-100 text-gray-500" aria-hidden="true">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                    </svg>
+                </span>
+                <div>
+                    <h3 class="font-bold text-gray-900">{{ "Activity versions"|trans }}</h3>
+                    <p class="text-xs text-gray-500">
+                        {{ "A file that belongs to this activity was imported more than once, so the data it replaced is kept here. Switching to a version replays the file it came from and keeps what it replaces as a new version."|trans }}
+                    </p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-2">
+                {% for row in rows|reverse %}
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                        <span class="pill pill--neutral text-xs shrink-0">
+                            {{ "Version {number}"|trans({'{number}': row.number}) }}
+                        </span>
+                        <span class="text-xs text-gray-500 shrink-0" title="{{ "Replaced on"|trans }}">
+                            {{ row.createdOn|formatDate() }}
+                            <span class="text-xxs">{{ row.createdOn|formatTime(true) }}</span>
+                        </span>
+                        {% if row.fileName %}
+                            <span class="text-xxs text-gray-400 max-w-52 truncate" title="{{ row.fileName }}">{{ row.fileName }}</span>
+                        {% endif %}
+                        <div class="flex items-center gap-3 text-xs text-gray-500">
+                            <span title="{{ "Distance"|trans }}" class="tabular-nums">{{ row.summary.getDistance()|renderMeasurement(1) }}</span>
+                            <span title="{{ "Time"|trans }}" class="tabular-nums">{{ row.summary.getElapsedTime()|formatSeconds }}</span>
+                            {% if row.summary.getAveragePower() is not null %}
+                                <span title="{{ "Average power"|trans }}" class="tabular-nums">
+                                    {{ row.summary.getAveragePower() }}<span class="text-xxs text-gray-400">w</span>
+                                </span>
+                            {% endif %}
+                        </div>
+                        {% if row.gained is not empty %}
+                            <span class="pill pill--info text-xs" title="{{ "Data this version has that the one before it does not"|trans }}">
+                                {{ "+{count} data series"|trans({'{count}': row.gained|length}) }}
+                            </span>
+                        {% endif %}
+                        {% if isAuthenticated() %}
+                            {# The command endpoint and its token normally live in the head of an
+                               admin page, which this page is not, so the form carries them. The
+                               token is a stateless one, so it is the same for every visitor and
+                               safe to render into a page that is cached for all of them. #}
+                            <form data-dispatch-command="{{ switchActivityRevisionCommand }}"
+                                  data-dispatch-url="{{ relativeUrl(path('admin_dispatch_command')) }}"
+                                  data-csrf-token="{{ csrf_token('dispatch-command') }}"
+                                  data-redirect="{{ relativeUrl(path('activity', {'activityId': activity.getId()})) }}"
+                                  class="ml-auto inline-flex">
+                                <input type="hidden" name="activityId" value="{{ activity.getId() }}">
+                                <input type="hidden" name="revisionNumber" value="{{ row.number }}">
+                                <button type="submit" data-has-loading-state class="btn--secondary text-xs shrink-0 group">
+                                    <svg class="size-4 shrink-0 group-[.is-loading]:animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4"/>
+                                    </svg>
+                                    <span>{{ "Switch to this version"|trans }}</span>
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endif %}

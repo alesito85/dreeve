@@ -211,6 +211,7 @@ Import: Import
 'Import segment details': 'Import segment details'
 'Import segment details so segment maps can be displayed. This needs an extra Strava API call per segment and increases import time significantly.': 'Import segment details so segment maps can be displayed. This needs an extra Strava API call per segment and increases import time significantly.'
 'Import source': 'Import source'
+'Import this file again': 'Importar este ficheiro novamente'
 'Imported files will appear here once you upload them.': 'Imported files will appear here once you upload them.'
 'Imported from Strava': 'Imported from Strava'
 'Imports new Strava activities.': 'Imports new Strava activities.'
@@ -431,6 +432,7 @@ Tasks: Tasks
 'Test automation rules': 'Test automation rules'
 'Test rules': 'Test rules'
 'The URL the app is hosted on.': 'The URL the app is hosted on.'
+'The activity has been switched to the selected version.': 'A atividade passou para a versão selecionada.'
 'The activity started': 'The activity started'
 'The activity will be marked as a commute.': 'The activity will be marked as a commute.'
 'The activity will be marked as a group activity.': 'The activity will be marked as a group activity.'
@@ -447,6 +449,7 @@ Tasks: Tasks
 'The distance': 'The distance'
 'The elapsed time': 'The elapsed time'
 'The elevation gain': 'The elevation gain'
+'The file has been put back in the watch folder and will be imported again.': 'O ficheiro foi reposto na pasta watch e será importado novamente.'
 'The formula used to calculate your max heart rate. The default is Fox (220 − age).': 'The formula used to calculate your max heart rate. The default is Fox (220 − age).'
 'The formula used to calculate your resting heart rate. The default is an age-based estimate.': 'The formula used to calculate your resting heart rate. The default is an age-based estimate.'
 'The key lets an external client upload activity files over HTTP. It is the only thing guarding that endpoint, so treat it like a password.': 'The key lets an external client upload activity files over HTTP. It is the only thing guarding that endpoint, so treat it like a password.'
@@ -505,6 +508,7 @@ Uploading...: Uploading...
 'Used to calculate the training load of this activity': 'Used to calculate the training load of this activity'
 Username: Username
 'Verify token': 'Verify token'
+'Version history for this activity': 'Histórico de versões desta atividade'
 Warning: Aviso
 'Weather and reverse geocoding have been retrieved.': 'Weather and reverse geocoding have been retrieved.'
 'Weather and/or reverse geocoding could not be retrieved when this activity was imported.': 'Weather and/or reverse geocoding could not be retrieved when this activity was imported.'
@@ -574,6 +578,7 @@ then: then
 '{count} files uploaded': '{count} files uploaded'
 '{count} images selected': '{count} images selected'
 '{count} rules apply': '{count} rules apply'
+'{count} versions': '{count} versões'
 '{envVar} is set, but it is not a key this app generated, so the API stays closed. Generate a new one and replace it.': '{envVar} is set, but it is not a key this app generated, so the API stays closed. Generate a new one and replace it.'
 '{label} (copy)': '{label} (copy)'
 "{name} can't be deleted because it is still linked to activities, maintenance or automation rules.": "{name} can't be deleted because it is still linked to activities, maintenance or automation rules."

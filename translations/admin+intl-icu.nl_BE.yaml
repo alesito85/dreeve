@@ -211,6 +211,7 @@ Import: Importeren
 'Import segment details': 'Segmentdetails importeren'
 'Import segment details so segment maps can be displayed. This needs an extra Strava API call per segment and increases import time significantly.': 'Importeer segmentdetails zodat segmentkaarten getoond kunnen worden. Dit vraagt een extra Strava API-call per segment en verlengt de importtijd aanzienlijk.'
 'Import source': Importbron
+'Import this file again': 'Dit bestand opnieuw importeren'
 'Imported files will appear here once you upload them.': 'Geïmporteerde bestanden verschijnen hier zodra je ze uploadt.'
 'Imported from Strava': 'Geïmporteerd van Strava'
 'Imports new Strava activities.': 'Importeert nieuwe Strava-activiteiten.'
@@ -431,6 +432,7 @@ Tasks: Taken
 'Test automation rules': 'Automatiseringsregels testen'
 'Test rules': 'Regels testen'
 'The URL the app is hosted on.': 'De URL waarop de app gehost wordt.'
+'The activity has been switched to the selected version.': 'De activiteit is omgeschakeld naar de geselecteerde versie.'
 'The activity started': 'De activiteit startte'
 'The activity will be marked as a commute.': 'De activiteit wordt gemarkeerd als woon-werk.'
 'The activity will be marked as a group activity.': 'De activiteit wordt gemarkeerd als groepsactiviteit.'
@@ -447,6 +449,7 @@ Tasks: Taken
 'The distance': 'De afstand'
 'The elapsed time': 'De verstreken tijd'
 'The elevation gain': 'De hoogtewinst'
+'The file has been put back in the watch folder and will be imported again.': 'Het bestand is teruggeplaatst in de watch-map en wordt opnieuw geïmporteerd.'
 'The formula used to calculate your max heart rate. The default is Fox (220 − age).': 'De formule om je maximale hartslag te berekenen. Standaard is Fox (220 − leeftijd).'
 'The formula used to calculate your resting heart rate. The default is an age-based estimate.': 'De formule om je rusthartslag te berekenen. Standaard is een schatting op basis van leeftijd.'
 'The key lets an external client upload activity files over HTTP. It is the only thing guarding that endpoint, so treat it like a password.': 'Met de sleutel kan een externe client activiteitsbestanden uploaden via HTTP. Het is het enige wat dat endpoint beveiligt, dus behandel hem als een wachtwoord.'
@@ -505,6 +508,7 @@ Uploading...: 'Aan het uploaden...'
 'Used to calculate the training load of this activity': 'Gebruikt om de trainingsbelasting van deze activiteit te berekenen'
 Username: Gebruikersnaam
 'Verify token': Verificatietoken
+'Version history for this activity': 'Versiegeschiedenis van deze activiteit'
 Warning: Waarschuwing
 'Weather and reverse geocoding have been retrieved.': 'Weer en reverse geocoding zijn opgehaald.'
 'Weather and/or reverse geocoding could not be retrieved when this activity was imported.': 'Weer en/of reverse geocoding konden niet opgehaald worden toen deze activiteit geïmporteerd werd.'
@@ -574,6 +578,7 @@ then: dan
 '{count} files uploaded': '{count} bestanden geüpload'
 '{count} images selected': '{count} afbeeldingen geselecteerd'
 '{count} rules apply': '{count} regels van toepassing'
+'{count} versions': '{count} versies'
 '{envVar} is set, but it is not a key this app generated, so the API stays closed. Generate a new one and replace it.': '{envVar} is ingesteld, maar het is geen sleutel die deze app gegenereerd heeft, dus de API blijft gesloten. Genereer een nieuwe en vervang hem.'
 '{label} (copy)': '{label} (kopie)'
 "{name} can't be deleted because it is still linked to activities, maintenance or automation rules.": '{name} kan niet verwijderd worden omdat het nog gekoppeld is aan activiteiten, onderhoud of automatiseringsregels.'

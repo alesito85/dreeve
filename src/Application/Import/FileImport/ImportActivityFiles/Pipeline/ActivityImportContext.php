@@ -24,6 +24,7 @@ final readonly class ActivityImportContext
         private ActivityLaps $laps,
         private ActivityDrivetrainUsages $drivetrainUsages,
         private ?ActivityWithRawData $mergeTarget,
+        private bool $replaces,
     ) {
     }
 
@@ -38,6 +39,7 @@ final readonly class ActivityImportContext
             laps: ActivityLaps::empty(),
             drivetrainUsages: ActivityDrivetrainUsages::empty(),
             mergeTarget: null,
+            replaces: false,
         );
     }
 
@@ -86,6 +88,18 @@ final readonly class ActivityImportContext
         ]);
     }
 
+    /**
+     * The file being imported replaces what is stored instead of adding to it.
+     * Set when a stored version is replayed, because the version being switched
+     * to is the whole truth about that ride, not one more file about it.
+     */
+    public function withReplace(): self
+    {
+        return clone ($this, [
+            'replaces' => true,
+        ]);
+    }
+
     public function withFile(RawActivityFile $file): self
     {
         return clone ($this, [
@@ -131,5 +145,10 @@ final readonly class ActivityImportContext
     public function isMerge(): bool
     {
         return $this->mergeTarget instanceof ActivityWithRawData;
+    }
+
+    public function isReplace(): bool
+    {
+        return $this->replaces;
     }
 }

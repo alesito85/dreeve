@@ -156,21 +156,29 @@ class ImportActivityFilesCommandHandlerTest extends ContainerTestCase
         $this->assertSame(ImportSource::GPX_FILE->value, $fileImports[1]['source']);
     }
 
-    public function testHandleSkipsUnsupportedFileType(): void
+    public function testHandleIgnoresFilesThatAreNotActivityFiles(): void
     {
         $this->watchStorage->write('watch/notes.txt', 'just some text');
+        $this->watchStorage->write('watch/notes.gz', 'not a gzipped activity');
+        $this->watchStorage->write('watch/ride.tcx', $this->fixture('activity.tcx'));
 
         $output = new SpyOutput();
         $this->handler->handle(new ImportActivityFiles($output, ImportedActivities::empty()));
 
-        $this->assertCount(0, $this->getConnection()
+        $fileImports = $this->getConnection()
             ->executeQuery('SELECT * FROM FileImport ORDER BY importedOn ASC')
-            ->fetchAllAssociative());
+            ->fetchAllAssociative();
+        $this->assertCount(1, $fileImports);
+        $this->assertSame(FileImportStatus::SUCCESS->value, $fileImports[0]['status']);
+        $this->assertTrue($this->watchStorage->fileExists('watch/notes.txt'), 'A file that is not an activity file should be left alone');
+        $this->assertTrue($this->watchStorage->fileExists('watch/notes.gz'), 'A file that is not an activity file should be left alone');
+        $this->assertFalse($this->watchStorage->fileExists('watch/ride.tcx'));
         $this->assertSame(
             implode("\n", [
                 'Importing activity files...',
-                '  => [1/1] Skipping "notes.txt", unsupported file type',
-                '  => Imported 0, skipped 1, failed 0 activity file(s)',
+                '  => Ignored 2 file(s) in "watch" that are not activity files: notes.gz, notes.txt',
+                '  => [1/1] Imported "ride.tcx" as activity "Night Ride - 08-09-2021"',
+                '  => Imported 1, skipped 0, failed 0 activity file(s)',
             ]),
             (string) $output,
         );

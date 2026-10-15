@@ -132,7 +132,15 @@ the stored original stays the gz the user handed over. Verified against these fi
 warning on stderr.
 
 On the PHP side `pathinfo` reports `gz`, so the extension gate needs to look through one trailing
-`.gz` before choosing a parser; the enum cases stay, so the import source remains `FIT_FILE`. While
-in that file: an unsupported extension currently records nothing and deletes nothing, while the
-watch directory listing is unfiltered, so such a file is retried forever. It should record a FAILED
-`FileImport` and delete the file, like the parse-failure branch beside it.
+`.gz` before choosing a parser; the enum cases stay, so the import source remains `FIT_FILE`.
+
+While in that file: a file whose extension is not an activity format was retried forever, because the
+watch directory listing was unfiltered and the branch that caught `UnsupportedFileType` recorded
+nothing and deleted nothing. It is fixed by filtering the listing and reporting the leftovers on one
+line, not by recording a FAILED `FileImport` and deleting them. A failed import needs an
+`ImportSource`, `FileImport.source` is not nullable, and inventing an "unknown" source to fill that
+column would put a meaningless option in the activity filter, where every case is a real source. The
+column is not the reason though: a parse failure is a file Dreeve tried to read and could not, so
+archiving its bytes and removing it is fair, while `notes.txt` is a file that was never an activity
+and the watch folder is the user's. Dreeve should not delete what it has no business reading, so it
+says what it ignored and leaves it alone.

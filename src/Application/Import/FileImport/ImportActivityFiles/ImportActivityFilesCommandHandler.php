@@ -29,6 +29,7 @@ use App\Infrastructure\DependencyInjection\Mutex\WithMutex;
 use App\Infrastructure\Mutex\LockName;
 use App\Infrastructure\Mutex\Mutex;
 use App\Infrastructure\Time\Clock\Clock;
+use League\Flysystem\StorageAttributes;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 #[WithMutex(lockName: LockName::IMPORT_DATA)]
@@ -68,7 +69,22 @@ final readonly class ImportActivityFilesCommandHandler implements CommandHandler
         $countSkipped = 0;
         $countFailed = 0;
 
-        $files = $this->watchDirectory->listFiles()->toArray();
+        // Anything that is not an activity file is left in the folder, a watch
+        // folder can hold whatever the user put there. It does need saying,
+        // otherwise it looks like an import that keeps getting stuck.
+        $ignoredFiles = $this->watchDirectory->listFilesThatAreNotActivityFiles()->toArray();
+        if ([] !== $ignoredFiles) {
+            $output->writeln(sprintf(
+                '  => Ignored %d file(s) in "watch" that are not activity files: %s',
+                count($ignoredFiles),
+                implode(', ', array_map(
+                    fn (StorageAttributes $file): string => $this->watchDirectory->getAbsolutePathFor($file)->getFilename(),
+                    $ignoredFiles,
+                )),
+            ));
+        }
+
+        $files = $this->watchDirectory->listFilesThatCanBeProcessed()->toArray();
         $countTotalFilesInWatchDirectory = count($files);
         $delta = 0;
         foreach ($files as $item) {

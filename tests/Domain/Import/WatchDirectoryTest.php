@@ -99,6 +99,22 @@ class WatchDirectoryTest extends TestCase
         );
     }
 
+    public function testListFilesThatAreNotActivityFilesOnlyListsTheRestSortedByPath(): void
+    {
+        $this->filesystem->write('watch/ride.fit', 'raw-fit-bytes');
+        $this->filesystem->write('watch/ride.fit.gz', 'gzipped-fit-bytes');
+        $this->filesystem->write('watch/notes.gz', 'some bytes');
+        $this->filesystem->write('watch/readme.txt', 'some text');
+        $this->filesystem->write('watch/.uploads/staged.fit', 'raw-fit-bytes');
+
+        $this->assertSame(
+            ['watch/notes.gz', 'watch/readme.txt'],
+            $this->watchDirectory->listFilesThatAreNotActivityFiles()
+                ->map(fn (StorageAttributes $file): string => $file->path())
+                ->toArray()
+        );
+    }
+
     public function testReadFile(): void
     {
         $this->filesystem->write('watch/ride.fit', 'raw-fit-bytes');

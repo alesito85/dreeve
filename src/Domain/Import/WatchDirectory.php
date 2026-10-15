@@ -44,6 +44,20 @@ final readonly class WatchDirectory
             ->sortByPath();
     }
 
+    /**
+     * Everything in the folder that is not an activity file. These are left
+     * where they are, a folder can hold anything, but they need reporting so a
+     * stray file does not read as an import that keeps getting stuck.
+     */
+    public function listFilesThatAreNotActivityFiles(): DirectoryListing
+    {
+        return $this->listFiles()
+            ->filter(fn (StorageAttributes $file): bool => !SupportedFileExtension::fromExtensionChain(
+                Path::fromString($file->path())->getFilename()
+            ) instanceof SupportedFileExtension)
+            ->sortByPath();
+    }
+
     public function listFiles(): DirectoryListing
     {
         return $this->defaultStorage->listContents(self::FOLDER_NAME, false)

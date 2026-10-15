@@ -65,8 +65,8 @@ There is no file checksum and no device identity stored anywhere in `src/`: `Act
 
 ## How identity should work
 
-Three layers, evaluated in order, in a new `ActivityIdentityMatcher` that replaces the body of
-`DuplicateActivityScanner`:
+Three layers, evaluated in order, in a new `ActivityIdentityMatcher`. `DuplicateActivityScanner` is
+gone with both of its rules:
 
 1. **File checksum**, SHA-256 of the uploaded bytes. A match means the identical file, so a merge
    would add nothing: skip, which is today's behaviour and the right one for this case.
@@ -104,6 +104,29 @@ already in scope there; TCX and GPX simply leave it null and no parser interface
 `DbalActivityRepository::update()` writes a narrower column set than `add()`, so it now carries both
 columns as well, otherwise any merge or Strava refresh would quietly erase the identity that later
 files are matched against.
+
+**As implemented.** `ActivityIdentityMatcher` holds the three layers and `ResolveActivityIdentity` is
+the pipeline step that calls it, at priority 97 so it runs right after parsing and before anything
+touches an activity. Two decisions the prose above left open:
+
+- the content gate measures its 5 % against the **incoming** distance, with a 50 m floor so two
+  sessions that both have no distance at all, an indoor ride with a dead GPS, still line up instead
+  of failing on float noise;
+- more than one candidate on the **device** layer is not ambiguity. One device cannot record two
+  activities at one instant, so two rows there are an activity Dreeve already duplicated, and the
+  file belongs to all of them; the oldest row wins because it is also the one every later run picks.
+  Ambiguity, and with it the refusal, only comes from the content gate, where two genuinely different
+  activities can fit one file.
+
+The refusal stores the bytes on the SKIPPED `FileImport` row and deletes the file from `watch`, so the
+decision can be made later from the import log instead of the file being retried every run.
+
+One honest limit in the start comparisons. `startDateTime` is stored as a wall-clock string in the
+timezone the parser used, which is the configured one for every import source, so equal instants do
+produce equal strings and the range search is sound. It is not an instant, so if the timezone setting
+changes between two imports, a re-imported file's start moves by the offset and the device and content
+layers miss. The checksum layer is timezone-proof and still catches the byte-identical case, which is
+the common one.
 
 ## How the merge should work
 

@@ -156,6 +156,52 @@ class ImportActivityFilesCommandHandlerTest extends ContainerTestCase
         $this->assertSame(ImportSource::GPX_FILE->value, $fileImports[1]['source']);
     }
 
+    public function testHandleSkipsAFileThatFitsTwoActivitiesItCannotTellApart(): void
+    {
+        $bytes = $this->fixture('activity.tcx');
+        $this->watchStorage->write('watch/ride1.tcx', $bytes);
+
+        $this->handler->handle(new ImportActivityFiles(new SpyOutput(), ImportedActivities::empty()));
+
+        // A second activity that fits the file just as well, with no fingerprint
+        // left on either of them. This is the state where Dreeve cannot say which
+        // activity the file belongs to, and picking one would duplicate the other.
+        $row = $this->getConnection()->fetchAssociative('SELECT * FROM Activity');
+        $this->assertIsArray($row);
+        $this->getConnection()->executeStatement('UPDATE Activity SET fileChecksum = NULL');
+        $this->getConnection()->insert('Activity', [
+            ...$row,
+            'activityId' => 'activity-20000000001',
+            'name' => 'The same ride under another name',
+            'fileChecksum' => null,
+        ]);
+
+        $this->watchStorage->write('watch/ride2.tcx', $bytes);
+        $output = new SpyOutput();
+        $this->handler->handle(new ImportActivityFiles($output, ImportedActivities::empty()));
+
+        $this->assertSame('2', (string) $this->getConnection()->executeQuery('SELECT COUNT(*) FROM Activity')->fetchOne());
+        $skipped = $this->getConnection()
+            ->executeQuery('SELECT * FROM FileImport WHERE status = :status', ['status' => FileImportStatus::SKIPPED->value])
+            ->fetchAllAssociative();
+        $this->assertCount(1, $skipped);
+        $this->assertNull($skipped[0]['activityId'], 'An ambiguous file must not be pinned to one activity');
+        $this->assertSame(
+            $bytes,
+            CompressedString::fromCompressed($skipped[0]['fileContents'])->uncompress(),
+            'The bytes have to survive in the import log, they are all that is left of the file'
+        );
+        $this->assertStringContainsString('needs a manual decision', $skipped[0]['errorMessage']);
+        $this->assertFalse(
+            $this->watchStorage->fileExists('watch/ride2.tcx'),
+            'The file cannot be left in watch to be retried on every run'
+        );
+        $this->assertStringContainsString(
+            '  => [1/1] Skipping "ride2.tcx", Could not match this file to a single activity, 2 activities fit it as well as each other',
+            (string) $output,
+        );
+    }
+
     public function testHandleIgnoresFilesThatAreNotActivityFiles(): void
     {
         $this->watchStorage->write('watch/notes.txt', 'just some text');

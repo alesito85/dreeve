@@ -15,6 +15,7 @@ use App\Domain\Activity\Scan\ActivityScanRepository;
 use App\Domain\Activity\Scan\ActivityScanType;
 use App\Domain\Activity\Shifting\ActivityDrivetrainUsageRepository;
 use App\Domain\Activity\Stream\ActivityStreamRepository;
+use App\Domain\Import\AmbiguousActivityMatch;
 use App\Domain\Import\FileImport;
 use App\Domain\Import\FileImportId;
 use App\Domain\Import\FileImportRepository;
@@ -110,6 +111,28 @@ final readonly class ImportActivityFilesCommandHandler implements CommandHandler
                 ));
 
                 $output->writeln(sprintf('  => [%d/%d] Skipping "%s", activity was already imported', $delta, $countTotalFilesInWatchDirectory, $filePath->getFilename()));
+                ++$countSkipped;
+                continue;
+            } catch (AmbiguousActivityMatch $e) {
+                // The bytes are stored with the row, so the file itself can go.
+                // It is in the import log, where it can be looked at and, if the
+                // decision is made by hand, imported from there.
+                $file = $context->getFile() ?? throw new \RuntimeException('File not set on $context');
+                $this->fileImportRepository->add(FileImport::createFromRawFile(
+                    fileImportId: FileImportId::random(),
+                    file: $file,
+                    source: $context->getImportSource(),
+                    status: FileImportStatus::SKIPPED,
+                    errorMessage: sprintf(
+                        'Skipped, %s. It needs a manual decision on which activity it belongs to',
+                        strtolower($e->getMessage())
+                    ),
+                    activityId: null,
+                    importedOn: $this->clock->getCurrentDateTimeImmutable(),
+                ));
+                $this->watchDirectory->deleteFile($filePath);
+
+                $output->writeln(sprintf('  => [%d/%d] Skipping "%s", %s', $delta, $countTotalFilesInWatchDirectory, $filePath->getFilename(), $e->getMessage()));
                 ++$countSkipped;
                 continue;
             } catch (UnsupportedFileType) {

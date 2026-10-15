@@ -292,6 +292,63 @@ class ActivityIdentityMatcherTest extends ContainerTestCase
         $this->assertNull($match->getActivityId());
     }
 
+    public function testAStravaPayloadMatchesTheFileImportThatDescribesTheSameRide(): void
+    {
+        $this->givenAnActivity(ActivityBuilder::fromDefaults()
+            ->withActivityId(ActivityId::fromUnprefixed('1'))
+            ->withImportSource(ImportSource::FIT_FILE)
+            ->withStartDateTime(SerializableDateTime::fromString('2026-10-14 12:31:02')));
+
+        $this->assertEquals(
+            ActivityId::fromUnprefixed('1'),
+            $this->activityIdentityMatcher->matchFileImportedTwin(
+                sportType: SportType::RIDE,
+                startDateTime: SerializableDateTime::fromString('2026-10-14 12:31:03'),
+                distance: Kilometer::from(10),
+            ),
+        );
+    }
+
+    public function testAStravaPayloadIsNotJudgedAgainstActivitiesThatCameFromTheApi(): void
+    {
+        // Activities that both came from the API are told apart by their Strava id,
+        // so content alone must not decide that one of them is a duplicate.
+        $this->givenAnActivity(ActivityBuilder::fromDefaults()
+            ->withActivityId(ActivityId::fromUnprefixed('1'))
+            ->withImportSource(ImportSource::STRAVA_API)
+            ->withStartDateTime(SerializableDateTime::fromString('2026-10-14 12:31:02')));
+
+        $this->assertNull($this->activityIdentityMatcher->matchFileImportedTwin(
+            sportType: SportType::RIDE,
+            startDateTime: SerializableDateTime::fromString('2026-10-14 12:31:03'),
+            distance: Kilometer::from(10),
+        ));
+    }
+
+    public function testAStravaPayloadRefusesToPickBetweenTwoFileImports(): void
+    {
+        foreach ([1, 2] as $activityId) {
+            $this->givenAnActivity(ActivityBuilder::fromDefaults()
+                ->withActivityId(ActivityId::fromUnprefixed((string) $activityId))
+                ->withImportSource(ImportSource::FIT_FILE)
+                ->withStartDateTime(SerializableDateTime::fromString('2026-10-14 12:31:02')));
+        }
+
+        try {
+            $this->activityIdentityMatcher->matchFileImportedTwin(
+                sportType: SportType::RIDE,
+                startDateTime: SerializableDateTime::fromString('2026-10-14 12:31:03'),
+                distance: Kilometer::from(10),
+            );
+            $this->fail('Expected an AmbiguousActivityMatch');
+        } catch (AmbiguousActivityMatch $e) {
+            $this->assertEquals([
+                ActivityId::fromUnprefixed('1'),
+                ActivityId::fromUnprefixed('2'),
+            ], $e->getCandidateIds());
+        }
+    }
+
     private function givenAnActivity(ActivityBuilder $builder): void
     {
         $this->activityRepository->add(ActivityWithRawData::fromState($builder->build(), []));

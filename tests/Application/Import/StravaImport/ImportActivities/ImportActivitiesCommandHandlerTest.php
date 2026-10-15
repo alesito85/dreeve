@@ -12,6 +12,7 @@ use App\Domain\Activity\ActivityRepository;
 use App\Domain\Activity\ActivityVisibility;
 use App\Domain\Activity\ActivityWithRawData;
 use App\Domain\Activity\BestEffort\ActivityBestEffortRepository;
+use App\Domain\Activity\ImportSource;
 use App\Domain\Activity\Lap\ActivityLapRepository;
 use App\Domain\Activity\Scan\ActivityScan;
 use App\Domain\Activity\Scan\ActivityScanRepository;
@@ -30,10 +31,12 @@ use App\Domain\Settings\SettingsGroup;
 use App\Domain\Settings\SettingsRepository;
 use App\Domain\Strava\Strava;
 use App\Infrastructure\CQRS\Command\Bus\CommandBus;
+use App\Infrastructure\Measurement\Length\Kilometer;
 use App\Infrastructure\Measurement\UnitSystem;
 use App\Infrastructure\ValueObject\Geography\Coordinate;
 use App\Infrastructure\ValueObject\Geography\Latitude;
 use App\Infrastructure\ValueObject\Geography\Longitude;
+use App\Infrastructure\ValueObject\Time\SerializableDateTime;
 use App\Tests\ContainerTestCase;
 use App\Tests\Domain\Activity\ActivityBuilder;
 use App\Tests\Domain\Activity\BestEffort\ActivityBestEffortBuilder;
@@ -480,6 +483,73 @@ class ImportActivitiesCommandHandlerTest extends ContainerTestCase
         );
     }
 
+    public function testItSkipsANewActivityThatAFileImportAlreadyDescribed(): void
+    {
+        $this->strava->setMaxNumberOfCallsBeforeTriggering429(1000);
+
+        // The ride is in the database because someone dropped the file in watch/,
+        // and it is also in Strava. One ride, one row, and the file owns it.
+        $this->addActivityThatLooksLikeStravaActivity4(
+            activityId: ActivityId::fromUnprefixed('the-file-import'),
+            importSource: ImportSource::FIT_FILE,
+        );
+
+        $output = new SpyOutput();
+        $this->commandBus->dispatch(new ImportActivities($output, ActivityIds::fromArray([ActivityId::fromUnprefixed(4)]), ImportedActivities::empty()));
+
+        $this->assertSame(
+            "Importing activities...\n"
+            .'  => Skipped activity 4, it is the Strava version of activity the-file-import, which was imported from a file',
+            (string) $output,
+        );
+        $this->assertFalse($this->getContainer()->get(ActivityRepository::class)->exists(ActivityId::fromUnprefixed(4)));
+    }
+
+    public function testItSkipsANewActivityThatSeveralFileImportedActivitiesFitEquallyWell(): void
+    {
+        $this->strava->setMaxNumberOfCallsBeforeTriggering429(1000);
+
+        // Nothing here says which of the two the payload belongs to, and importing
+        // on a guess is how a second row for one ride appears.
+        $this->addActivityThatLooksLikeStravaActivity4(
+            activityId: ActivityId::fromUnprefixed('the-first-file-import'),
+            importSource: ImportSource::FIT_FILE,
+        );
+        $this->addActivityThatLooksLikeStravaActivity4(
+            activityId: ActivityId::fromUnprefixed('the-second-file-import'),
+            importSource: ImportSource::GPX_FILE,
+        );
+
+        $output = new SpyOutput();
+        $this->commandBus->dispatch(new ImportActivities($output, ActivityIds::fromArray([ActivityId::fromUnprefixed(4)]), ImportedActivities::empty()));
+
+        $this->assertSame(
+            "Importing activities...\n"
+            .'  => Skipped activity 4, 2 file imported activities fit it as well as each other, so it is not safe to pick one',
+            (string) $output,
+        );
+        $this->assertFalse($this->getContainer()->get(ActivityRepository::class)->exists(ActivityId::fromUnprefixed(4)));
+    }
+
+    public function testItDoesNotSkipANewActivityThatOnlyResemblesAnApiImportedOne(): void
+    {
+        $this->strava->setMaxNumberOfCallsBeforeTriggering429(1000);
+
+        // Activities that both came from the API are told apart by their Strava id.
+        // Skipping on content alone would drop a real activity that happens to look
+        // like one that is already in the database.
+        $this->addActivityThatLooksLikeStravaActivity4(
+            activityId: ActivityId::fromUnprefixed(1000),
+            importSource: ImportSource::STRAVA_API,
+        );
+
+        $output = new SpyOutput();
+        $this->commandBus->dispatch(new ImportActivities($output, ActivityIds::fromArray([ActivityId::fromUnprefixed(4)]), ImportedActivities::empty()));
+
+        $this->assertStringContainsString('Imported activity: ', (string) $output);
+        $this->assertTrue($this->getContainer()->get(ActivityRepository::class)->exists(ActivityId::fromUnprefixed(4)));
+    }
+
     #[\Override]
     protected function setUp(): void
     {
@@ -492,6 +562,26 @@ class ImportActivitiesCommandHandlerTest extends ContainerTestCase
 
         $this->commandBus = $this->getContainer()->get(CommandBus::class);
         $this->strava = $this->getContainer()->get(Strava::class);
+    }
+
+    /**
+     * A ride with the sport type, start instant and distance that the Strava
+     * fixture for activity 4 reports.
+     */
+    private function addActivityThatLooksLikeStravaActivity4(
+        ActivityId $activityId,
+        ImportSource $importSource,
+    ): void {
+        $this->getContainer()->get(ActivityRepository::class)->add(ActivityWithRawData::fromState(
+            ActivityBuilder::fromDefaults()
+                ->withActivityId($activityId)
+                ->withImportSource($importSource)
+                ->withSportType(SportType::RIDE)
+                ->withStartDateTime(SerializableDateTime::fromString('2023-09-11 21:05:38'))
+                ->withDistance(Kilometer::from(6.106))
+                ->build(),
+            []
+        ));
     }
 
     /**

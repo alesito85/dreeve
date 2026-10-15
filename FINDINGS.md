@@ -128,6 +128,15 @@ changes between two imports, a re-imported file's start moves by the offset and 
 layers miss. The checksum layer is timezone-proof and still catches the byte-identical case, which is
 the common one.
 
+The rule runs in the other direction too, because the duplicate that matters most is the file that
+is imported first and the same ride showing up in Strava afterwards. `matchFileImportedTwin` runs the
+content gate against file sourced rows only, and `ImportActivitiesCommandHandler` skips a new Strava
+activity it matches, printing which activity it is the Strava version of. The source filter is what
+keeps that safe: two activities that both came from the API are told apart by their own Strava ids,
+so judging those by content would drop real rides that merely look alike, which is the opposite of
+what removing duplicates should do. Ambiguity skips here as well, because importing on a guess is how
+a second row for one ride ends up in the database.
+
 ## How the merge should work
 
 The newer file wins wherever both sides have a value, and a hole in the newer file keeps the stored

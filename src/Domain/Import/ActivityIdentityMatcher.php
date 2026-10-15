@@ -7,8 +7,11 @@ namespace App\Domain\Import;
 use App\Domain\Activity\Activity;
 use App\Domain\Activity\ActivityDeviceReference;
 use App\Domain\Activity\ActivityId;
+use App\Domain\Activity\ImportSource;
 use App\Domain\Activity\SportType\SportType;
+use App\Infrastructure\Measurement\Length\Kilometer;
 use App\Infrastructure\ValueObject\Time\SerializableDateTime;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ParameterType;
 
@@ -79,6 +82,38 @@ final readonly class ActivityIdentityMatcher
         };
     }
 
+    /**
+     * Finds the file imported activity a Strava payload describes, if there is one.
+     *
+     * A ride that came in as a file and also shows up in Strava is one activity,
+     * not two. The file owns the row, because it is the one whose bytes can be
+     * replayed later, so the API version of the same ride has nothing to add.
+     * Only file imports are considered here: activities that both came from the
+     * API are told apart by their Strava id, and guessing from content alone would
+     * drop real activities that happen to look alike.
+     *
+     * @throws AmbiguousActivityMatch when more than one file import fits equally well
+     */
+    public function matchFileImportedTwin(
+        SportType $sportType,
+        SerializableDateTime $startDateTime,
+        Kilometer $distance,
+    ): ?ActivityId {
+        $candidates = $this->findCandidates(
+            deviceReference: null,
+            sportType: $sportType,
+            startDateTime: $startDateTime,
+            distanceInMetres: $distance->toMeter()->toInt(),
+            consideredSources: ImportSource::fileBasedSources(),
+        );
+
+        return match (count($candidates)) {
+            0 => null,
+            1 => $candidates[0],
+            default => throw new AmbiguousActivityMatch(candidateIds: $candidates),
+        };
+    }
+
     private function findForIdenticalFile(?string $fileChecksum): ?ActivityId
     {
         if (null === $fileChecksum) {
@@ -98,6 +133,8 @@ final readonly class ActivityIdentityMatcher
     }
 
     /**
+     * @param ImportSource[]|null $consideredSources null means every import source
+     *
      * @return list<ActivityId>
      */
     private function findCandidates(
@@ -105,6 +142,7 @@ final readonly class ActivityIdentityMatcher
         ?SportType $sportType,
         SerializableDateTime $startDateTime,
         ?int $distanceInMetres,
+        ?array $consideredSources = null,
     ): array {
         $query = $this->connection->createQueryBuilder()
             ->select('activityId')
@@ -119,6 +157,14 @@ final readonly class ActivityIdentityMatcher
         if ($deviceReference instanceof ActivityDeviceReference) {
             $query->andWhere('deviceReferenceId = :deviceReferenceId')
                 ->setParameter('deviceReferenceId', $deviceReference);
+        }
+
+        if (null !== $consideredSources) {
+            $query->andWhere($query->expr()->in('importSource', ':importSources'))
+                ->setParameter('importSources', array_map(
+                    static fn (ImportSource $source): string => $source->value,
+                    $consideredSources,
+                ), ArrayParameterType::STRING);
         }
 
         if ($sportType instanceof SportType) {

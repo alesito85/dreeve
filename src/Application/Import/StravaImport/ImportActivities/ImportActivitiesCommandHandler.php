@@ -16,18 +16,22 @@ use App\Domain\Activity\Scan\ActivityScanRepository;
 use App\Domain\Activity\Scan\ActivityScanType;
 use App\Domain\Activity\SportType\SportType;
 use App\Domain\Activity\Stream\ActivityStreamRepository;
+use App\Domain\Import\ActivityIdentityMatcher;
+use App\Domain\Import\AmbiguousActivityMatch;
 use App\Domain\Settings\SettingsRepository;
 use App\Domain\Strava\RateLimit\StravaRateLimitHasBeenReached;
 use App\Domain\Strava\Strava;
 use App\Infrastructure\CQRS\Command\Command;
 use App\Infrastructure\CQRS\Command\CommandHandler;
 use App\Infrastructure\DependencyInjection\Mutex\WithMutex;
+use App\Infrastructure\Measurement\Length\Kilometer;
 use App\Infrastructure\Mutex\LockName;
 use App\Infrastructure\Mutex\Mutex;
 use App\Infrastructure\ValueObject\Time\SerializableDateTime;
 use App\Infrastructure\ValueObject\Time\SerializableTimezone;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 #[WithMutex(lockName: LockName::IMPORT_DATA)]
@@ -43,6 +47,7 @@ final readonly class ImportActivitiesCommandHandler implements CommandHandler
         private ActivityStreamRepository $activityStreamRepository,
         private ActivityScanRepository $activityScanRepository,
         private SettingsRepository $settingsRepository,
+        private ActivityIdentityMatcher $activityIdentityMatcher,
         private Mutex $mutex,
         #[AutowireIterator('app.activity_import.pipeline_step')]
         private iterable $steps,
@@ -118,11 +123,12 @@ final readonly class ImportActivitiesCommandHandler implements CommandHandler
                 continue;
             }
 
-            if ($skipActivitiesRecordedBefore?->isAfterOrOn(SerializableDateTime::createFromFormat(
+            $startDate = SerializableDateTime::createFromFormat(
                 format: Activity::DATE_TIME_FORMAT,
                 datetime: $rawStravaData['start_date_local'],
                 timezone: SerializableTimezone::default(),
-            ))) {
+            );
+            if ($skipActivitiesRecordedBefore?->isAfterOrOn($startDate)) {
                 continue;
             }
 
@@ -131,8 +137,18 @@ final readonly class ImportActivitiesCommandHandler implements CommandHandler
                 continue;
             }
 
+            $isNewActivity = !$this->activityRepository->exists($activityId);
+            if ($isNewActivity && $this->skipActivityDescribedByAFileImport(
+                activityId: $activityId,
+                sportType: $sportType,
+                startDate: $startDate,
+                distance: Kilometer::from(round($rawStravaData['distance'] / 1000, 3)),
+                output: $command->getOutput(),
+            )) {
+                continue;
+            }
+
             try {
-                $isNewActivity = !$this->activityRepository->exists($activityId);
                 if ($isNewActivity && $command->isFullImport()) {
                     // When a partial import is triggered we fetch the activity from Strava beforehand.
                     // We only need to fetch activity details when running a full import.
@@ -238,5 +254,50 @@ final readonly class ImportActivitiesCommandHandler implements CommandHandler
                 $activity->getStartDate()->format('d-m-Y'))
             );
         }
+    }
+
+    /**
+     * Tells whether this Strava activity is the API version of a ride that a file
+     * import already put in the database, in which case it is skipped.
+     *
+     * The file owns the row, because it is the one whose bytes can be replayed when
+     * a version is restored, and the values Strava reports are derived from that very
+     * file. Ambiguity skips too: importing on a guess is how a second row for one
+     * ride ends up in the database.
+     */
+    private function skipActivityDescribedByAFileImport(
+        ActivityId $activityId,
+        SportType $sportType,
+        SerializableDateTime $startDate,
+        Kilometer $distance,
+        OutputInterface $output,
+    ): bool {
+        try {
+            $twinActivityId = $this->activityIdentityMatcher->matchFileImportedTwin(
+                sportType: $sportType,
+                startDateTime: $startDate,
+                distance: $distance,
+            );
+        } catch (AmbiguousActivityMatch $match) {
+            $output->writeln(sprintf(
+                '  => Skipped activity %s, %d file imported activities fit it as well as each other, so it is not safe to pick one',
+                $activityId->toUnprefixedString(),
+                count($match->getCandidateIds()),
+            ));
+
+            return true;
+        }
+
+        if (!$twinActivityId instanceof ActivityId) {
+            return false;
+        }
+
+        $output->writeln(sprintf(
+            '  => Skipped activity %s, it is the Strava version of activity %s, which was imported from a file',
+            $activityId->toUnprefixedString(),
+            $twinActivityId->toUnprefixedString(),
+        ));
+
+        return true;
     }
 }

@@ -6,8 +6,11 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/binary"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -232,4 +235,116 @@ func fieldValue(t *testing.T, msg outMessage, num byte) string {
 	t.Fatalf("message %q has no field %d, it has %+v", msg.Name, num, msg.Fields)
 
 	return ""
+}
+
+func TestDecompressUnzipsAGzippedFITFile(t *testing.T) {
+	fit := fitFile(t, mesgDefinition(0, 0, fieldDefinition(0, 1, 0x00)), dataMessage(0, 0x04))
+
+	unzipped, err := decompress(gzipBytes(t, fit))
+	if err != nil {
+		t.Fatalf("decompress: %v", err)
+	}
+	if !bytes.Equal(unzipped, fit) {
+		t.Error("decompress: want the exact FIT bytes back")
+	}
+
+	files, err := decode(unzipped)
+	if err != nil {
+		t.Fatalf("decode the unzipped file: %v", err)
+	}
+	if len(files) != 1 || len(files[0].Messages) != 1 {
+		t.Fatalf("decoded %+v, want one file holding one message", files)
+	}
+}
+
+func TestDecompressLeavesFITBytesAlone(t *testing.T) {
+	fit := fitFile(t, mesgDefinition(0, 0, fieldDefinition(0, 1, 0x00)), dataMessage(0, 0x04))
+
+	unzipped, err := decompress(fit)
+	if err != nil {
+		t.Fatalf("decompress: %v", err)
+	}
+	if !bytes.Equal(unzipped, fit) {
+		t.Error("decompress: want a file that is not gzip to pass through untouched")
+	}
+}
+
+func TestDecompressReadsEveryGzipMember(t *testing.T) {
+	fit := fitFile(t, mesgDefinition(0, 0, fieldDefinition(0, 1, 0x00)), dataMessage(0, 0x04))
+
+	// Two members in one archive, which is what appending two .gz files does.
+	archive := new(bytes.Buffer)
+	for range 2 {
+		zw := gzip.NewWriter(archive)
+		if _, err := zw.Write(fit); err != nil {
+			t.Fatalf("write gzip member: %v", err)
+		}
+		if err := zw.Close(); err != nil {
+			t.Fatalf("close gzip member: %v", err)
+		}
+	}
+
+	unzipped, err := decompress(archive.Bytes())
+	if err != nil {
+		t.Fatalf("decompress: %v", err)
+	}
+	if want := append(bytes.Clone(fit), fit...); !bytes.Equal(unzipped, want) {
+		t.Errorf("decompress: want both members in order, got %d bytes", len(unzipped))
+	}
+
+	// The two unzipped files are chained FIT files, which decode handles as-is.
+	files, err := decode(unzipped)
+	if err != nil {
+		t.Fatalf("decode the unzipped members: %v", err)
+	}
+	if len(files) != 2 {
+		t.Fatalf("decoded %d files, want 2", len(files))
+	}
+}
+
+func TestRunDecodesAGzippedFileFromDisk(t *testing.T) {
+	fit := fitFile(t, mesgDefinition(0, 0, fieldDefinition(0, 1, 0x00)), dataMessage(0, 0x04))
+	path := filepath.Join(t.TempDir(), "ride.fit.gz")
+	if err := os.WriteFile(path, gzipBytes(t, fit), 0o600); err != nil {
+		t.Fatalf("write file: %v", err)
+	}
+
+	out := filepath.Join(t.TempDir(), "out.json")
+	stdout := os.Stdout
+	file, err := os.Create(out)
+	if err != nil {
+		t.Fatalf("create stdout stand-in: %v", err)
+	}
+	os.Stdout = file
+	runErr := run(path)
+	os.Stdout = stdout
+	if err := file.Close(); err != nil {
+		t.Fatalf("close stdout stand-in: %v", err)
+	}
+	if runErr != nil {
+		t.Fatalf("run: %v", runErr)
+	}
+
+	written, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatalf("read json: %v", err)
+	}
+	if !strings.Contains(string(written), `"file_id"`) {
+		t.Errorf("run wrote %s, want it to contain the file_id message", written)
+	}
+}
+
+func gzipBytes(t *testing.T, b []byte) []byte {
+	t.Helper()
+
+	out := new(bytes.Buffer)
+	zw := gzip.NewWriter(out)
+	if _, err := zw.Write(b); err != nil {
+		t.Fatalf("gzip: %v", err)
+	}
+	if err := zw.Close(); err != nil {
+		t.Fatalf("close gzip: %v", err)
+	}
+
+	return out.Bytes()
 }

@@ -6,6 +6,9 @@
 //
 //	fit-tool <path-to-fit-file>
 //
+// A gzip-compressed file (.fit.gz) is unzipped before decoding, so the caller
+// does not need to know which of the two it was handed.
+//
 // Output shape:
 //
 //	{
@@ -33,10 +36,12 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"os"
 
@@ -83,6 +88,11 @@ func run(path string) error {
 		return fmt.Errorf("open file: %w", err)
 	}
 
+	raw, err = decompress(raw)
+	if err != nil {
+		return err
+	}
+
 	files, err := decode(raw)
 	// A bad CRC almost always means a quirky-but-readable file rather than
 	// corrupt data, so retry while ignoring the checksum instead of failing.
@@ -115,6 +125,32 @@ func run(path string) error {
 	}
 
 	return nil
+}
+
+// decompress returns the FIT bytes behind b. A .fit.gz file is unzipped here so
+// the rest of the tool only ever sees FIT bytes: the gzip magic cannot be
+// confused with a FIT header, whose first byte is the header size and whose
+// second is a protocol version no device numbers 135. Chain-compressed members
+// are read as one stream by the reader itself.
+func decompress(b []byte) ([]byte, error) {
+	if !bytes.HasPrefix(b, []byte{0x1f, 0x8b}) {
+		return b, nil
+	}
+
+	zr, err := gzip.NewReader(bytes.NewReader(b))
+	if err != nil {
+		return nil, fmt.Errorf("read gzip: %w", err)
+	}
+	defer func() {
+		_ = zr.Close()
+	}()
+
+	out := new(bytes.Buffer)
+	if _, err := io.Copy(out, zr); err != nil {
+		return nil, fmt.Errorf("unzip: %w", err)
+	}
+
+	return out.Bytes(), nil
 }
 
 // decode reads every chained FIT file in b into the output shape. The opts are

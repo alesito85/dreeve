@@ -11,6 +11,7 @@ use App\Domain\Import\FileParser\ActivityLapsMapper;
 use App\Domain\Import\FileParser\ActivityStreamsMapper;
 use App\Domain\Import\FileParser\CouldNotParseActivityFile;
 use App\Domain\Import\FileParser\FitFileParser;
+use App\Domain\Import\FileParser\ParsedActivityFile;
 use App\Domain\Import\FileParser\RawActivityFile;
 use App\Domain\Import\SupportedFileExtension;
 use App\Infrastructure\Process\ProcessFactory;
@@ -184,6 +185,54 @@ class FitFileParserTest extends ActivityFileParserTestCase
         $this->assertParsedFileMatchesSnapshot(
             $parser->parse($this->rawFileFromFixture('activity.fit'))
         );
+    }
+
+    // The gzip wrapper is taken off inside the binary, so this is the only test that
+    // proves a .fit.gz reaches the decoder as something it can read.
+    public function testParseRealGzippedFitFileThroughBinary(): void
+    {
+        $gzipped = gzencode((string) file_get_contents(__DIR__.'/fixtures/activity.fit'), 9);
+        $path = Path::fromString(sys_get_temp_dir().'/fit-file-parser-'.uniqid().'.fit.gz');
+        if (false === file_put_contents((string) $path, $gzipped)) {
+            self::fail('Could not write the gzipped fixture');
+        }
+
+        $plain = $this->parseThroughBinary(Path::fromString(__DIR__.'/fixtures/activity.fit'), $gzipped);
+
+        try {
+            $parsed = $this->parseThroughBinary($path, $gzipped);
+            $actual = $parsed->getActivity();
+            $expected = $plain->getActivity();
+
+            // Everything the bytes say, and nothing the filename says: the two parses
+            // are of one file under two names, which is the case that must never be
+            // treated as two rides.
+            $this->assertEquals($expected->getSportType(), $actual->getSportType());
+            $this->assertEquals($expected->getStartDate(), $actual->getStartDate());
+            $this->assertEquals($expected->getDistance(), $actual->getDistance());
+            $this->assertEquals($expected->getElapsedTimeInSeconds(), $actual->getElapsedTimeInSeconds());
+            $this->assertEquals($expected->getMovingTimeInSeconds(), $actual->getMovingTimeInSeconds());
+            $this->assertEquals($expected->getDistance()->toMeter()->toInt() > 0, true);
+            $this->assertEquals(
+                $plain->getStreams()->toArray(),
+                $parsed->getStreams()->toArray(),
+            );
+        } finally {
+            unlink((string) $path);
+        }
+    }
+
+    private function parseThroughBinary(Path $path, string $contents): ParsedActivityFile
+    {
+        $parser = new FitFileParser(
+            new IncrementingActivityIdFactory(),
+            new ActivityLapsMapper(new IncrementingActivityLapIdFactory()),
+            new SymfonyProcessFactory(),
+            new ActivityStreamsMapper(PausedClock::fromString('2023-10-17 16:15:04')),
+            SerializableTimezone::UTC(),
+        );
+
+        return $parser->parse(RawActivityFile::from($path, $contents));
     }
 
     public function testParseRealPoolSwimWithStrapHeartRateThroughBinary(): void

@@ -257,3 +257,28 @@ column is not the reason though: a parse failure is a file Dreeve tried to read 
 archiving its bytes and removing it is fair, while `notes.txt` is a file that was never an activity
 and the watch folder is the user's. Dreeve should not delete what it has no business reading, so it
 says what it ignored and leaves it alone.
+
+## Verified with the real files
+
+`FitFileParserTest::testParseRealGzippedFitFileThroughBinary` gzips the real `activity.fit` fixture
+and parses it through the binary, comparing it to the same bytes uncompressed: same sport type,
+start, distance, times and every stream. The only thing that differs is the reference derived from
+the filename, which is the whole reason filenames are not identity.
+
+The three cases that matter, run through the import pipeline with the two sample files, one activity
+row from start to finish:
+
+| Imported | What happened |
+| --- | --- |
+| `21741882933.fit` | Imported as "Afternoon Ride - 14-10-2026", 21599 m, 3684 s, start 2026-10-14 12:31:02, device reference `289-2-22701926` |
+| `Afternoon_Ride (4).fit`, the same bytes under another name | SKIPPED, "activity was already imported", the checksum layer matched |
+| the same bytes again as a `.fit.gz`, so a different checksum | MERGED into that same activity by the device layer, and no version recorded because it added nothing |
+
+That activity ends up with `left_pedal_smoothness` and `right_pedal_smoothness` on the same 3674
+sample axis as everything else, 3470 of them carrying a value, which is the data whose absence
+started this.
+
+One requirement this has: the `fit-tool` on PATH must be built from this branch. The gzip sniff is
+new, so a binary from before it fails on a `.fit.gz`. CI and both docker images compile it from
+source, so only a host install can be stale; on this machine `/usr/bin/fit-tool` predates the change
+and a current build sits in `~/.local/bin`, which comes first on PATH.

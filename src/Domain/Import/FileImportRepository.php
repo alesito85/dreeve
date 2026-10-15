@@ -15,4 +15,10 @@ interface FileImportRepository
     public function delete(FileImportId $fileImportId): void;
 
     public function deleteForActivity(ActivityId $activityId): void;
+
+    /**
+     * The import whose bytes produced what an activity looks like now, which is
+     * what a retired version needs to be pointed at.
+     */
+    public function findMostRecentSuccessfulForActivity(ActivityId $activityId): ?FileImport;
 }

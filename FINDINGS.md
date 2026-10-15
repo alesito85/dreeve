@@ -131,22 +131,50 @@ the common one.
 ## How the merge should work
 
 The newer file wins wherever both sides have a value, and a hole in the newer file keeps the stored
-value, so a re-import primarily adds what is missing:
+value, so a re-import primarily adds what is missing. `ActivityStreamMerger` does the streams,
+`Activity::mergeWith()` and `ActivityDynamics::mergeWith()` do the columns, `MergeActivityFile`
+orchestrates and is the last step in the pipeline (priority 40), after the attribute steps have had
+their say about the parsed file:
 
-- the merged timeline is the **union of both files keyed by absolute time**, so a truncated file
-  leaves the tail it never recorded intact and a fuller file appends the tail it now has;
+- the axis is the **union of both files' seconds**, each sample at its own start plus its offset, so
+  a truncated file leaves the tail it never recorded intact and a fuller file appends the tail it now
+  has. The offset only applies inside the same 30 s window the identity matcher already allowed; a
+  larger disagreement between the two starts is a clock that was set wrong, so the files align head to
+  head rather than leaving a hole no ride has;
+- the axis stays **sparse where the files were sparse**. `ActivityStreamsMapper` deliberately does not
+  fill TIME, so a file that recorded every ten seconds has two TIME samples, and merging it with a
+  file that recorded the same instants has to give two back. Densifying it would rewrite every stream
+  of an activity that did not change and put a version in the history for nothing;
+- a second with no value on either side carries the last known value, and a stream that only starts
+  reporting later reaches back to the start. That is the parser's own `fillGaps()` rule, and a merged
+  stream has to read like a parsed one or a chart shows a hole after the merge where it showed a value
+  before it;
 - a stream type only the new file carries is added on that axis, which is exactly the case of these
   two files and their per-side pedal smoothness and torque effectiveness;
 - a stream type only the existing activity has is kept, including samples past the end of a shorter
-  file;
+  file, and keeps the date it was first stored on. A stream the activity did not have yet is as old as
+  the file that finally brought it;
+- the `MOVING` stream is dropped rather than stitched, because it is derived from speed and
+  `CalculateMovingStream` rebuilds it from the merged timeline, which is the only version that is
+  true. No type-scoped delete is needed: the merge deletes all streams and re-adds what it merged;
+- every merged stream is re-keyed to the activity being merged into. The parser built them with the id
+  of an activity that is never stored, and `add()` is a bare insert on a primary key of activity and
+  stream type, so stored streams go first and merged ones follow;
 - scalars go newer-wins, `null` parsed values fall back to what is stored, and the monotone ones
-  (`maxPower`, `maxSpeed`, `maxHeartRate`) take the larger value;
-- laps and drivetrain usages are replaced wholesale, their primary keys do not add up across
-  versions;
+  (`maxPower`, `maxSpeed`, `maxHeartRate`) take the larger value. Identity and gear are never touched:
+  `externalReferenceId`, `importSource`, gear and the start date stay as they are, and a name or
+  description that is already there is not replaced;
+- laps and drivetrain usages are replaced wholesale, their primary keys do not add up across versions,
+  but only when the new file says something about them. A file with no laps must not delete the ones
+  that are stored;
 - everything derived from streams is deleted and rebuilt by the metrics steps that already select
-  their own pending work: combined streams, splits, best efforts, stream metrics, custom segment
-  efforts and the moving stream. Milestones and gear stats read the activity columns live, so they
-  follow the newer totals on their own.
+  their own pending work: combined streams, splits, best efforts, stream metrics and custom segment
+  efforts, plus the custom segment scan markers. The stream scan markers survive, they are what keeps
+  a file activity from being fetched from Strava again. Milestones and gear stats read the activity
+  columns live, so they follow the newer totals on their own.
+- a merged activity is not added to `ImportedActivities`, so the success notification does not report
+  it as a new ride, and the watch file is deleted with a SUCCESS `FileImport` row pointing at the
+  activity it merged into.
 
 ## Versions, so a replaced state is never lost
 
@@ -155,6 +183,11 @@ table: revision number, a compact summary (totals, averages, which stream types 
 samples each has), a link to the `FileImport` row that produced it, and a timestamp. The activity
 stays a single row, which is why no read path in the 62 files that query `Activity` with raw SQL has
 to change and no aggregate can double count.
+
+A merge that changes nothing records nothing: the retired summary is compared to what the merge
+produces and equal means no row. Otherwise a re-export of the same ride that only differs in its
+author line (the bytes differ, so it is not the identical-file skip, but the ride is the same) would
+put a version in the history and leave the user a list to read for no reason.
 
 Restoring a version replays the bytes that `FileImport` already stores compressed, forced to win
 regardless of timestamps, and appends the state it replaced as a new revision so history stays

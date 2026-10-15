@@ -67,6 +67,17 @@ final readonly class ActivityDrivetrainUsage
         );
     }
 
+    /**
+     * The row belongs to whichever activity ends up owning it, which is not the
+     * one the parser made when a file merges into an existing activity.
+     */
+    public function withActivityId(ActivityId $activityId): self
+    {
+        return clone ($this, [
+            'activityId' => $activityId,
+        ]);
+    }
+
     public function getActivityId(): ActivityId
     {
         return $this->activityId;

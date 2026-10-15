@@ -159,6 +159,35 @@ final readonly class ImportActivityFilesCommandHandler implements CommandHandler
             $activity = $context->getActivity() ?? throw new \RuntimeException('Activity not set on $context');
             $activityId = $activity->getId();
 
+            if ($context->isMerge()) {
+                // The merge step already wrote the activity, its streams and the
+                // version it replaced. What is left is the log row for this file
+                // and the file itself. It is not a new activity, so it stays out
+                // of the count the success notification reports on.
+                $this->fileImportRepository->add(FileImport::createFromRawFile(
+                    fileImportId: FileImportId::random(),
+                    file: $context->getFile() ?? throw new \RuntimeException('File not set on $context'),
+                    source: $context->getImportSource(),
+                    status: FileImportStatus::SUCCESS,
+                    errorMessage: null,
+                    activityId: $activityId,
+                    importedOn: $this->clock->getCurrentDateTimeImmutable(),
+                ));
+                $this->watchDirectory->deleteFile($filePath);
+
+                $output->writeln(sprintf(
+                    '  => [%d/%d] Merged "%s" into activity "%s - %s"',
+                    $delta,
+                    $countTotalFilesInWatchDirectory,
+                    $filePath->getFilename(),
+                    $activity->getName(),
+                    $activity->getStartDate()->format('d-m-Y'),
+                ));
+                ++$countImported;
+
+                continue;
+            }
+
             $this->activityRepository->add(ActivityWithRawData::fromState(
                 activity: $activity,
                 rawData: [],

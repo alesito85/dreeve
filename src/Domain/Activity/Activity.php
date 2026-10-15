@@ -812,6 +812,108 @@ final class Activity
         ]));
     }
 
+    public function withAveragePower(?int $averagePower): self
+    {
+        return $this->recordUpdate(clone ($this, [
+            'averagePower' => $averagePower,
+        ]));
+    }
+
+    public function withMaxPower(?int $maxPower): self
+    {
+        return $this->recordUpdate(clone ($this, [
+            'maxPower' => $maxPower,
+        ]));
+    }
+
+    public function withAverageCadence(?int $averageCadence): self
+    {
+        return $this->recordUpdate(clone ($this, [
+            'averageCadence' => $averageCadence,
+        ]));
+    }
+
+    public function withDynamics(?ActivityDynamics $dynamics): self
+    {
+        return $this->recordUpdate(clone ($this, [
+            'dynamics' => $dynamics,
+        ]));
+    }
+
+    /**
+     * Folds the activity a re-imported file describes into this one.
+     *
+     * The newer file wins, but only where newer means something. A value
+     * measured over a shorter ride does not describe a longer one, so the
+     * averages follow the longer timeline and the totals take the larger of the
+     * two: a sync that stopped halfway and the full file that came after it are
+     * one activity, and the full file has the numbers. Gear, source and
+     * external reference are not measurements, so a file does not overwrite
+     * them, and neither does it overwrite text the user may have edited.
+     */
+    public function mergeWith(self $incoming): self
+    {
+        $incomingMeasuredTheLongerRide = $incoming->getElapsedTimeInSeconds() >= $this->getElapsedTimeInSeconds();
+
+        $merged = $this
+            ->withSportType($incoming->getSportType())
+            ->withWorldType($incoming->getWorldType())
+            ->withDistance(Kilometer::from(max(
+                $this->distance->toMeter()->toInt(),
+                $incoming->distance->toMeter()->toInt(),
+            ) / 1000))
+            ->withElevation(Meter::from(max($this->elevation->toInt(), $incoming->elevation->toInt())))
+            ->withMovingTimeInSeconds(max($this->movingTimeInSeconds, $incoming->movingTimeInSeconds))
+            ->withElapsedTimeInSeconds(max($this->elapsedTimeInSeconds, $incoming->elapsedTimeInSeconds))
+            ->withCalories($this->largestOf($this->calories, $incoming->calories))
+            ->withKilojoules($this->largestOf($this->kilojoules, $incoming->kilojoules))
+            ->withMaxPower($this->largestOf($this->maxPower, $incoming->maxPower))
+            ->withMaxHeartRate($this->largestOf($this->maxHeartRate, $incoming->maxHeartRate))
+            ->withMaxSpeed(KmPerHour::from(max($this->maxSpeed->toFloat(), $incoming->maxSpeed->toFloat())))
+            ->withDeviceName($incoming->deviceName ?? $this->deviceName)
+            ->withStartingCoordinate($incoming->startingCoordinate ?? $this->startingCoordinate);
+
+        if ($incomingMeasuredTheLongerRide) {
+            $merged = $merged
+                ->withAveragePower($incoming->averagePower ?? $this->averagePower)
+                ->withAverageHeartRate($incoming->averageHeartRate ?? $this->averageHeartRate)
+                ->withAverageCadence($incoming->averageCadence ?? $this->averageCadence)
+                ->withAverageSpeed($incoming->averageSpeed)
+                ->withPolyline($incoming->polyline ?? $this->polyline)
+                ->withRouteGeography($incoming->routeGeography);
+        }
+
+        if ($incoming->dynamics instanceof \App\Domain\Activity\ActivityDynamics) {
+            $merged = $merged->withDynamics($incoming->dynamics->mergeWith($this->dynamics));
+        }
+
+        if ('' === trim($this->getName())) {
+            $merged = $merged->withName(ActivityName::fromString($incoming->getOriginalName()));
+        }
+        if ('' === trim($this->getDescription()) && '' !== trim($incoming->getDescription())) {
+            $merged = $merged->withDescription($incoming->getDescription());
+        }
+
+        if (!$this->weather && $incoming->weather) {
+            // Weather is stored as JSON and read back through getWeather(), so
+            // the stored bytes are copied rather than re-encoded through
+            // withWeather(). A merge never replaces weather it already has.
+            $merged = clone ($merged, ['weather' => $incoming->weather]);
+        }
+
+        return $merged->withWorkoutType($incoming->workoutType ?? $this->workoutType);
+    }
+
+    private function largestOf(?int ...$values): ?int
+    {
+        $values = array_filter($values, static fn (?int $value): bool => null !== $value);
+        if ([] === $values) {
+            return null;
+        }
+
+        return max($values);
+    }
+
     public function isZwiftRide(): bool
     {
         return WorldType::ZWIFT === $this->getWorldType();

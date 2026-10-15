@@ -3,12 +3,14 @@
 namespace App\Tests\Domain\Activity;
 
 use App\Domain\Activity\Activity;
+use App\Domain\Activity\ActivityDynamics;
 use App\Domain\Activity\ActivityId;
 use App\Domain\Activity\ActivityImagesHaveBeenUpdated;
 use App\Domain\Activity\ActivityName;
 use App\Domain\Activity\ActivityRouteWasUpdated;
 use App\Domain\Activity\ActivityWasAdded;
 use App\Domain\Activity\ActivityWasUpdated;
+use App\Domain\Activity\ImportSource;
 use App\Domain\Activity\Route\RouteGeography;
 use App\Domain\Activity\SportType\SportType;
 use App\Domain\Activity\WorkoutType;
@@ -23,6 +25,7 @@ use App\Infrastructure\Serialization\Json;
 use App\Infrastructure\ValueObject\Geography\Coordinate;
 use App\Infrastructure\ValueObject\Geography\Latitude;
 use App\Infrastructure\ValueObject\Geography\Longitude;
+use App\Infrastructure\ValueObject\String\ExternalReferenceId;
 use App\Infrastructure\ValueObject\Time\SerializableDateTime;
 use App\Infrastructure\ValueObject\Time\Year;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -466,5 +469,193 @@ class ActivityTest extends TestCase
         yield 'with one other athlete' => [2, true];
         yield 'group ride' => [42, true];
         yield 'not reported by Strava' => [null, false];
+    }
+
+    public function testMergeWithTakesTheBiggerTotalsAndTheHighestPeaks(): void
+    {
+        $merged = ActivityBuilder::fromDefaults()
+            ->withDistance(Kilometer::from(10))
+            ->withElevation(Meter::from(50))
+            ->withMovingTimeInSeconds(90)
+            ->withElapsedTimeInSeconds(100)
+            ->withKilojoules(100)
+            ->withMaxPower(500)
+            ->withMaxHeartRate(170)
+            ->withMaxSpeed(KmPerHour::from(40))
+            ->build()
+            ->mergeWith(ActivityBuilder::fromDefaults()
+                ->withDistance(Kilometer::from(11))
+                ->withElevation(Meter::from(40))
+                ->withMovingTimeInSeconds(60)
+                ->withElapsedTimeInSeconds(200)
+                ->withMaxPower(600)
+                ->withMaxHeartRate(160)
+                ->withMaxSpeed(KmPerHour::from(35))
+                ->build());
+
+        // A file that only made it halfway through the ride has less of
+        // everything counted up and lower peaks, so the larger number wins in
+        // both directions.
+        $this->assertEquals(Kilometer::from(11), $merged->getDistance());
+        $this->assertEquals(Meter::from(50), $merged->getElevation());
+        $this->assertSame(90, $merged->getMovingTimeInSeconds());
+        $this->assertSame(200, $merged->getElapsedTimeInSeconds());
+        $this->assertSame(100, $merged->getKilojoules());
+        $this->assertSame(600, $merged->getMaxPower());
+        $this->assertSame(170, $merged->getMaxHeartRate());
+        $this->assertEquals(KmPerHour::from(40), $merged->getMaxSpeed());
+    }
+
+    public function testMergeWithLetsTheLongerTimelineDecideTheAverages(): void
+    {
+        $merged = ActivityBuilder::fromDefaults()
+            ->withElapsedTimeInSeconds(100)
+            ->withAveragePower(120)
+            ->withAverageHeartRate(130)
+            ->withAverageCadence(80)
+            ->withAverageSpeed(KmPerHour::from(20))
+            ->build()
+            ->mergeWith(ActivityBuilder::fromDefaults()
+                ->withElapsedTimeInSeconds(200)
+                ->withAveragePower(150)
+                ->withAverageSpeed(KmPerHour::from(30))
+                ->build());
+
+        // An average over a longer ride is the honest one. Where the new file
+        // parsed nothing at all the stored average stands, so a file without a
+        // heart rate sensor cannot blank out a real number.
+        $this->assertSame(150, $merged->getAveragePower());
+        $this->assertSame(130, $merged->getAverageHeartRate());
+        $this->assertSame(80, $merged->getAverageCadence());
+        $this->assertEquals(KmPerHour::from(30), $merged->getAverageSpeed());
+    }
+
+    public function testMergeWithKeepsTheStoredAveragesWhenTheNewFileIsTheShorterRide(): void
+    {
+        $merged = ActivityBuilder::fromDefaults()
+            ->withElapsedTimeInSeconds(200)
+            ->withAveragePower(120)
+            ->withAverageSpeed(KmPerHour::from(20))
+            ->build()
+            ->mergeWith(ActivityBuilder::fromDefaults()
+                ->withElapsedTimeInSeconds(50)
+                ->withAveragePower(300)
+                ->withAverageSpeed(KmPerHour::from(40))
+                ->build());
+
+        // A file that stopped after 50 seconds of a hard climb says nothing
+        // about the ride as a whole.
+        $this->assertSame(120, $merged->getAveragePower());
+        $this->assertEquals(KmPerHour::from(20), $merged->getAverageSpeed());
+    }
+
+    public function testMergeWithNeverTouchesIdentityOrGear(): void
+    {
+        $merged = ActivityBuilder::fromDefaults()
+            ->withStartDateTime(SerializableDateTime::fromString('2023-10-10 12:00:00'))
+            ->withGearId(GearId::fromUnprefixed('stored-bike'))
+            ->build()
+            ->mergeWith(ActivityBuilder::fromDefaults()
+                ->withActivityId(ActivityId::fromUnprefixed('from-the-new-file'))
+                ->withStartDateTime(SerializableDateTime::fromString('2023-10-10 12:00:30'))
+                ->withImportSource(ImportSource::FIT_FILE)
+                ->withExternalReferenceId(ExternalReferenceId::fromString('999'))
+                ->withGearId(GearId::fromUnprefixed('other-bike'))
+                ->build());
+
+        $this->assertEquals(ActivityId::fromUnprefixed('903645'), $merged->getId());
+        $this->assertEquals(SerializableDateTime::fromString('2023-10-10 12:00:00'), $merged->getStartDate());
+        $this->assertSame(ImportSource::STRAVA_API, $merged->getImportSource());
+        $this->assertEquals(ExternalReferenceId::fromString('1234567'), $merged->getExternalReferenceId());
+        $this->assertEquals(GearId::fromUnprefixed('stored-bike'), $merged->getGearId());
+    }
+
+    public function testMergeWithOnlyFillsANameOrDescriptionThatIsNotThereYet(): void
+    {
+        $existing = ActivityBuilder::fromDefaults()
+            ->withName('#sfs-chain-lubed')
+            ->build();
+
+        $merged = $existing->mergeWith(ActivityBuilder::fromDefaults()
+            ->withName('Afternoon_Ride (4)')
+            ->withDescription('Imported from a file')
+            ->build());
+
+        $this->assertSame('Afternoon_Ride (4)', $merged->getName());
+        $this->assertSame('Imported from a file', $merged->getDescription());
+
+        // A ride that already has a name keeps it, whoever imported the file.
+        $this->assertSame('Test activity', ActivityBuilder::fromDefaults()
+            ->build()
+            ->mergeWith(ActivityBuilder::fromDefaults()
+                ->withName('Afternoon_Ride (4)')
+                ->withDescription('Imported from a file')
+                ->build())
+            ->getName());
+    }
+
+    public function testMergeWithKeepsWeatherItAlreadyHas(): void
+    {
+        $incoming = ActivityBuilder::fromDefaults()->build()
+            ->withWeather(Weather::fromState(['temperature' => 9.9]));
+
+        $this->assertEquals(
+            Weather::fromState(['temperature' => 18.3]),
+            ActivityBuilder::fromDefaults()->build()
+                ->withWeather(Weather::fromState(['temperature' => 18.3]))
+                ->mergeWith($incoming)
+                ->getWeather(),
+        );
+
+        $this->assertEquals(
+            Weather::fromState(['temperature' => 9.9]),
+            ActivityBuilder::fromDefaults()->build()
+                ->mergeWith($incoming)
+                ->getWeather(),
+        );
+    }
+
+    public function testMergeWithFoldsInWhatTheNewFileKnowsAboutTheRide(): void
+    {
+        $merged = ActivityBuilder::fromDefaults()
+            ->withDynamics(new ActivityDynamics(leftPedalSmoothnessInPercent: 30))
+            ->withWorkoutType(WorkoutType::RACE)
+            ->withDeviceName('Edge 1040')
+            ->build()
+            ->mergeWith(ActivityBuilder::fromDefaults()
+                ->withDynamics(new ActivityDynamics(leftRightBalanceInPercent: 45.5))
+                ->build());
+
+        $dynamics = $merged->getDynamics();
+        $this->assertNotNull($dynamics);
+        $this->assertSame(45.5, $dynamics->getLeftRightBalanceInPercent());
+        $this->assertSame(30.0, $dynamics->getLeftPedalSmoothnessInPercent());
+        // A file that does not label the workout must not undo a label someone
+        // set in the UI.
+        $this->assertSame(WorkoutType::RACE, $merged->getWorkoutType());
+        $this->assertSame('Edge 1040', $merged->getDeviceName());
+    }
+
+    public function testMergeWithDoesNotBlankOutValuesTheNewFileNeverParsed(): void
+    {
+        $existing = ActivityBuilder::fromDefaults()
+            ->withAveragePower(120)
+            ->withMaxPower(500)
+            ->withAverageCadence(80)
+            ->withDynamics(new ActivityDynamics(aerobicTrainingEffect: 3.4))
+            ->withFileChecksum('stored-checksum')
+            ->build();
+
+        $merged = $existing->mergeWith(ActivityBuilder::fromDefaults()
+            ->withElapsedTimeInSeconds(1000)
+            ->build());
+
+        $this->assertSame(120, $merged->getAveragePower());
+        $this->assertSame(500, $merged->getMaxPower());
+        $this->assertSame(80, $merged->getAverageCadence());
+        $this->assertSame(3.4, $merged->getDynamics()?->getAerobicTrainingEffect());
+        // The fingerprint of the activity stays, a merge adds a file to it
+        // rather than replacing which file it came from.
+        $this->assertSame('stored-checksum', $merged->getFileChecksum());
     }
 }

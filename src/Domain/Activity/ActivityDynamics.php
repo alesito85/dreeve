@@ -69,6 +69,34 @@ final readonly class ActivityDynamics implements \JsonSerializable
         return $dynamics->isEmpty() ? null : $dynamics;
     }
 
+    /**
+     * Folds this set of aggregates into an older one, value by value. A newer
+     * file that carries no per-side smoothness must not blank out what an older
+     * file did record.
+     */
+    public function mergeWith(?self $older): self
+    {
+        if (!$older instanceof self) {
+            return $this;
+        }
+
+        return new self(
+            leftRightBalanceInPercent: $this->leftRightBalanceInPercent ?? $older->leftRightBalanceInPercent,
+            aerobicTrainingEffect: $this->aerobicTrainingEffect ?? $older->aerobicTrainingEffect,
+            anaerobicTrainingEffect: $this->anaerobicTrainingEffect ?? $older->anaerobicTrainingEffect,
+            jumpCount: $this->jumpCount ?? $older->jumpCount,
+            leftTorqueEffectivenessInPercent: $this->leftTorqueEffectivenessInPercent ?? $older->leftTorqueEffectivenessInPercent,
+            rightTorqueEffectivenessInPercent: $this->rightTorqueEffectivenessInPercent ?? $older->rightTorqueEffectivenessInPercent,
+            leftPedalSmoothnessInPercent: $this->leftPedalSmoothnessInPercent ?? $older->leftPedalSmoothnessInPercent,
+            rightPedalSmoothnessInPercent: $this->rightPedalSmoothnessInPercent ?? $older->rightPedalSmoothnessInPercent,
+            combinedPedalSmoothnessInPercent: $this->combinedPedalSmoothnessInPercent ?? $older->combinedPedalSmoothnessInPercent,
+            leftPowerPhaseInDegrees: $this->leftPowerPhaseInDegrees ?? $older->leftPowerPhaseInDegrees,
+            leftPowerPhasePeakInDegrees: $this->leftPowerPhasePeakInDegrees ?? $older->leftPowerPhasePeakInDegrees,
+            rightPowerPhaseInDegrees: $this->rightPowerPhaseInDegrees ?? $older->rightPowerPhaseInDegrees,
+            rightPowerPhasePeakInDegrees: $this->rightPowerPhasePeakInDegrees ?? $older->rightPowerPhasePeakInDegrees,
+        );
+    }
+
     public function getLeftRightBalanceInPercent(): ?float
     {
         return $this->leftRightBalanceInPercent;

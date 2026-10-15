@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Import\FileImport\ImportActivityFiles\Pipeline;
 
 use App\Domain\Activity\Activity;
+use App\Domain\Activity\ActivityWithRawData;
 use App\Domain\Activity\ImportSource;
 use App\Domain\Activity\Lap\ActivityLaps;
 use App\Domain\Activity\Shifting\ActivityDrivetrainUsages;
@@ -22,6 +23,7 @@ final readonly class ActivityImportContext
         private ActivityStreams $streams,
         private ActivityLaps $laps,
         private ActivityDrivetrainUsages $drivetrainUsages,
+        private ?ActivityWithRawData $mergeTarget,
     ) {
     }
 
@@ -35,6 +37,7 @@ final readonly class ActivityImportContext
             streams: ActivityStreams::empty(),
             laps: ActivityLaps::empty(),
             drivetrainUsages: ActivityDrivetrainUsages::empty(),
+            mergeTarget: null,
         );
     }
 
@@ -69,6 +72,17 @@ final readonly class ActivityImportContext
     {
         return clone ($this, [
             'drivetrainUsages' => $drivetrainUsages,
+        ]);
+    }
+
+    /**
+     * The activity this file belongs to. Set by the identity step, and what
+     * turns the import from an insert into a merge.
+     */
+    public function withMergeTarget(ActivityWithRawData $mergeTarget): self
+    {
+        return clone ($this, [
+            'mergeTarget' => $mergeTarget,
         ]);
     }
 
@@ -107,5 +121,15 @@ final readonly class ActivityImportContext
     public function getDrivetrainUsages(): ActivityDrivetrainUsages
     {
         return $this->drivetrainUsages;
+    }
+
+    public function getMergeTarget(): ?ActivityWithRawData
+    {
+        return $this->mergeTarget;
+    }
+
+    public function isMerge(): bool
+    {
+        return $this->mergeTarget instanceof ActivityWithRawData;
     }
 }

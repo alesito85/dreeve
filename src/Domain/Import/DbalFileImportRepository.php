@@ -44,16 +44,7 @@ final readonly class DbalFileImportRepository extends DbalRepository implements 
             throw new EntityNotFound(sprintf('File import "%s" is no longer available', $fileImportId));
         }
 
-        return FileImport::fromState(
-            fileImportId: FileImportId::fromString($result['fileImportId']),
-            originalFilename: $result['originalFilename'],
-            fileContents: null !== $result['fileContents'] ? CompressedString::fromCompressed($result['fileContents'])->uncompress() : null,
-            source: ImportSource::from($result['source']),
-            status: FileImportStatus::from($result['status']),
-            errorMessage: $result['errorMessage'],
-            activityId: ActivityId::fromOptionalString($result['activityId']),
-            importedOn: SerializableDateTime::fromString($result['importedOn']),
-        );
+        return $this->hydrate($result);
     }
 
     public function delete(FileImportId $fileImportId): void
@@ -72,5 +63,44 @@ final readonly class DbalFileImportRepository extends DbalRepository implements 
         $this->connection->executeStatement($sql, [
             'activityId' => $activityId,
         ]);
+    }
+
+    public function findMostRecentSuccessfulForActivity(ActivityId $activityId): ?FileImport
+    {
+        $result = $this->connection->createQueryBuilder()
+            ->select('*')
+            ->from('FileImport')
+            ->andWhere('activityId = :activityId')
+            ->andWhere('status = :status')
+            ->setParameter('activityId', (string) $activityId)
+            ->setParameter('status', FileImportStatus::SUCCESS->value)
+            ->orderBy('importedOn', 'DESC')
+            ->addOrderBy('fileImportId', 'DESC')
+            ->setMaxResults(1)
+            ->executeQuery()
+            ->fetchAssociative();
+
+        if (false === $result) {
+            return null;
+        }
+
+        return $this->hydrate($result);
+    }
+
+    /**
+     * @param array<string, mixed> $result
+     */
+    private function hydrate(array $result): FileImport
+    {
+        return FileImport::fromState(
+            fileImportId: FileImportId::fromString($result['fileImportId']),
+            originalFilename: $result['originalFilename'],
+            fileContents: null !== $result['fileContents'] ? CompressedString::fromCompressed($result['fileContents'])->uncompress() : null,
+            source: ImportSource::from($result['source']),
+            status: FileImportStatus::from($result['status']),
+            errorMessage: $result['errorMessage'],
+            activityId: ActivityId::fromOptionalString($result['activityId']),
+            importedOn: SerializableDateTime::fromString($result['importedOn']),
+        );
     }
 }

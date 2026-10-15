@@ -17,6 +17,13 @@ interface ActivityScanRepository
 
     public function deleteForActivity(ActivityId $activityId): void;
 
+    /**
+     * Deletes one kind of scan marker for one activity. The STREAMS markers have
+     * to survive a merge, they are what stops a Strava stream fetch for an
+     * activity that has its streams from a file.
+     */
+    public function deleteForActivityAndType(ActivityId $activityId, ActivityScanType $type): void;
+
     public function deleteForSubject(ActivityScanType $type, string $subjectId): void;
 
     /**

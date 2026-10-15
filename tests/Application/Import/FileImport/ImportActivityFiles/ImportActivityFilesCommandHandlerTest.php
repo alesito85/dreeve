@@ -10,21 +10,46 @@ use App\Application\Import\ImportedActivities;
 use App\Domain\Activity\Activity;
 use App\Domain\Activity\ActivityId;
 use App\Domain\Activity\ActivityRepository;
+use App\Domain\Activity\BestEffort\ActivityBestEffort;
+use App\Domain\Activity\BestEffort\ActivityBestEffortRepository;
 use App\Domain\Activity\ImportSource;
 use App\Domain\Activity\Lap\ActivityLapRepository;
+use App\Domain\Activity\Revision\ActivityRevisionRepository;
+use App\Domain\Activity\Scan\ActivityScan;
 use App\Domain\Activity\Scan\ActivityScanRepository;
 use App\Domain\Activity\Scan\ActivityScanType;
+use App\Domain\Activity\Split\ActivitySplit;
+use App\Domain\Activity\Split\ActivitySplitRepository;
+use App\Domain\Activity\SportType\SportType;
+use App\Domain\Activity\Stream\ActivityStream;
 use App\Domain\Activity\Stream\ActivityStreamRepository;
+use App\Domain\Activity\Stream\CombinedStream\CombinedActivityStream;
+use App\Domain\Activity\Stream\CombinedStream\CombinedActivityStreamRepository;
+use App\Domain\Activity\Stream\CombinedStream\CombinedStreamType;
+use App\Domain\Activity\Stream\CombinedStream\CombinedStreamTypes;
+use App\Domain\Activity\Stream\Metric\ActivityStreamMetric;
+use App\Domain\Activity\Stream\Metric\ActivityStreamMetricRepository;
+use App\Domain\Activity\Stream\Metric\ActivityStreamMetricType;
 use App\Domain\Activity\Stream\StreamType;
 use App\Domain\Import\FileImportStatus;
+use App\Domain\Segment\SegmentEffort\SegmentEffort;
+use App\Domain\Segment\SegmentEffort\SegmentEffortId;
+use App\Domain\Segment\SegmentEffort\SegmentEffortRepository;
+use App\Domain\Segment\SegmentRepository;
 use App\Infrastructure\Cache\Cacheability;
 use App\Infrastructure\Cache\CacheableRenderer;
 use App\Infrastructure\Cache\Render\RenderCache;
 use App\Infrastructure\Cache\Tag\CacheTags;
 use App\Infrastructure\Cache\Tag\RootCacheTag;
+use App\Infrastructure\Measurement\Length\Kilometer;
+use App\Infrastructure\Measurement\Length\Meter;
+use App\Infrastructure\Measurement\UnitSystem;
+use App\Infrastructure\Measurement\Velocity\MetersPerSecond;
 use App\Infrastructure\ValueObject\String\CompressedString;
 use App\Infrastructure\ValueObject\String\KernelProjectDir;
+use App\Infrastructure\ValueObject\Time\SerializableDateTime;
 use App\Tests\ContainerTestCase;
+use App\Tests\Domain\Segment\SegmentBuilder;
 use App\Tests\Infrastructure\Cache\RenderStub;
 use App\Tests\SpyOutput;
 use League\Flysystem\FilesystemOperator;
@@ -202,6 +227,113 @@ class ImportActivityFilesCommandHandlerTest extends ContainerTestCase
         );
     }
 
+    public function testHandleMergesAFileThatBelongsToAnActivityItAlreadyHas(): void
+    {
+        $this->watchStorage->write('watch/ride.tcx', $this->fixture('activity.tcx'));
+        $this->handler->handle(new ImportActivityFiles(new SpyOutput(), ImportedActivities::empty()));
+
+        $activityId = ActivityId::fromString((string) $this->getConnection()->fetchOne('SELECT activityId FROM Activity'));
+        $this->addRowsDerivedFromTheStreams($activityId);
+
+        $extended = $this->extendedFixture();
+        $this->watchStorage->write('watch/ride-full-sync.tcx', $extended);
+
+        $output = new SpyOutput();
+        $importedActivities = ImportedActivities::empty();
+        $this->handler->handle(new ImportActivityFiles($output, $importedActivities));
+
+        // The whole point: a file that belongs to an activity already in the
+        // database adds to it, it never becomes a second activity.
+        $this->assertSame('1', (string) $this->getConnection()->executeQuery('SELECT COUNT(*) FROM Activity')->fetchOne());
+        $this->assertCount(0, $importedActivities->toArray(), 'A merge is not a new activity, the notification must not count it');
+
+        $activity = $this->getContainer()->get(ActivityRepository::class)->find($activityId);
+        $this->assertEquals(Kilometer::from(0.09), $activity->getDistance());
+        $this->assertSame(20, $activity->getElapsedTimeInSeconds());
+        $this->assertSame(ImportSource::TCX_FILE, $activity->getImportSource());
+
+        $streams = $this->getContainer()->get(ActivityStreamRepository::class)->findByActivityId($activityId);
+        $this->assertSame([0, 10, 20], $streams->filterOnType(StreamType::TIME)?->getData());
+        $this->assertNull(
+            $streams->filterOnType(StreamType::MOVING),
+            'The derived stream has to go, it is rebuilt from the merged timeline'
+        );
+
+        // Second 10 takes the newer sample, second 20 is the tail the first file
+        // never recorded, and second 0 is where both files agree.
+        $this->assertSame([120, 135, 140], $streams->filterOnType(StreamType::HEART_RATE)?->getData());
+        $this->assertSame([200, 210, 220], $streams->filterOnType(StreamType::WATTS)?->getData());
+        $this->assertSame([80, 82, 84], $streams->filterOnType(StreamType::CADENCE)?->getData());
+
+        // Everything built off the old streams is dropped, the metrics steps pick
+        // the activity up again on the next run.
+        foreach (['ActivitySplit', 'CombinedActivityStream', 'ActivityStreamMetric', 'ActivityBestEffort', 'SegmentEffort'] as $table) {
+            $this->assertSame(0, $this->countRows($table, $activityId), sprintf('"%s" should have been invalidated', $table));
+        }
+        $this->assertSame(
+            [ActivityScanType::STREAMS->value],
+            array_map(
+                static fn (array $row): string => $row['type'],
+                $this->getConnection()->fetchAllAssociative('SELECT type FROM ActivityScan WHERE activityId = :activityId', ['activityId' => (string) $activityId]),
+            ),
+            'The stream marker keeps the file activity from being fetched from Strava, the custom segment marker has to go'
+        );
+
+        // The state the merge replaced stays reachable.
+        $revisions = $this->getContainer()->get(ActivityRevisionRepository::class)->findForActivity($activityId);
+        $this->assertCount(1, $revisions);
+        $revision = $revisions->getFirst();
+        $this->assertNotNull($revision);
+        $this->assertSame(1, $revision->getRevisionNumber());
+        $this->assertSame(50, $revision->getSummary()->getDistanceInMetres());
+        $this->assertSame(10, $revision->getSummary()->getElapsedTimeInSeconds());
+        $this->assertNotNull(
+            $revision->getGeneratedByFileImportId(),
+            'A version can only be restored while the bytes behind it are in the import log'
+        );
+
+        $fileImport = $this->getConnection()->fetchAssociative('SELECT * FROM FileImport WHERE originalFilename = :filename', ['filename' => 'ride-full-sync.tcx']);
+        $this->assertIsArray($fileImport);
+        $this->assertSame(FileImportStatus::SUCCESS->value, $fileImport['status']);
+        $this->assertSame((string) $activityId, $fileImport['activityId'], 'The log row points at the activity it merged into');
+        $this->assertSame($extended, CompressedString::fromCompressed($fileImport['fileContents'])->uncompress());
+        $this->assertFalse($this->watchStorage->fileExists('watch/ride-full-sync.tcx'));
+
+        $this->assertStringContainsString(
+            '  => [1/1] Merged "ride-full-sync.tcx" into activity "Night Ride - 08-09-2021"',
+            (string) $output,
+        );
+    }
+
+    public function testHandleMergingAFileThatAddsNothingRecordsNoVersion(): void
+    {
+        $this->watchStorage->write('watch/ride.tcx', $this->fixture('activity.tcx'));
+        $this->handler->handle(new ImportActivityFiles(new SpyOutput(), ImportedActivities::empty()));
+
+        $activityId = ActivityId::fromString((string) $this->getConnection()->fetchOne('SELECT activityId FROM Activity'));
+
+        // Same ride, different bytes: only the author line differs, so nothing
+        // about the activity changes.
+        $this->watchStorage->write('watch/ride-renamed.tcx', str_replace(
+            '<Name>Garmin Edge 530</Name>',
+            '<Name>Garmin Edge 530 ANT+</Name>',
+            $this->fixture('activity.tcx'),
+        ));
+        $this->handler->handle(new ImportActivityFiles(new SpyOutput(), ImportedActivities::empty()));
+
+        $this->assertSame('1', (string) $this->getConnection()->executeQuery('SELECT COUNT(*) FROM Activity')->fetchOne());
+        $this->assertSame(
+            0,
+            (int) $this->getConnection()->executeQuery('SELECT COUNT(*) FROM ActivityRevision')->fetchOne(),
+            'A history the user has to read for no reason is worse than no history'
+        );
+        $this->assertSame(
+            [120, 130],
+            $this->getContainer()->get(ActivityStreamRepository::class)->findByActivityId($activityId)->filterOnType(StreamType::HEART_RATE)?->getData(),
+            'The same samples in, the same stream out',
+        );
+    }
+
     public function testHandleIgnoresFilesThatAreNotActivityFiles(): void
     {
         $this->watchStorage->write('watch/notes.txt', 'just some text');
@@ -283,6 +415,135 @@ class ImportActivityFilesCommandHandlerTest extends ContainerTestCase
 
         $this->cacheableRenderer->render($cacheability, $render(...));
         $this->assertEquals(1, $render->renderCount);
+    }
+
+    /**
+     * The rows that only exist because the stored streams did, plus the markers
+     * and the derived stream a merge has to invalidate, so the sweep has proof
+     * of having run.
+     */
+    private function addRowsDerivedFromTheStreams(ActivityId $activityId): void
+    {
+        $this->getContainer()->get(ActivitySplitRepository::class)->add(ActivitySplit::create(
+            activityId: $activityId,
+            unitSystem: UnitSystem::METRIC,
+            splitNumber: 1,
+            distance: Meter::from(50),
+            elapsedTimeInSeconds: 10,
+            movingTimeInSeconds: 10,
+            elevationDifference: Meter::from(10),
+            averageSpeed: MetersPerSecond::from(5),
+            minAverageSpeed: MetersPerSecond::from(5),
+            maxAverageSpeed: MetersPerSecond::from(6),
+            paceZone: 1,
+        ));
+
+        $this->getContainer()->get(CombinedActivityStreamRepository::class)->add(CombinedActivityStream::create(
+            activityId: $activityId,
+            unitSystem: UnitSystem::METRIC,
+            streamTypes: CombinedStreamTypes::fromArray([CombinedStreamType::WATTS]),
+            data: [[0, 200], [10, 210]],
+            maxYAxisValue: 210,
+        ));
+
+        $this->getContainer()->get(ActivityStreamMetricRepository::class)->add(ActivityStreamMetric::create(
+            activityId: $activityId,
+            streamType: StreamType::WATTS,
+            metricType: ActivityStreamMetricType::NORMALIZED_POWER,
+            data: ['normalizedPower' => 205],
+        ));
+
+        $this->getContainer()->get(ActivityBestEffortRepository::class)->add(ActivityBestEffort::create(
+            activityId: $activityId,
+            distanceInMeter: Meter::from(50),
+            sportType: SportType::RIDE,
+            timeInSeconds: 10,
+        ));
+
+        $segment = SegmentBuilder::fromDefaults()->build();
+        $this->getContainer()->get(SegmentRepository::class)->add($segment);
+        $this->getContainer()->get(SegmentEffortRepository::class)->add(SegmentEffort::create(
+            segmentEffortId: SegmentEffortId::fromUnprefixed('1'),
+            segment: $segment,
+            activityId: $activityId,
+            startDateTime: SerializableDateTime::fromString('2021-09-08 00:00:00'),
+            elapsedTimeInSeconds: 10,
+            distance: Kilometer::from(0.05),
+            averageWatts: 205,
+            averageHeartRate: 125,
+            maxHeartRate: 130,
+        ));
+
+        // The stream marker is already there from the import. This is the other
+        // one, and unlike the stream marker it has to go.
+        $this->getContainer()->get(ActivityScanRepository::class)->add(ActivityScan::create(
+            activityId: $activityId,
+            type: ActivityScanType::CUSTOM_SEGMENT,
+            subjectId: 'custom-segment-1',
+        ));
+
+        // A MOVING stream built off the speed samples as they were before the
+        // merge, which is exactly the kind of row that cannot be trusted after one.
+        $this->getContainer()->get(ActivityStreamRepository::class)->add(ActivityStream::create(
+            activityId: $activityId,
+            streamType: StreamType::MOVING,
+            streamData: [true, true],
+            createdOn: SerializableDateTime::fromString('2023-10-17 16:15:04'),
+        ));
+    }
+
+    private function countRows(string $table, ActivityId $activityId): int
+    {
+        return (int) $this->getConnection()->executeQuery(
+            sprintf('SELECT COUNT(*) FROM %s WHERE activityId = :activityId', $table),
+            ['activityId' => (string) $activityId],
+        )->fetchOne();
+    }
+
+    /**
+     * The same ride from a sync that finished later: ten more seconds of
+     * timeline, one more trackpoint, and a corrected heart rate sample. The
+     * distance stays inside the floor the identity matcher allows, so the file
+     * has to merge into the activity the first file already created.
+     */
+    private function extendedFixture(): string
+    {
+        $extraTrackpoint = implode("\n", [
+            '          <Trackpoint>',
+            '            <Time>2021-09-08T00:00:20Z</Time>',
+            '            <Position>',
+            '              <LatitudeDegrees>45.2</LatitudeDegrees>',
+            '              <LongitudeDegrees>22.7</LongitudeDegrees>',
+            '            </Position>',
+            '            <AltitudeMeters>120</AltitudeMeters>',
+            '            <DistanceMeters>90</DistanceMeters>',
+            '            <HeartRateBpm><Value>140</Value></HeartRateBpm>',
+            '            <Cadence>84</Cadence>',
+            '            <Extensions>',
+            '              <ns3:TPX>',
+            '                <ns3:Speed>6.5</ns3:Speed>',
+            '                <ns3:Watts>220</ns3:Watts>',
+            '              </ns3:TPX>',
+            '            </Extensions>',
+            '          </Trackpoint>',
+        ]);
+
+        $extended = str_replace(
+            [
+                "<TotalTimeSeconds>10</TotalTimeSeconds>\n        <DistanceMeters>50</DistanceMeters>",
+                '<HeartRateBpm><Value>130</Value></HeartRateBpm>',
+                "          </Trackpoint>\n        </Track>",
+            ],
+            [
+                "<TotalTimeSeconds>20</TotalTimeSeconds>\n        <DistanceMeters>90</DistanceMeters>",
+                '<HeartRateBpm><Value>135</Value></HeartRateBpm>',
+                '          </Trackpoint>'."\n".$extraTrackpoint."\n        </Track>",
+            ],
+            $this->fixture('activity.tcx'),
+        );
+        $this->assertNotSame($this->fixture('activity.tcx'), $extended, 'The extended fixture has to be a different file');
+
+        return $extended;
     }
 
     private function fixture(string $name): string

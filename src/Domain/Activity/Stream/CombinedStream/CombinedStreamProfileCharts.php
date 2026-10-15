@@ -20,12 +20,20 @@ final readonly class CombinedStreamProfileCharts
     private const int GAP = 5;
     private const int RIBBON_HEIGHT = 18;
     private const string LANE_BACKGROUND_COLOR = '#3E444D';
+    private const string BALANCE_STRONGER_SIDE_COLOR = '#3ba272';
+    private const string BALANCE_WEAKER_SIDE_COLOR = '#fac858';
     private const float ZONE_BAND_OPACITY = 0.35;
+    private const float BALANCE_BAND_OPACITY = 0.12;
+    private const int MINIMUM_DIVERGING_SPREAD = 3;
 
     /**
      * @param list<array{
      *     yAxisData: array<int, int|float>,
      *     yAxisStreamType: CombinedStreamType,
+     *     yAxisCompanionSeries?: list<array{
+     *         yAxisStreamType: CombinedStreamType,
+     *         yAxisData: array<int, int|float>,
+     *     }>,
      * }> $items
      * @param array<int, int|float> $topXAxisData
      * @param array<int, int|float> $bottomXAxisData
@@ -52,6 +60,10 @@ final readonly class CombinedStreamProfileCharts
      * @param list<array{
      *     yAxisData: array<int, int|float>,
      *     yAxisStreamType: CombinedStreamType,
+     *     yAxisCompanionSeries?: list<array{
+     *         yAxisStreamType: CombinedStreamType,
+     *         yAxisData: array<int, int|float>,
+     *     }>,
      * }> $items
      * @param array<int, int|float> $topXAxisData
      * @param array<int, int|float> $bottomXAxisData
@@ -127,27 +139,35 @@ final readonly class CombinedStreamProfileCharts
         }
 
         foreach ($this->items as $index => $item) {
-            $yAxisData = $item['yAxisData'];
+            $seriesDefinitions = [[
+                'streamType' => $item['yAxisStreamType'],
+                'data' => $item['yAxisData'],
+            ]];
+            foreach ($item['yAxisCompanionSeries'] ?? [] as $companionSeries) {
+                $seriesDefinitions[] = [
+                    'streamType' => $companionSeries['yAxisStreamType'],
+                    'data' => $companionSeries['yAxisData'],
+                ];
+            }
+
             /** @var CombinedStreamType $yAxisStreamType */
-            $yAxisStreamType = $item['yAxisStreamType'];
+            $yAxisStreamType = $seriesDefinitions[0]['streamType'];
             $isFirst = 0 === $index;
             $isLast = $index === $count - 1;
 
-            if ([] === $yAxisData) {
+            if ([] === $seriesDefinitions[0]['data']) {
                 throw new \RuntimeException('yAxisData data cannot be empty');
             }
 
             $yAxisSuffix = $yAxisStreamType->getSuffix($this->unitSystem, $this->sportType);
             $isHeartRateStreamType = CombinedStreamType::HEART_RATE === $yAxisStreamType;
+            $laneSharesSeries = count($seriesDefinitions) > 1;
+            $midValue = $yAxisStreamType->getDivergingMidValue();
 
-            [$min, $max] = [min($yAxisData), max($yAxisData)];
-            $margin = ($max - $min) * 0.1;
-            $maxYAxis = (int) ceil($max + $margin);
-            $minYAxis = max($min, 0);
-
-            if (CombinedStreamType::ALTITUDE === $yAxisStreamType) {
-                $minYAxis = (int) floor($min - $margin);
-            }
+            [$minYAxis, $maxYAxis] = $this->buildYAxisBounds(
+                seriesDefinitions: $seriesDefinitions,
+                laneStreamType: $yAxisStreamType,
+            );
 
             $gridIndex = $index + $gridIndexOffset;
             $top = self::TOP_MARGIN + $topOffset + $index * (self::GRID_HEIGHT + self::GAP);
@@ -205,7 +225,7 @@ final readonly class CombinedStreamProfileCharts
                 ],
                 'axisLabel' => [
                     'show' => true,
-                    'customValues' => [$minYAxis, $maxYAxis],
+                    'customValues' => is_null($midValue) ? [$minYAxis, $maxYAxis] : [$minYAxis, $midValue, $maxYAxis],
                     'formatter' => CombinedStreamType::PACE === $yAxisStreamType ? 'callback:formatSecondsTrimZero' : null,
                     'color' => '#aaa',
                     'verticalAlignMaxLabel' => 'top',
@@ -213,66 +233,68 @@ final readonly class CombinedStreamProfileCharts
                 ],
             ];
 
-            $seriesData = $yAxisData;
-            if (CombinedStreamType::ALTITUDE === $yAxisStreamType && [] !== $this->grades) {
-                $seriesData = array_map(
-                    fn (int|float $elevation, int|float $grade): array => ['value' => $elevation, 'extra' => $grade.'%'],
-                    $yAxisData,
-                    $this->grades,
-                );
-            }
+            $heartRateZoneBounds = [];
             if ($isHeartRateStreamType) {
-                $zones = [];
                 foreach ($this->heartRateZones->getZones() as $i => $heartRateZone) {
-                    $zones[] = [
+                    $heartRateZoneBounds[] = [
                         'fromBpm' => $heartRateZone->getRangeInBpm($this->athleteMaxHeartRate)[0],
                         'name' => sprintf('zone %d', $i + 1),
                     ];
                 }
-                $zones = array_reverse($zones);
-                $seriesData = array_map(
-                    function (int|float $heartRate) use ($zones): int|float|array {
-                        foreach ($zones as $zone) {
-                            if ($heartRate >= $zone['fromBpm']) {
-                                return ['value' => $heartRate, 'extra' => $zone['name']];
-                            }
-                        }
-
-                        return $heartRate;
-                    },
-                    $yAxisData
-                );
+                $heartRateZoneBounds = array_reverse($heartRateZoneBounds);
             }
 
-            $series[] = [
-                'name' => CombinedStreamType::PACE === $yAxisStreamType ? '__pace' : $yAxisSuffix,
-                'xAxisIndex' => $gridIndex,
-                'yAxisIndex' => $gridIndex,
-                'markArea' => $this->buildMarkArea(
-                    streamType: $yAxisStreamType,
-                    minYAxis: $minYAxis,
-                    maxYAxis: $maxYAxis
-                ),
-                'data' => $seriesData,
-                'type' => 'line',
-                'showSymbol' => false,
-                'progressive' => 5000,
-                'progressiveThreshold' => 10000,
-                'color' => $yAxisStreamType->getSeriesColor(),
-                'smooth' => true,
-                'lineStyle' => [
-                    'width' => $isHeartRateStreamType ? 2 : 0,
-                ],
-                'emphasis' => [
-                    'disabled' => true,
-                ],
-                ...$isHeartRateStreamType ? [] : [
-                    'areaStyle' => [
-                        'opacity' => 1,
-                        'origin' => 'start',
+            // A lane can carry more than one series, which is how both sides of
+            // the same metric end up on one axis instead of in two lookalikes.
+            $laneSeries = [];
+            foreach ($seriesDefinitions as $seriesDefinition) {
+                /** @var CombinedStreamType $seriesStreamType */
+                $seriesStreamType = $seriesDefinition['streamType'];
+                $isFirstSeries = [] === $laneSeries;
+                $drawsALine = $isHeartRateStreamType
+                    || $laneSharesSeries
+                    || !is_null($midValue);
+
+                $laneSeries[] = [
+                    'name' => CombinedStreamType::PACE === $seriesStreamType ? '__pace' : $yAxisSuffix,
+                    'xAxisIndex' => $gridIndex,
+                    'yAxisIndex' => $gridIndex,
+                    ...$isFirstSeries ? [
+                        'markArea' => $this->buildMarkArea(
+                            streamType: $yAxisStreamType,
+                            minYAxis: $minYAxis,
+                            maxYAxis: $maxYAxis,
+                            midValue: $midValue,
+                        ),
+                        ...$this->buildMarkLine($midValue),
+                    ] : [],
+                    'data' => $this->buildSeriesData(
+                        streamType: $seriesStreamType,
+                        data: $seriesDefinition['data'],
+                        heartRateZoneBounds: $heartRateZoneBounds,
+                        laneSharesSeries: $laneSharesSeries,
+                    ),
+                    'type' => 'line',
+                    'showSymbol' => false,
+                    'progressive' => 5000,
+                    'progressiveThreshold' => 10000,
+                    'color' => $seriesStreamType->getSeriesColor(),
+                    'smooth' => true,
+                    'lineStyle' => [
+                        'width' => $drawsALine ? 2 : 0,
                     ],
-                ],
-            ];
+                    'emphasis' => [
+                        'disabled' => true,
+                    ],
+                    ...$drawsALine ? [] : [
+                        'areaStyle' => [
+                            'opacity' => 1,
+                            'origin' => 'start',
+                        ],
+                    ],
+                ];
+            }
+            array_push($series, ...$laneSeries);
         }
 
         return [
@@ -333,6 +355,164 @@ final readonly class CombinedStreamProfileCharts
             'xAxis' => $xAxes,
             'yAxis' => $yAxes,
             'series' => $series,
+        ];
+    }
+
+    /**
+     * @param list<array{streamType: CombinedStreamType, data: array<int, int|float>}> $seriesDefinitions
+     *
+     * @return array{int|float, int|float}
+     */
+    private function buildYAxisBounds(array $seriesDefinitions, CombinedStreamType $laneStreamType): array
+    {
+        $values = [];
+        foreach ($seriesDefinitions as $definition) {
+            foreach ($definition['data'] as $value) {
+                if ($this->isGap($definition['streamType'], $value)) {
+                    continue;
+                }
+                $values[] = $value;
+            }
+        }
+
+        if ([] === $values) {
+            return [0, 1];
+        }
+
+        [$min, $max] = [min($values), max($values)];
+
+        if (null !== $midValue = $laneStreamType->getDivergingMidValue()) {
+            // Symmetric around the midline, so a deviation reads as the same
+            // distance from the middle whether it leans left or right.
+            $spread = 1.1 * max(
+                self::MINIMUM_DIVERGING_SPREAD,
+                $max - $midValue,
+                $midValue - $min,
+            );
+
+            return [
+                max(0, (int) floor($midValue - $spread)),
+                min(100, (int) ceil($midValue + $spread)),
+            ];
+        }
+
+        $margin = ($max - $min) * 0.1;
+        $maxYAxis = (int) ceil($max + $margin);
+        $minYAxis = max($min, 0);
+
+        if (CombinedStreamType::ALTITUDE === $laneStreamType) {
+            $minYAxis = (int) floor($min - $margin);
+        }
+
+        return [$minYAxis, $maxYAxis];
+    }
+
+    /**
+     * @param array<int, int|float|null>              $data
+     * @param list<array{fromBpm: int, name: string}> $heartRateZoneBounds
+     *
+     * @return array<int, array<string, mixed>|int|float|null>
+     */
+    private function buildSeriesData(
+        CombinedStreamType $streamType,
+        array $data,
+        array $heartRateZoneBounds,
+        bool $laneSharesSeries,
+    ): array {
+        if (CombinedStreamType::ALTITUDE === $streamType && [] !== $this->grades) {
+            return array_map(
+                fn (int|float|null $elevation, int|float $grade): ?array => is_null($elevation) ? null : ['value' => $elevation, 'extra' => $grade.'%'],
+                $data,
+                $this->grades,
+            );
+        }
+
+        if ([] !== $heartRateZoneBounds) {
+            return array_map(
+                function (int|float|null $heartRate) use ($heartRateZoneBounds): int|float|array|null {
+                    if (is_null($heartRate)) {
+                        return null;
+                    }
+                    foreach ($heartRateZoneBounds as $zone) {
+                        if ($heartRate >= $zone['fromBpm']) {
+                            return ['value' => $heartRate, 'extra' => $zone['name']];
+                        }
+                    }
+
+                    return $heartRate;
+                },
+                $data
+            );
+        }
+
+        $sideLabel = $laneSharesSeries ? $streamType->transSeriesLabel($this->translator) : null;
+
+        return array_map(
+            function (int|float|null $value) use ($streamType, $sideLabel): array|int|float|null {
+                if ($this->isGap($streamType, $value)) {
+                    return null;
+                }
+
+                if (is_null($sideLabel)) {
+                    /* @var int|float $value */
+                    return $value;
+                }
+
+                return ['value' => $value, 'extra' => $sideLabel];
+            },
+            $data,
+        );
+    }
+
+    /**
+     * Coasting reports a smoothness of zero. That is not a measurement of zero
+     * effort, it is the absence of any, so it has to render as a gap.
+     */
+    private function isGap(CombinedStreamType $streamType, mixed $value): bool
+    {
+        if (null === $value) {
+            return true;
+        }
+
+        return 0 !== $value
+            ? false
+            : null === $streamType->getDivergingMidValue() && $streamType->isPedalingDynamics();
+    }
+
+    /**
+     * The line that says "nothing leaning either way" on a diverging lane.
+     *
+     * @return array<string, mixed>
+     */
+    private function buildMarkLine(?int $midValue): array
+    {
+        if (is_null($midValue)) {
+            return [];
+        }
+
+        return [
+            'markLine' => [
+                'symbol' => 'none',
+                'silent' => true,
+                'label' => [
+                    'show' => true,
+                    'position' => 'insideStartTop',
+                    'formatter' => (string) $midValue,
+                    'color' => '#aaa',
+                    'fontSize' => 10,
+                ],
+                'lineStyle' => [
+                    'color' => '#aaa',
+                    'type' => 'dashed',
+                    'width' => 1,
+                ],
+                'emphasis' => [
+                    'disabled' => true,
+                ],
+                'data' => [
+                    ['yAxis' => $midValue],
+                ],
+            ],
         ];
     }
 
@@ -442,6 +622,7 @@ final readonly class CombinedStreamProfileCharts
         CombinedStreamType $streamType,
         int|float $minYAxis,
         int|float $maxYAxis,
+        ?int $midValue = null,
     ): array {
         $data = [
             [
@@ -461,6 +642,37 @@ final readonly class CombinedStreamProfileCharts
                 ],
             ],
         ];
+
+        if (!is_null($midValue)) {
+            // Tint the side of the midline the series leans to, so the chart
+            // says which leg is doing the work without reading the axis.
+            foreach ([
+                [$maxYAxis, $midValue, self::BALANCE_STRONGER_SIDE_COLOR],
+                [$midValue, $minYAxis, self::BALANCE_WEAKER_SIDE_COLOR],
+            ] as [$from, $to, $color]) {
+                if ($from <= $to) {
+                    continue;
+                }
+
+                $data[] = [
+                    [
+                        'xAxis' => 'min',
+                        'yAxis' => $from,
+                        'itemStyle' => [
+                            'color' => $color,
+                            'opacity' => self::BALANCE_BAND_OPACITY,
+                        ],
+                        'emphasis' => [
+                            'disabled' => true,
+                        ],
+                    ],
+                    [
+                        'xAxis' => 'max',
+                        'yAxis' => $to,
+                    ],
+                ];
+            }
+        }
 
         if (CombinedStreamType::HEART_RATE !== $streamType) {
             return ['data' => $data];

@@ -112,8 +112,9 @@ final readonly class CalculateCombinedStreams implements CalculateActivityMetric
                     // Smoothen the velocity stream to remove peaks in velocity due to GPS issues.
                     $stream = $stream->applySimpleMovingAverage(15);
                 }
-                if (in_array($stream->getStreamType(), [StreamType::LEFT_RIGHT_BALANCE, StreamType::TORQUE_EFFECTIVENESS, StreamType::PEDAL_SMOOTHNESS], true)) {
-                    // Smoothen the pedaling dynamics, they jitter per sample.
+                if (StreamType::LEFT_RIGHT_BALANCE === $stream->getStreamType()) {
+                    // Smoothen the balance, it jitters per sample. Smoothing the
+                    // smoothness series would smear its coasting gaps into slopes.
                     $stream = $stream->applySimpleMovingAverage(5);
                 }
 

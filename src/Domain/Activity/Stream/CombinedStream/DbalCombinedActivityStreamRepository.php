@@ -52,10 +52,13 @@ final readonly class DbalCombinedActivityStreamRepository extends DbalRepository
             return 0;
         }
 
-        return count(array_filter(
-            explode(',', (string) $streamTypes),
-            fn (string $streamType): bool => CombinedStreamType::from($streamType)->isChartable()
+        $chartableStreamTypes = array_values(array_filter(
+            array_map(CombinedStreamType::from(...), explode(',', (string) $streamTypes)),
+            fn (CombinedStreamType $streamType): bool => $streamType->isChartable()
         ));
+
+        // Two series on one axis is one lane, so the chart stays the right height.
+        return count(CombinedStreamType::chartLanesFor($chartableStreamTypes));
     }
 
     public function hasStreamTypeFor(ActivityId $activityId, UnitSystem $unitSystem, CombinedStreamType $streamType): bool

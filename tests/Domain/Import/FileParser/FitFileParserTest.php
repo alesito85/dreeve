@@ -250,6 +250,8 @@ class FitFileParserTest extends ActivityFileParserTestCase
                         ['name' => 'left_right_balance', 'value' => 0x80 | 46],
                         ['name' => 'left_torque_effectiveness', 'value' => 96],
                         ['name' => 'right_torque_effectiveness', 'value' => 94],
+                        // Coasting: the left side reports a zero, the right stops reporting.
+                        ['name' => 'left_pedal_smoothness', 'value' => 0],
                         ['name' => 'combined_pedal_smoothness', 'value' => 90],
                     ]],
                 ],
@@ -272,12 +274,19 @@ class FitFileParserTest extends ActivityFileParserTestCase
         $this->assertEquals([52.0, 54.0], array_values(array_filter(
             $streams->filterOnType(StreamType::LEFT_RIGHT_BALANCE)?->getData() ?? [],
         )));
-        $this->assertEquals([94.0, 95.0], array_values(array_filter(
-            $streams->filterOnType(StreamType::TORQUE_EFFECTIVENESS)?->getData() ?? [],
-        )));
-        $this->assertEquals([73.0, 90.0], array_values(array_filter(
-            $streams->filterOnType(StreamType::PEDAL_SMOOTHNESS)?->getData() ?? [],
-        )));
+        // Per record torque effectiveness tracks pedal smoothness almost exactly,
+        // so it is no longer stored; the session average carries the number.
+        $this->assertNull($streams->filterOnType(StreamType::TORQUE_EFFECTIVENESS));
+        // The zero survives the gap filling, the missing sample does not.
+        $this->assertEquals([74.0, 0.0], array_values(
+            $streams->filterOnType(StreamType::LEFT_PEDAL_SMOOTHNESS)?->getData() ?? [],
+        ));
+        $this->assertEquals([72.0, 72.0], array_values(
+            $streams->filterOnType(StreamType::RIGHT_PEDAL_SMOOTHNESS)?->getData() ?? [],
+        ));
+        // Both sides are on file, so the combined series would draw the same
+        // stroke a second time.
+        $this->assertNull($streams->filterOnType(StreamType::PEDAL_SMOOTHNESS));
     }
 
     public function testParseWithoutPedalingDynamics(): void
@@ -290,6 +299,8 @@ class FitFileParserTest extends ActivityFileParserTestCase
         $this->assertNull($parsed->getStreams()->filterOnType(StreamType::LEFT_RIGHT_BALANCE));
         $this->assertNull($parsed->getStreams()->filterOnType(StreamType::TORQUE_EFFECTIVENESS));
         $this->assertNull($parsed->getStreams()->filterOnType(StreamType::PEDAL_SMOOTHNESS));
+        $this->assertNull($parsed->getStreams()->filterOnType(StreamType::LEFT_PEDAL_SMOOTHNESS));
+        $this->assertNull($parsed->getStreams()->filterOnType(StreamType::RIGHT_PEDAL_SMOOTHNESS));
     }
 
     public function testParsePrefersProductNameWhenManufacturerHasNoProductEnum(): void

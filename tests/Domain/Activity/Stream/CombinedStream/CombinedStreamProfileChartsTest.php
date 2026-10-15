@@ -54,6 +54,68 @@ class CombinedStreamProfileChartsTest extends ContainerTestCase
         ]);
     }
 
+    public function testItShouldCentreTheBalanceLaneOnAnEvenSplit(): void
+    {
+        $chart = $this->buildChart(items: [
+            ['yAxisData' => [51, 52, 48, 78, 22], 'yAxisStreamType' => CombinedStreamType::LEFT_RIGHT_BALANCE],
+        ]);
+
+        // 28 off the midline at the most, so the axis runs just past that in
+        // both directions and the 50 line sits in the middle of the lane.
+        $this->assertEquals(19, $chart['yAxis'][0]['min']);
+        $this->assertEquals(81, $chart['yAxis'][0]['max']);
+        $this->assertEquals([19, 50, 81], $chart['yAxis'][0]['axisLabel']['customValues']);
+        $this->assertEquals([['yAxis' => 50]], $chart['series'][0]['markLine']['data']);
+        $this->assertEquals(2, $chart['series'][0]['lineStyle']['width']);
+        $this->assertArrayNotHasKey('areaStyle', $chart['series'][0]);
+
+        // The lean gets a tint on whichever side of the midline it falls.
+        $this->assertEquals(
+            [['xAxis' => 'min', 'yAxis' => 81, 'itemStyle' => ['color' => '#3ba272', 'opacity' => 0.12], 'emphasis' => ['disabled' => true]], ['xAxis' => 'max', 'yAxis' => 50]],
+            $chart['series'][0]['markArea']['data'][1],
+        );
+        $this->assertEquals(
+            [['xAxis' => 'min', 'yAxis' => 50, 'itemStyle' => ['color' => '#fac858', 'opacity' => 0.12], 'emphasis' => ['disabled' => true]], ['xAxis' => 'max', 'yAxis' => 19]],
+            $chart['series'][0]['markArea']['data'][2],
+        );
+    }
+
+    public function testItShouldDrawBothSmoothnessSidesOnOneAxis(): void
+    {
+        $chart = $this->buildChart(items: [[
+            'yAxisData' => [20, 22, 0, 24],
+            'yAxisStreamType' => CombinedStreamType::LEFT_PEDAL_SMOOTHNESS,
+            'yAxisCompanionSeries' => [[
+                'yAxisStreamType' => CombinedStreamType::RIGHT_PEDAL_SMOOTHNESS,
+                'yAxisData' => [18, 0, 19, 21],
+            ]],
+        ]]);
+
+        $this->assertCount(1, $chart['grid']);
+        $this->assertCount(2, $chart['series']);
+        $this->assertEquals(0, $chart['series'][1]['xAxisIndex']);
+        $this->assertEquals('#5470c6', $chart['series'][1]['color']);
+        $this->assertEquals(2, $chart['series'][1]['lineStyle']['width']);
+        $this->assertArrayNotHasKey('areaStyle', $chart['series'][1]);
+
+        // Coasting is no pedal stroke at all, so it draws a gap and stays out
+        // of the axis bounds instead of squashing the strokes against the bottom.
+        $this->assertNull($chart['series'][0]['data'][2]);
+        $this->assertNull($chart['series'][1]['data'][1]);
+        $this->assertEquals(18, $chart['yAxis'][0]['min']);
+        $this->assertEquals(25, $chart['yAxis'][0]['max']);
+
+        // Both strokes need naming in the tooltip, the unit alone cannot tell them apart.
+        $this->assertEquals(
+            ['value' => 20, 'extra' => 'Left'],
+            $chart['series'][0]['data'][0],
+        );
+        $this->assertEquals(
+            ['value' => 18, 'extra' => 'Right'],
+            $chart['series'][1]['data'][0],
+        );
+    }
+
     public function testItShouldAddABandPerHeartRateZone(): void
     {
         $chart = $this->buildChart(items: [

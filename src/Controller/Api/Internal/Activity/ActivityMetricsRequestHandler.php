@@ -9,6 +9,7 @@ use App\Domain\Activity\ActivityId;
 use App\Domain\Activity\ActivityRepository;
 use App\Domain\Activity\Stream\CombinedStream\CombinedActivityStreamRepository;
 use App\Domain\Activity\Stream\CombinedStream\CombinedStreamProfileCharts;
+use App\Domain\Activity\Stream\CombinedStream\CombinedStreamType;
 use App\Domain\Settings\SettingsRepository;
 use App\Infrastructure\Cache\Cacheability;
 use App\Infrastructure\Cache\CacheableRenderer;
@@ -71,11 +72,30 @@ final readonly class ActivityMetricsRequestHandler
         );
 
         $items = [];
-        foreach ($combinedActivityStream->getStreamTypesForCharts() as $combinedStreamType) {
-            $items[] = [
+        $chartStreamTypes = $combinedActivityStream->getStreamTypesForCharts()->toArray();
+        foreach (CombinedStreamType::chartLanesFor($chartStreamTypes) as $combinedStreamType) {
+            $item = [
                 'yAxisData' => $combinedActivityStream->getChartStreamData($combinedStreamType),
                 'yAxisStreamType' => $combinedStreamType,
             ];
+
+            $companions = [];
+            foreach ($combinedStreamType->getSeriesPartners() as $partner) {
+                // A partner sharing this axis does not need one of its own.
+                $partnerData = $combinedActivityStream->getChartStreamData($partner);
+                if ([] === $partnerData) {
+                    continue;
+                }
+                $companions[] = [
+                    'yAxisStreamType' => $partner,
+                    'yAxisData' => $partnerData,
+                ];
+            }
+            if ([] !== $companions) {
+                $item['yAxisCompanionSeries'] = $companions;
+            }
+
+            $items[] = $item;
         }
 
         return CombinedStreamProfileCharts::create(

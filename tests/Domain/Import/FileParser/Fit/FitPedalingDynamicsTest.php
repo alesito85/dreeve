@@ -125,30 +125,38 @@ class FitPedalingDynamicsTest extends TestCase
         $this->assertNull(FitPedalingDynamics::recordLeftBalanceInPercent([]));
     }
 
-    public function testRecordTorqueEffectivenessAveragesBothSides(): void
+    public function testRecordPedalSmoothnessKeepsTheSidesApart(): void
     {
         $this->assertEquals(
-            94.0,
-            FitPedalingDynamics::recordTorqueEffectivenessInPercent([
-                'left_torque_effectiveness' => 95,
-                'right_torque_effectiveness' => 93,
+            74.0,
+            FitPedalingDynamics::recordLeftPedalSmoothnessInPercent([
+                'left_pedal_smoothness' => 74,
+                'right_pedal_smoothness' => 72,
+            ])
+        );
+        $this->assertEquals(
+            72.0,
+            FitPedalingDynamics::recordRightPedalSmoothnessInPercent([
+                'left_pedal_smoothness' => 74,
+                'right_pedal_smoothness' => 72,
             ])
         );
     }
 
-    public function testRecordTorqueEffectivenessFallsBackToASingleSide(): void
+    public function testRecordPedalSmoothnessKeepsCoastingAsAZero(): void
     {
+        // A zero is coasting, which the gap filling must not overwrite with the
+        // last value from before the stop pedalling.
         $this->assertEquals(
-            95.0,
-            FitPedalingDynamics::recordTorqueEffectivenessInPercent([
-                'left_torque_effectiveness' => 95,
-                'right_torque_effectiveness' => 127.5,
-            ])
+            0.0,
+            FitPedalingDynamics::recordLeftPedalSmoothnessInPercent(['left_pedal_smoothness' => 0])
         );
-        $this->assertNull(FitPedalingDynamics::recordTorqueEffectivenessInPercent([]));
+        $this->assertNull(FitPedalingDynamics::recordLeftPedalSmoothnessInPercent([]));
+        $this->assertNull(FitPedalingDynamics::recordLeftPedalSmoothnessInPercent(['left_pedal_smoothness' => 127.5]));
+        $this->assertNull(FitPedalingDynamics::recordRightPedalSmoothnessInPercent([]));
     }
 
-    public function testRecordPedalSmoothnessPrefersTheCombinedField(): void
+    public function testRecordCombinedPedalSmoothnessUsesTheCombinedField(): void
     {
         $this->assertEquals(
             90.0,
@@ -158,16 +166,9 @@ class FitPedalingDynamicsTest extends TestCase
                 'combined_pedal_smoothness' => 90,
             ])
         );
-    }
-
-    public function testRecordPedalSmoothnessAveragesTheSidesWithoutACombinedField(): void
-    {
-        $this->assertEquals(
-            73.0,
-            FitPedalingDynamics::recordPedalSmoothnessInPercent([
-                'left_pedal_smoothness' => 74,
-                'right_pedal_smoothness' => 72,
-            ])
-        );
+        $this->assertNull(FitPedalingDynamics::recordPedalSmoothnessInPercent([
+            'left_pedal_smoothness' => 74,
+            'right_pedal_smoothness' => 72,
+        ]));
     }
 }

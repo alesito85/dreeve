@@ -77,27 +77,47 @@ final readonly class FitPedalingDynamics
     /**
      * @param array<string, mixed> $record
      */
-    public static function recordTorqueEffectivenessInPercent(array $record): ?float
+    public static function recordLeftPedalSmoothnessInPercent(array $record): ?float
     {
-        return self::averageOfSides(
-            self::percent($record['left_torque_effectiveness'] ?? null),
-            self::percent($record['right_torque_effectiveness'] ?? null),
-        );
+        return self::pedalingPercent($record['left_pedal_smoothness'] ?? null);
     }
 
     /**
      * @param array<string, mixed> $record
      */
+    public static function recordRightPedalSmoothnessInPercent(array $record): ?float
+    {
+        return self::pedalingPercent($record['right_pedal_smoothness'] ?? null);
+    }
+
+    /**
+     * The combined series, for the files that report one instead of both sides.
+     *
+     * @param array<string, mixed> $record
+     */
     public static function recordPedalSmoothnessInPercent(array $record): ?float
     {
-        if (null !== $combined = self::percent($record['combined_pedal_smoothness'] ?? null)) {
-            return $combined;
+        return self::pedalingPercent($record['combined_pedal_smoothness'] ?? null);
+    }
+
+    /**
+     * A zero is coasting, which is a statement about the pedal stroke and not
+     * a missing sample, so it has to survive the gap filling that carries the
+     * last known value forward. It renders as a gap instead of as a value.
+     */
+    private static function pedalingPercent(mixed $value): ?float
+    {
+        $value = self::first($value);
+        if (!is_numeric($value)) {
+            return null;
         }
 
-        return self::averageOfSides(
-            self::percent($record['left_pedal_smoothness'] ?? null),
-            self::percent($record['right_pedal_smoothness'] ?? null),
-        );
+        $percent = (float) $value;
+        if (0.0 === $percent) {
+            return 0.0;
+        }
+
+        return self::percent($percent);
     }
 
     private static function sessionLeftBalanceInPercent(mixed $balance): ?float
@@ -122,19 +142,6 @@ final readonly class FitPedalingDynamics
         }
 
         return $isRightSide ? round(100 - $percent, 1) : round($percent, 1);
-    }
-
-    /**
-     * Averages both sides, or returns the only side that was recorded.
-     */
-    private static function averageOfSides(?float $left, ?float $right): ?float
-    {
-        $values = array_filter([$left, $right], static fn (?float $value): bool => null !== $value);
-        if ([] === $values) {
-            return null;
-        }
-
-        return round(array_sum($values) / count($values), 1);
     }
 
     /**

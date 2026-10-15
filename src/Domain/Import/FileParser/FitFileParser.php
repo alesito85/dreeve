@@ -420,8 +420,9 @@ final readonly class FitFileParser implements ActivityFileParser
             StreamType::WATTS->value => [],
             StreamType::TEMP->value => [],
             StreamType::LEFT_RIGHT_BALANCE->value => [],
-            StreamType::TORQUE_EFFECTIVENESS->value => [],
             StreamType::PEDAL_SMOOTHNESS->value => [],
+            StreamType::LEFT_PEDAL_SMOOTHNESS->value => [],
+            StreamType::RIGHT_PEDAL_SMOOTHNESS->value => [],
         ];
 
         foreach ($records as $record) {
@@ -442,8 +443,16 @@ final readonly class FitFileParser implements ActivityFileParser
             $streams[StreamType::WATTS->value][] = is_numeric($record['power'] ?? null) ? (int) round((float) $record['power']) : null;
             $streams[StreamType::TEMP->value][] = is_numeric($record['temperature'] ?? null) ? (int) round((float) $record['temperature']) : null;
             $streams[StreamType::LEFT_RIGHT_BALANCE->value][] = FitPedalingDynamics::recordLeftBalanceInPercent($record);
-            $streams[StreamType::TORQUE_EFFECTIVENESS->value][] = FitPedalingDynamics::recordTorqueEffectivenessInPercent($record);
             $streams[StreamType::PEDAL_SMOOTHNESS->value][] = FitPedalingDynamics::recordPedalSmoothnessInPercent($record);
+            $streams[StreamType::LEFT_PEDAL_SMOOTHNESS->value][] = FitPedalingDynamics::recordLeftPedalSmoothnessInPercent($record);
+            $streams[StreamType::RIGHT_PEDAL_SMOOTHNESS->value][] = FitPedalingDynamics::recordRightPedalSmoothnessInPercent($record);
+        }
+
+        // Both sides beat the combined series some files carry alongside them,
+        // otherwise the chart would draw the same stroke twice.
+        if ([] !== array_filter($streams[StreamType::LEFT_PEDAL_SMOOTHNESS->value])
+            || [] !== array_filter($streams[StreamType::RIGHT_PEDAL_SMOOTHNESS->value])) {
+            $streams[StreamType::PEDAL_SMOOTHNESS->value] = [];
         }
 
         return $streams;

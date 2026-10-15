@@ -39,6 +39,20 @@ class ActivityFileParsersTest extends TestCase
         $this->registry->parse(RawActivityFile::from(Path::fromString('/import/sub/dir/ride.gpx'), ''));
     }
 
+    public function testParseRoutesAGzippedFileToTheParserOfTheFormatInsideIt(): void
+    {
+        $this->expectExceptionObject(new \LogicException('parsed-by-fit'));
+
+        $this->registry->parse(RawActivityFile::from(Path::fromString('/import/sub/dir/ride.fit.gz'), ''));
+    }
+
+    public function testParseRoutesAGzippedTcxFileToTheTcxParser(): void
+    {
+        $this->expectExceptionObject(new \LogicException('parsed-by-tcx'));
+
+        $this->registry->parse(RawActivityFile::from(Path::fromString('/import/ride.tcx.gz'), ''));
+    }
+
     public function testParseWithoutExtensionThrows(): void
     {
         $rawActivityFile = RawActivityFile::from(Path::fromString('/import/activity'), '');

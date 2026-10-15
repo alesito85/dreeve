@@ -31,6 +31,8 @@ class ActivityFileNameTest extends TestCase
         // basename() does not treat a backslash as a separator on Linux, but Flysystem resolves
         // it, so an unnormalised "..\ride.fit" lands outside the watch folder.
         yield 'a backslash escape is reduced to its last segment' => ['..\\ride.fit', 'ride.fit'];
+        yield 'a gzipped file' => ['ride.fit.gz', 'ride.fit.gz'];
+        yield 'an uppercase gzipped file' => ['ride.FIT.GZ', 'ride.FIT.GZ'];
     }
 
     #[DataProvider('provideInvalidNames')]
@@ -48,6 +50,8 @@ class ActivityFileNameTest extends TestCase
     public static function provideInvalidNames(): iterable
     {
         yield 'an unsupported extension' => ['notes.txt', 'The file type is not supported.'];
+        yield 'a gzip without a format behind it' => ['notes.gz', 'The file type is not supported.'];
+        yield 'a double gzipped file' => ['ride.fit.gz.gz', 'The file type is not supported.'];
         yield 'no extension' => ['ride', 'The file type is not supported.'];
         yield 'only an extension' => ['.fit', 'The file name is not valid.'];
         yield 'an empty name' => ['', 'The file name is not valid.'];
@@ -66,11 +70,27 @@ class ActivityFileNameTest extends TestCase
         );
     }
 
+    public function testGetExtensionLooksThroughAGzipWrapper(): void
+    {
+        $this->assertSame(
+            SupportedFileExtension::TCX,
+            ActivityFileName::fromString('Ride_2026-07-02.tcx.gz')->getExtension(),
+        );
+    }
+
     public function testWithSuffix(): void
     {
         $this->assertSame(
             'Ride_2026-07-02-1.FIT',
             (string) ActivityFileName::fromString('Ride_2026-07-02.FIT')->withSuffix('1'),
+        );
+    }
+
+    public function testWithSuffixKeepsTheGzipWrapperAtTheEnd(): void
+    {
+        $this->assertSame(
+            'Ride_2026-07-02-1.fit.gz',
+            (string) ActivityFileName::fromString('Ride_2026-07-02.fit.gz')->withSuffix('1'),
         );
     }
 }

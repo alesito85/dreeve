@@ -40,8 +40,8 @@ final readonly class ActivityImportContext
 
     public function getImportSource(): ImportSource
     {
-        return SupportedFileExtension::tryFrom($this->filePath->getExtension())?->getImportSource()
-            ?? throw new \RuntimeException(sprintf('Unknown file extension "%s"', $this->filePath->getExtension()));
+        return SupportedFileExtension::fromExtensionChain($this->filePath->getFilename())?->getImportSource()
+            ?? throw new \RuntimeException(sprintf('Unknown file extension "%s"', $this->filePath->getFilename()));
     }
 
     public function withActivity(Activity $activity): self

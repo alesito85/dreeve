@@ -39,10 +39,24 @@ class WatchDirectoryTest extends TestCase
         $this->assertTrue($this->watchDirectory->hasFilesThatCanBeProcessed());
     }
 
+    public function testHasFilesThatCanBeProcessedWhenAFileIsGzipped(): void
+    {
+        $this->filesystem->write('watch/ride.fit.gz', 'gzipped-fit-bytes');
+
+        $this->assertTrue($this->watchDirectory->hasFilesThatCanBeProcessed());
+        $this->assertSame(
+            ['watch/ride.fit.gz'],
+            $this->watchDirectory->listFilesThatCanBeProcessed()
+                ->map(fn (StorageAttributes $file): string => $file->path())
+                ->toArray(),
+        );
+    }
+
     public function testHasFilesThatCanBeProcessedWhenOnlyUnsupportedFilesArePresent(): void
     {
         $this->filesystem->write('watch/readme.txt', 'some text');
         $this->filesystem->write('watch/picture.jpg', 'some bytes');
+        $this->filesystem->write('watch/notes.gz', 'some bytes');
 
         $this->assertFalse($this->watchDirectory->hasFilesThatCanBeProcessed());
     }
@@ -124,6 +138,16 @@ class WatchDirectoryTest extends TestCase
         $this->assertSame('first', $this->filesystem->read('watch/ride.fit'));
         $this->assertSame('second', $this->filesystem->read('watch/ride-1.fit'));
         $this->assertSame('third', $this->filesystem->read('watch/ride-2.fit'));
+    }
+
+    public function testWriteFileDoesNotOverwriteAnExistingGzippedFile(): void
+    {
+        $this->watchDirectory->writeFile(ActivityFileName::fromString('ride.fit.gz'), 'first');
+        $writtenAs = $this->watchDirectory->writeFile(ActivityFileName::fromString('ride.fit.gz'), 'second');
+
+        $this->assertSame('ride-1.fit.gz', (string) $writtenAs);
+        $this->assertSame('first', $this->filesystem->read('watch/ride.fit.gz'));
+        $this->assertSame('second', $this->filesystem->read('watch/ride-1.fit.gz'));
     }
 
     public function testWriteFileLeavesNothingBehindInTheStagingFolder(): void

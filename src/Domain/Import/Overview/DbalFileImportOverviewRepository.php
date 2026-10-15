@@ -72,7 +72,7 @@ final readonly class DbalFileImportOverviewRepository extends DbalRepository imp
 
                 return FileImportOverviewItem::queued(
                     originalFilename: $path->getFilename(),
-                    source: SupportedFileExtension::from($path->getExtension())->getImportSource(),
+                    source: SupportedFileExtension::importSourceFor($path->getFilename()),
                 );
             })
             ->filter(static fn (FileImportOverviewItem $item): bool => !$activityId instanceof ActivityId

@@ -38,8 +38,8 @@ final readonly class WatchDirectory
     public function listFilesThatCanBeProcessed(): DirectoryListing
     {
         return $this->listFiles()
-            ->filter(fn (StorageAttributes $file): bool => SupportedFileExtension::tryFrom(
-                Path::fromString($file->path())->getExtension()
+            ->filter(fn (StorageAttributes $file): bool => SupportedFileExtension::fromExtensionChain(
+                Path::fromString($file->path())->getFilename()
             ) instanceof SupportedFileExtension)
             ->sortByPath();
     }

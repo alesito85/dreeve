@@ -18,7 +18,7 @@
                     }, 'admin') }}
                 </p>
                 <form id="upload-form" class="flex flex-col mt-8"
-                      data-supported-file-extensions='{{ supportedFileExtensions }}' data-translations='{{ {
+                      data-supported-file-extensions='{{ acceptedExtensions|json_encode }}' data-translations='{{ {
                     "filesReadyToUpload": "{count} files ready to upload"|trans({}, 'admin'),
                     "filesUploaded": "{count} files uploaded"|trans({}, 'admin'),
                     "unsupportedFileType": "Unsupported file type"|trans({}, 'admin'),
@@ -29,7 +29,7 @@
                     <label id="dropzone"
                            class="group relative flex flex-col items-center text-center gap-1.5 px-6 py-10 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 cursor-pointer transition-colors hover:border-primary hover:bg-primary-soft [&.is-dragging]:border-primary [&.is-dragging]:bg-primary-soft [&.is-dragging]:ring-4 [&.is-dragging]:ring-primary/10"
                            for="file-input">
-                        <input id="file-input" class="sr-only" type="file" multiple accept=".fit,.tcx,.gpx"/>
+                        <input id="file-input" class="sr-only" type="file" multiple accept=".{{ acceptedExtensions|join(',.') }}"/>
                         <span class="grid place-items-center w-12 h-12 mb-1 rounded-full bg-primary-soft text-primary transition-colors group-hover:bg-primary group-hover:text-white in-[.is-dragging]:bg-primary in-[.is-dragging]:text-white"
                               aria-hidden="true">
                                <svg class="size-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -49,9 +49,9 @@
                         </span>
                         <span class="mt-0.5 text-xs text-gray-400">
                             {{ "Supported types"|trans({}, 'admin') }}:
-                            <code class="font-mono text-[0.85em] bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded">.fit</code>
-                            <code class="font-mono text-[0.85em] bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded">.tcx</code>
-                            <code class="font-mono text-[0.85em] bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded">.gpx</code>
+                            {% for extension in acceptedExtensions %}
+                            <code class="font-mono text-[0.85em] bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded">.{{ extension }}</code>
+                            {% endfor %}
                         </span>
                     </label>
                     <div id="file-list-header"

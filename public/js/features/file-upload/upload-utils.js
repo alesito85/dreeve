@@ -7,6 +7,9 @@ export const Status = {
 
 export const extensionOf = (name) => name.split('.').pop().toLowerCase();
 
+// A gzip wrapper does not change what a file is, so ".fit.gz" is still a fit file.
+export const extensionChainOf = (name) => extensionOf(name) === 'gz' ? `${extensionOf(name.slice(0, -3))}.gz` : extensionOf(name);
+
 const formatFileSize = (bytes) => {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';

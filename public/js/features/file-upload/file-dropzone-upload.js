@@ -1,5 +1,5 @@
 import {dispatchCommand} from "../../utils";
-import {extensionOf, readFileAsBase64, Status, metaFor} from "./upload-utils";
+import {extensionChainOf, readFileAsBase64, Status, metaFor} from "./upload-utils";
 
 export default class FileDropzoneUpload {
     constructor(rootNode) {
@@ -63,7 +63,7 @@ export default class FileDropzoneUpload {
                 file,
                 name: file.name,
                 size: file.size,
-                ok: this.supportedFileExtension.includes(extensionOf(file.name)),
+                ok: this.supportedFileExtension.includes(extensionChainOf(file.name)),
                 status: Status.Pending,
             });
         }

@@ -30,7 +30,7 @@ final readonly class ActivityFileName implements \Stringable
             throw InvalidActivityFileName::isNotValid();
         }
 
-        $extension = SupportedFileExtension::tryFrom(strtolower(pathinfo($name, PATHINFO_EXTENSION)))
+        $extension = SupportedFileExtension::fromExtensionChain($name)
             ?? throw InvalidActivityFileName::fileTypeIsNotSupported();
 
         return new self($name, $extension);
@@ -43,15 +43,33 @@ final readonly class ActivityFileName implements \Stringable
 
     public function withSuffix(string $suffix): self
     {
+        [$name, $extensionChain] = $this->splitExtensionChain($this->name, $this->extension);
+
         return new self(
-            sprintf(
-                '%s-%s.%s',
-                pathinfo($this->name, PATHINFO_FILENAME),
-                $suffix,
-                pathinfo($this->name, PATHINFO_EXTENSION),
-            ),
+            sprintf('%s-%s.%s', $name, $suffix, $extensionChain),
             $this->extension,
         );
+    }
+
+    /**
+     * Splits a name into everything before its extensions and the extensions
+     * themselves, as written. When the file is gzipped both suffixes are kept,
+     * the gzip is part of the name and a collision suffix belongs before it.
+     *
+     * @return array{string, string}
+     */
+    private function splitExtensionChain(string $name, SupportedFileExtension $extension): array
+    {
+        $extensionChain = pathinfo($name, PATHINFO_EXTENSION);
+        if (strtolower($extensionChain) !== $extension->value) {
+            // The trailing ".gz" only wraps the real format, so cut it off, read
+            // the format underneath it, and put both back at the end later on.
+            $name = substr($name, 0, -3);
+            $extensionChain = pathinfo($name, PATHINFO_EXTENSION).'.gz';
+        }
+
+        // Everything up to the dot in front of the last extension is the name.
+        return [substr($name, 0, -strlen(pathinfo($name, PATHINFO_EXTENSION)) - 1), $extensionChain];
     }
 
     public function __toString(): string

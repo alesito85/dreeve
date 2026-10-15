@@ -25,8 +25,11 @@ final readonly class ActivityFileParsers
             throw new CouldNotParseActivityFile(message: sprintf('Could not determine file extension for "%s"', $file->getPath()), activityFile: $file);
         }
 
+        // A gzipped file belongs to the parser of the format inside it.
+        $supportedExtension = SupportedFileExtension::fromExtensionChain($file->getPath()->getFilename());
+
         foreach ($this->parsers as $parser) {
-            if (SupportedFileExtension::tryFrom($extension) === $parser->supportedExtension()) {
+            if ($supportedExtension === $parser->supportedExtension()) {
                 return $parser->parse($file);
             }
         }

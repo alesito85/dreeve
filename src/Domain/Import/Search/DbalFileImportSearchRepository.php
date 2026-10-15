@@ -75,7 +75,7 @@ final readonly class DbalFileImportSearchRepository extends DbalRepository imple
 
                 return FileImportOverviewItem::queued(
                     originalFilename: $path->getFilename(),
-                    source: SupportedFileExtension::from($path->getExtension())->getImportSource(),
+                    source: SupportedFileExtension::importSourceFor($path->getFilename()),
                 );
             })
             ->filter(static fn (FileImportOverviewItem $item): bool => (null === $filename || $filename === $item->getOriginalFilename())

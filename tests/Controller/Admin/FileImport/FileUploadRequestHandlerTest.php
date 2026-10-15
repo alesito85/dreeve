@@ -44,6 +44,24 @@ class FileUploadRequestHandlerTest extends AdminWebTestCase
         );
     }
 
+    public function testTheDropzoneAcceptsGzippedFiles(): void
+    {
+        $this->withImportMode(ImportMode::FILES);
+        $this->client->loginUser($this->adminUser());
+
+        $crawler = $this->client->request('GET', '/admin/upload');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString(
+            '.fit.gz',
+            (string) $crawler->filter('#file-input')->attr('accept'),
+        );
+        $this->assertStringContainsString(
+            '"fit.gz"',
+            (string) $crawler->filter('#upload-form')->attr('data-supported-file-extensions'),
+        );
+    }
+
     public static function provideAdminPaths(): iterable
     {
         yield 'root admin path' => ['/admin'];

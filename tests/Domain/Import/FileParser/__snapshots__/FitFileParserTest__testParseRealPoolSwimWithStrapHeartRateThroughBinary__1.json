@@ -36,6 +36,8 @@
         "isGroupActivity": 0,
         "workoutType": null,
         "dynamics": "{\"aerobicTrainingEffect\":2.6,\"anaerobicTrainingEffect\":0.1}",
+        "fileChecksum": null,
+        "deviceReferenceId": "1-4532-3623773702",
         "startingCoordinateLatitude": null,
         "startingCoordinateLongitude": null
     }

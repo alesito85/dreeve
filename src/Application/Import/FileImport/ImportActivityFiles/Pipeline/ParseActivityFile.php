@@ -30,7 +30,10 @@ final readonly class ParseActivityFile implements ImportActivityFileStep
         $context = $context->withFile($file);
         $parsedFile = $this->activityFileParsers->parse($file);
 
-        $activity = $parsedFile->getActivity();
+        // The checksum is of the bytes as they arrived, gzip wrapper and all, and
+        // it is stored with the very first import so a later file can find this
+        // activity instead of adding a second one.
+        $activity = $parsedFile->getActivity()->withFileChecksum($file->getChecksum());
         if ($this->duplicateActivityScanner->isDuplicate(
             file: $file,
             sportType: $activity->getSportType(),

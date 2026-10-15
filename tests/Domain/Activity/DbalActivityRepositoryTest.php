@@ -3,6 +3,7 @@
 namespace App\Tests\Domain\Activity;
 
 use App\Domain\Activity\Activity;
+use App\Domain\Activity\ActivityDeviceReference;
 use App\Domain\Activity\ActivityDynamics;
 use App\Domain\Activity\ActivityId;
 use App\Domain\Activity\ActivityName;
@@ -32,6 +33,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 class DbalActivityRepositoryTest extends ContainerTestCase
 {
+    // sha256("afternoon-ride"), the kind of thing a file's bytes hash to.
+    private const string FILE_CHECKSUM = 'fc95a264ca54253018d8228e385ab62ba70e87670780ce29c1c988c3b31fa598';
+
     private ActivityRepository $activityRepository;
 
     public function testFind(): void
@@ -187,6 +191,49 @@ class DbalActivityRepositoryTest extends ContainerTestCase
             rightPowerPhaseInDegrees: 30.2,
             rightPowerPhasePeakInDegrees: 98.1,
         )];
+    }
+
+    public function testAddAndFindPreservesTheFileFingerprint(): void
+    {
+        $activity = ActivityBuilder::fromDefaults()
+            ->withFileChecksum(self::FILE_CHECKSUM)
+            ->withDeviceReferenceId(ActivityDeviceReference::fromManufacturerProductAndSerial(289, 2, 22701926))
+            ->build();
+
+        $this->activityRepository->add(ActivityWithRawData::fromState($activity, []));
+
+        $persisted = $this->activityRepository->find($activity->getId());
+        $this->assertSame(self::FILE_CHECKSUM, $persisted->getFileChecksum());
+        $this->assertEquals(
+            ActivityDeviceReference::fromString('289-2-22701926'),
+            $persisted->getDeviceReferenceId()
+        );
+    }
+
+    public function testUpdateKeepsTheFileFingerprint(): void
+    {
+        $activity = ActivityBuilder::fromDefaults()
+            ->withFileChecksum(self::FILE_CHECKSUM)
+            ->withDeviceReferenceId(ActivityDeviceReference::fromManufacturerProductAndSerial(289, 2, 22701926))
+            ->build();
+
+        $this->activityRepository->add(ActivityWithRawData::fromState($activity, []));
+
+        // A merge or a Strava refresh only updates what it knows about. The
+        // fingerprint is what later files are matched against, so an update that
+        // leaves it out would leave the activity impossible to recognise.
+        $this->activityRepository->update(ActivityWithRawData::fromState(
+            activity: $activity->withName(ActivityName::fromString('Updated name')),
+            rawData: []
+        ));
+
+        $persisted = $this->activityRepository->find($activity->getId());
+        $this->assertEquals('Updated name', $persisted->getName());
+        $this->assertSame(self::FILE_CHECKSUM, $persisted->getFileChecksum());
+        $this->assertEquals(
+            ActivityDeviceReference::fromString('289-2-22701926'),
+            $persisted->getDeviceReferenceId()
+        );
     }
 
     public function testAddAndFindWithRawDataFromRawData(): void

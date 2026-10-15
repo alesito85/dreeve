@@ -30,6 +30,7 @@ final readonly class ActivityHydrator
         'averageCadence', 'movingTimeInSeconds', 'elapsedTimeInSeconds', 'deviceName',
         'connectedSensors', 'totalImageCount', 'localImagePaths', 'polyline', 'routeGeography',
         'weather', 'gearId', 'isCommute', 'isGroupActivity', 'workoutType', 'dynamics',
+        'fileChecksum', 'deviceReferenceId',
     ];
 
     public static function columns(?string $alias = null): string
@@ -92,6 +93,8 @@ final readonly class ActivityHydrator
             isGroupActivity: (bool) $result['isGroupActivity'],
             workoutType: WorkoutType::tryFrom($result['workoutType'] ?? ''),
             dynamics: ActivityDynamics::fromJson($result['dynamics'] ?? null),
+            fileChecksum: $result['fileChecksum'] ?? null,
+            deviceReferenceId: ActivityDeviceReference::fromOptionalString($result['deviceReferenceId'] ?? null),
         );
     }
 }

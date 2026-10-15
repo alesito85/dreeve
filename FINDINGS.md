@@ -71,12 +71,16 @@ Three layers, evaluated in order, in a new `ActivityIdentityMatcher` that replac
 1. **File checksum**, SHA-256 of the uploaded bytes. A match means the identical file, so a merge
    would add nothing: skip, which is today's behaviour and the right one for this case.
 2. **Device reference**, the primary identity for FIT: manufacturer, product and serial from
-   `file_id`, paired with the **session** `start_time`, matched with a 30 s tolerance. For these
-   files that is `289-2-22701926-2026-10-14T12:31:02Z`. The session start is used rather than
-   `file_id.time_created` because the two differ by a second here, and because a multi-sport file
-   carries one `file_id` with several sessions, so only the session start is unique per activity. A
-   rename, a re-export or a truncated sync changes none of those four components. A `file_id`
-   without a serial still yields a key, but a weaker one that the content gate has to confirm.
+   `file_id`, stored as `289-2-22701926` and paired with the activity's `startDateTime` at a 30 s
+   tolerance. The start instant is deliberately not baked into the stored key: a device column
+   compared for equality plus a start column compared as a range is what makes the match a single
+   indexed query, and a composed string key cannot be range searched at all, so the tolerance would
+   only exist in prose. The pairing uses the **session** `start_time` rather than
+   `file_id.time_created`, because the two differ by a second in these files and because a
+   multi-sport file carries one `file_id` with several sessions, so only the session start is unique
+   per activity. A rename, a re-export or a truncated sync changes neither the device nor the start
+   instant. A `file_id` without a serial stores no reference at all, because a reference without a
+   serial names a model rather than a device, and such a file is carried by the content gate alone.
 3. **Content gate**, the fallback for sources with no device identity (TCX, GPX, the Strava API):
    same `sportType`, start within 30 s, distance within 5 %. Duration is deliberately not a gate. An
    early partial sync followed by the full file is the same activity with distance off by more than
@@ -89,6 +93,17 @@ refuses: it records a SKIPPED `FileImport` saying the file could not be safely m
 manual decision. That is not a theoretical branch, files with no sub-day time precision (a GPX that
 defaults to midnight) and two indoor sessions on the same day all satisfy sport plus same 30 s plus
 5 % distance at once.
+
+**Storage.** Two nullable columns on `Activity`, `fileChecksum VARCHAR(64)` and `deviceReferenceId
+VARCHAR(255)`, one index each, the device index being `(deviceReferenceId, startDateTime)` so the
+device equality and the start range above are one index seek. `fileChecksum` is the hash of the
+bytes as they arrived, gzip wrapper included, stamped by `ParseActivityFile` on every import so the
+first import of an old file gives the later ones something to match on. The device reference is set
+by the FIT parser itself, in `Activity::create()`, because the `file_id` fields it is built from are
+already in scope there; TCX and GPX simply leave it null and no parser interface has to widen.
+`DbalActivityRepository::update()` writes a narrower column set than `add()`, so it now carries both
+columns as well, otherwise any merge or Strava refresh would quietly erase the identity that later
+files are matched against.
 
 ## How the merge should work
 

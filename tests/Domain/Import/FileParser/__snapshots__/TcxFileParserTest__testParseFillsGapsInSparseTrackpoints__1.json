@@ -36,6 +36,8 @@
         "isGroupActivity": 0,
         "workoutType": null,
         "dynamics": null,
+        "fileChecksum": null,
+        "deviceReferenceId": null,
         "startingCoordinateLatitude": 45.1,
         "startingCoordinateLongitude": 22.6
     }

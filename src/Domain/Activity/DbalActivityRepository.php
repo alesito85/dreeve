@@ -140,13 +140,15 @@ final readonly class DbalActivityRepository extends DbalRepository implements Ac
             elevation, startingCoordinateLatitude, startingCoordinateLongitude, calories, kilojoules,
             averagePower, maxPower, averageSpeed, maxSpeed, averageHeartRate, maxHeartRate,
             averageCadence,movingTimeInSeconds, elapsedTimeInSeconds, deviceName, connectedSensors, totalImageCount, localImagePaths,
-            polyline, routeGeography, weather, gearId, data, isCommute, isGroupActivity, workoutType, dynamics
+            polyline, routeGeography, weather, gearId, data, isCommute, isGroupActivity, workoutType, dynamics,
+            fileChecksum, deviceReferenceId
         ) VALUES(
             :activityId, :startDateTime, :sportType, :activityType, :worldType, :importSource, :externalReferenceId, :name, :description, :distance,
             :elevation, :startingCoordinateLatitude, :startingCoordinateLongitude, :calories, :kilojoules,
             :averagePower, :maxPower, :averageSpeed, :maxSpeed, :averageHeartRate, :maxHeartRate,
             :averageCadence, :movingTimeInSeconds, :elapsedTimeInSeconds, :deviceName, :connectedSensors, :totalImageCount, :localImagePaths,
-            :polyline, :routeGeography, :weather, :gearId, :data, :isCommute, :isGroupActivity, :workoutType, :dynamics
+            :polyline, :routeGeography, :weather, :gearId, :data, :isCommute, :isGroupActivity, :workoutType, :dynamics,
+            :fileChecksum, :deviceReferenceId
         )';
 
         $activity = $activityWithRawData->getActivity();
@@ -188,6 +190,8 @@ final readonly class DbalActivityRepository extends DbalRepository implements Ac
             'isGroupActivity' => (int) $activity->isGroupActivity(),
             'workoutType' => $activity->getWorkoutType()?->value,
             'dynamics' => $activity->getDynamics() instanceof ActivityDynamics ? Json::encode($activity->getDynamics()) : null,
+            'fileChecksum' => $activity->getFileChecksum(),
+            'deviceReferenceId' => $activity->getDeviceReferenceId(),
         ]);
 
         $this->eventBus->publishEvents($activity->getRecordedEvents());
@@ -225,7 +229,9 @@ final readonly class DbalActivityRepository extends DbalRepository implements Ac
                     isCommute = :isCommute,
                     isGroupActivity = :isGroupActivity,
                     workoutType = :workoutType,
-                    dynamics = :dynamics
+                    dynamics = :dynamics,
+                    fileChecksum = :fileChecksum,
+                    deviceReferenceId = :deviceReferenceId
                     WHERE activityId = :activityId';
 
         $activity = $activityWithRawData->getActivity();
@@ -260,6 +266,8 @@ final readonly class DbalActivityRepository extends DbalRepository implements Ac
             'isGroupActivity' => (int) $activity->isGroupActivity(),
             'workoutType' => $activity->getWorkoutType()?->value,
             'dynamics' => $activity->getDynamics() instanceof ActivityDynamics ? Json::encode($activity->getDynamics()) : null,
+            'fileChecksum' => $activity->getFileChecksum(),
+            'deviceReferenceId' => $activity->getDeviceReferenceId(),
             'data' => Json::encode($this->cleanData($activityWithRawData->getRawData())),
         ]);
 

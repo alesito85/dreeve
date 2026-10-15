@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Domain\Activity;
 
 use App\Domain\Activity\Activity;
+use App\Domain\Activity\ActivityDeviceReference;
 use App\Domain\Activity\ActivityDynamics;
 use App\Domain\Activity\ActivityId;
 use App\Domain\Activity\ActivityName;
@@ -59,6 +60,8 @@ final class ActivityBuilder
     private bool $isGroupActivity;
     private ?WorkoutType $workoutType;
     private ?ActivityDynamics $dynamics = null;
+    private ?string $fileChecksum = null;
+    private ?ActivityDeviceReference $deviceReferenceId = null;
 
     private function __construct()
     {
@@ -124,6 +127,8 @@ final class ActivityBuilder
             isGroupActivity: $this->isGroupActivity,
             workoutType: $this->workoutType,
             dynamics: $this->dynamics,
+            fileChecksum: $this->fileChecksum,
+            deviceReferenceId: $this->deviceReferenceId,
         );
     }
 
@@ -164,6 +169,8 @@ final class ActivityBuilder
             isGroupActivity: $this->isGroupActivity,
             workoutType: $this->workoutType,
             dynamics: $this->dynamics,
+            fileChecksum: $this->fileChecksum,
+            deviceReferenceId: $this->deviceReferenceId,
         );
     }
 
@@ -415,6 +422,20 @@ final class ActivityBuilder
     public function withDynamics(ActivityDynamics $dynamics): self
     {
         $this->dynamics = $dynamics;
+
+        return $this;
+    }
+
+    public function withFileChecksum(?string $fileChecksum): self
+    {
+        $this->fileChecksum = $fileChecksum;
+
+        return $this;
+    }
+
+    public function withDeviceReferenceId(?ActivityDeviceReference $deviceReferenceId): self
+    {
+        $this->deviceReferenceId = $deviceReferenceId;
 
         return $this;
     }

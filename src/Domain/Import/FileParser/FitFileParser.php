@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Import\FileParser;
 
 use App\Domain\Activity\Activity;
+use App\Domain\Activity\ActivityDeviceReference;
 use App\Domain\Activity\ActivityIdFactory;
 use App\Domain\Activity\ActivityName;
 use App\Domain\Activity\ImportSource;
@@ -88,6 +89,7 @@ final readonly class FitFileParser implements ActivityFileParser
         $productName = null;
         $manufacturerId = null;
         $productId = null;
+        $serialNumber = null;
 
         $messages = Json::decodeLazy(
             json: $output,
@@ -123,6 +125,9 @@ final readonly class FitFileParser implements ActivityFileParser
                 case 'file_id':
                     $manufacturerId ??= is_numeric($fields['manufacturer'] ?? null) ? (int) round((float) $fields['manufacturer']) : null;
                     $productId ??= is_numeric($fields['product'] ?? null) ? (int) round((float) $fields['product']) : null;
+                    // A serial is a number on some devices and a string on others,
+                    // so it is kept as it came out of the file.
+                    $serialNumber ??= $fields['serial_number'] ?? null;
                     break;
             }
             if (null === $productName && is_string($fields['product_name'] ?? null) && '' !== $fields['product_name']) {
@@ -234,6 +239,11 @@ final readonly class FitFileParser implements ActivityFileParser
             isGroupActivity: false,
             workoutType: null,
             dynamics: FitPedalingDynamics::fromSession($session),
+            deviceReferenceId: ActivityDeviceReference::fromManufacturerProductAndSerial(
+                manufacturerId: $manufacturerId,
+                productId: $productId,
+                serialNumber: $serialNumber,
+            ),
         );
 
         return ParsedActivityFile::create(

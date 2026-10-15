@@ -39,6 +39,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'Activity_gearIdStartDateTime', columns: ['gearId', 'startDateTime'])]
 #[ORM\Index(name: 'Activity_markedForDeletion', columns: ['markedForDeletion'])]
 #[ORM\Index(name: 'Activity_importSource', columns: ['importSource'])]
+#[ORM\Index(name: 'Activity_fileChecksum', columns: ['fileChecksum'])]
+#[ORM\Index(name: 'Activity_deviceReferenceId', columns: ['deviceReferenceId', 'startDateTime'])]
 final class Activity
 {
     use RecordsEvents;
@@ -128,6 +130,10 @@ final class Activity
         private readonly ?WorkoutType $workoutType,
         #[ORM\Column(type: 'json', nullable: true)]
         private readonly ?ActivityDynamics $dynamics = null,
+        #[ORM\Column(type: 'string', length: 64, nullable: true)]
+        private readonly ?string $fileChecksum = null,
+        #[ORM\Column(type: 'string', nullable: true)]
+        private readonly ?ActivityDeviceReference $deviceReferenceId = null,
     ) {
     }
 
@@ -222,6 +228,8 @@ final class Activity
         bool $isGroupActivity,
         ?WorkoutType $workoutType,
         ?ActivityDynamics $dynamics = null,
+        ?string $fileChecksum = null,
+        ?ActivityDeviceReference $deviceReferenceId = null,
     ): self {
         $activity = self::fromState(
             activityId: $activityId,
@@ -258,6 +266,8 @@ final class Activity
             isGroupActivity: $isGroupActivity,
             workoutType: $workoutType,
             dynamics: $dynamics,
+            fileChecksum: $fileChecksum,
+            deviceReferenceId: $deviceReferenceId,
         );
         $activity->recordThat(new ActivityWasAdded($activity->getStartDate()));
         if ($activity->hasMappableRoute()) {
@@ -305,6 +315,8 @@ final class Activity
         bool $isGroupActivity,
         ?WorkoutType $workoutType,
         ?ActivityDynamics $dynamics = null,
+        ?string $fileChecksum = null,
+        ?ActivityDeviceReference $deviceReferenceId = null,
     ): self {
         return new self(
             activityId: $activityId,
@@ -340,7 +352,9 @@ final class Activity
             isCommute: $isCommute,
             isGroupActivity: $isGroupActivity,
             workoutType: $workoutType,
-            dynamics: $dynamics
+            dynamics: $dynamics,
+            fileChecksum: $fileChecksum,
+            deviceReferenceId: $deviceReferenceId
         );
     }
 
@@ -761,6 +775,34 @@ final class Activity
     public function getDynamics(): ?ActivityDynamics
     {
         return $this->dynamics;
+    }
+
+    /**
+     * SHA-256 of the bytes the activity was imported from. It is what lets a
+     * file that is a byte for byte copy of another be recognised as such.
+     */
+    public function getFileChecksum(): ?string
+    {
+        return $this->fileChecksum;
+    }
+
+    public function withFileChecksum(?string $fileChecksum): self
+    {
+        return $this->recordUpdate(clone ($this, [
+            'fileChecksum' => $fileChecksum,
+        ]));
+    }
+
+    public function getDeviceReferenceId(): ?ActivityDeviceReference
+    {
+        return $this->deviceReferenceId;
+    }
+
+    public function withDeviceReferenceId(?ActivityDeviceReference $deviceReferenceId): self
+    {
+        return $this->recordUpdate(clone ($this, [
+            'deviceReferenceId' => $deviceReferenceId,
+        ]));
     }
 
     public function withWorkoutType(?WorkoutType $workoutType): self

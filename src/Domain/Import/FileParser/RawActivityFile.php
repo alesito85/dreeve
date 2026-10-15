@@ -33,4 +33,13 @@ final readonly class RawActivityFile
     {
         return $this->fileContents;
     }
+
+    /**
+     * SHA-256 of the bytes as they were handed over, gzip wrapper and all. Two
+     * files with the same checksum are the same file, however they are named.
+     */
+    public function getChecksum(): string
+    {
+        return hash('sha256', $this->fileContents);
+    }
 }

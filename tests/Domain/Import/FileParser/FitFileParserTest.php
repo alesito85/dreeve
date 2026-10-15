@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Domain\Import\FileParser;
 
+use App\Domain\Activity\ActivityDeviceReference;
 use App\Domain\Activity\SportType\SportType;
 use App\Domain\Activity\Stream\StreamType;
 use App\Domain\Import\FileParser\ActivityLapsMapper;
@@ -33,6 +34,32 @@ class FitFileParserTest extends ActivityFileParserTestCase
     public function testSupportedExtensions(): void
     {
         $this->assertSame(SupportedFileExtension::FIT, $this->parser->supportedExtension());
+    }
+
+    public function testParseReferencesTheDeviceThatRecordedTheFile(): void
+    {
+        $this->givenFitToolReturns(Json::encode($this->minimalFitDocument(fileIdFields: [
+            ['name' => 'manufacturer', 'value' => 289],
+            ['name' => 'product', 'value' => 2],
+            ['name' => 'serial_number', 'value' => 22701926],
+        ])));
+
+        $this->assertEquals(
+            ActivityDeviceReference::fromString('289-2-22701926'),
+            $this->parser->parse(RawActivityFile::from(Path::fromString('/tmp/activity.fit'), ''))->getActivity()->getDeviceReferenceId()
+        );
+    }
+
+    public function testParseWithoutASerialHasNoDeviceReference(): void
+    {
+        $this->givenFitToolReturns(Json::encode($this->minimalFitDocument(fileIdFields: [
+            ['name' => 'manufacturer', 'value' => 289],
+            ['name' => 'product', 'value' => 2],
+        ])));
+
+        $this->assertNull(
+            $this->parser->parse(RawActivityFile::from(Path::fromString('/tmp/activity.fit'), ''))->getActivity()->getDeviceReferenceId()
+        );
     }
 
     public function testParse(): void

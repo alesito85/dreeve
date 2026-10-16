@@ -23,6 +23,7 @@ use App\Domain\Import\DbalFileImportRepository;
 use App\Domain\Import\FileImportId;
 use App\Domain\Import\FileImportStatus;
 use App\Infrastructure\Config\DemoMode;
+use App\Infrastructure\Measurement\Length\Kilometer;
 use App\Infrastructure\Measurement\Velocity\SecPerKm;
 use App\Infrastructure\ValueObject\Time\SerializableDateTime;
 use App\Tests\Controller\Admin\AdminWebTestCase;
@@ -131,6 +132,31 @@ class ActivityRequestHandlerTest extends AdminWebTestCase
         $content = (string) $this->client->getResponse()->getContent();
         $this->assertStringContainsString('>141</div>', $content);
         $this->assertStringContainsString('173', $content);
+        $this->assertStringNotContainsString('Time in zone', $content);
+    }
+
+    public function testItRendersAWorkoutThatHasNeitherStreamsNorDistance(): void
+    {
+        $this->provideFullTestSet();
+
+        // A summary-only TCX (e.g. a Mi Fitness workout) stores no streams at all.
+        $activityId = ActivityId::fromUnprefixed('123456789');
+        $this->getContainer()->get(ActivityRepository::class)->add(ActivityWithRawData::fromState(
+            ActivityBuilder::fromDefaults()
+                ->withActivityId($activityId)
+                ->withImportSource(ImportSource::TCX_FILE)
+                ->withSportType(SportType::WORKOUT)
+                ->withDistance(Kilometer::from(0))
+                ->withAverageHeartRate(85)
+                ->build(),
+            [],
+        ));
+
+        $this->client->request('GET', '/activities/'.$activityId);
+
+        $this->assertResponseIsSuccessful();
+        $content = (string) $this->client->getResponse()->getContent();
+        $this->assertStringContainsString('>85</div>', $content);
         $this->assertStringNotContainsString('Time in zone', $content);
     }
 

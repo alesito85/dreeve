@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Mimics a Mi Fitness workout export: a summary only, no <Track> and no trackpoints.
+     The only instant in the file is <Activity><Id>, the lap heart rate is a bare element
+     rather than the schema's AverageHeartRateBpm, and the activity total calories differ
+     from the lap ones. -->
+<TrainingCenterDatabase creator="Mi Fitness" version="1.0" xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2">
+  <Activities>
+    <Activity Sport="">
+      <Id>2021-09-08T17:12:44.000Z</Id>
+      <Calories>410</Calories>
+      <Lap>
+        <TotalTimeSeconds>1802.4</TotalTimeSeconds>
+        <Calories>400</Calories>
+        <HeartRateBpm>112</HeartRateBpm>
+      </Lap>
+    </Activity>
+  </Activities>
+</TrainingCenterDatabase>

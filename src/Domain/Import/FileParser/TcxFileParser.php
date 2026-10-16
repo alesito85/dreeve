@@ -9,6 +9,7 @@ use App\Domain\Activity\ActivityIdFactory;
 use App\Domain\Activity\ActivityName;
 use App\Domain\Activity\ImportSource;
 use App\Domain\Activity\Lap\ActivityLap;
+use App\Domain\Activity\Lap\ActivityLaps;
 use App\Domain\Activity\Math;
 use App\Domain\Activity\Route\RouteGeography;
 use App\Domain\Activity\Shifting\ActivityDrivetrainUsages;
@@ -59,6 +60,7 @@ final readonly class TcxFileParser implements ActivityFileParser
         $deviceName = $this->stringChild($activityXml->Creator, 'Name');
 
         [$laps, $streams, $startTimestamp] = $this->parseLapsAndStreams($activityXml);
+        $startTimestamp ??= $this->resolveStartTimestampFromSummary($activityXml);
 
         if (null === $startTimestamp) {
             throw new CouldNotParseActivityFile(message: sprintf('No trackpoints with a timestamp found in "%s"', $file->getPath()->getFilename()), activityFile: $file);
@@ -110,7 +112,7 @@ final readonly class TcxFileParser implements ActivityFileParser
             maxPower: Math::max($streams[StreamType::WATTS->value]),
             averageSpeed: MetersPerSecond::fromOptional(Math::averageFloat($streams[StreamType::VELOCITY->value]))->toKmPerHour(),
             maxSpeed: MetersPerSecond::fromOptional(Math::maxFloat($streams[StreamType::VELOCITY->value]))->toKmPerHour(),
-            averageHeartRate: Math::average($streams[StreamType::HEART_RATE->value]),
+            averageHeartRate: Math::average($streams[StreamType::HEART_RATE->value]) ?? $this->summaryAverageHeartRate($activityLaps),
             maxHeartRate: Math::max($streams[StreamType::HEART_RATE->value]),
             averageCadence: Math::average($streams[StreamType::CADENCE->value]),
             movingTimeInSeconds: (int) $activityLaps->sum(static fn (ActivityLap $lap): int => $lap->getMovingTimeInSeconds()),
@@ -202,11 +204,15 @@ final readonly class TcxFileParser implements ActivityFileParser
                 }
             }
 
+            // A lap without a single timed trackpoint has no evidence of active time,
+            // so it gets no active seconds rather than zero active seconds.
+            $hasTimedTrackpoints = [] !== array_filter($lapTimes, static fn (?int $time): bool => null !== $time);
+
             $laps[] = $this->buildLap(
                 index: $lapIndex++,
                 lap: $lap,
                 elevationGain: StreamMath::elevationGain($lapAltitudes),
-                activeSeconds: StreamMath::activeSeconds($lapTimes),
+                activeSeconds: $hasTimedTrackpoints ? StreamMath::activeSeconds($lapTimes) : null,
                 trackpointDistance: $this->trackpointDistance($lapDistances),
             );
         }
@@ -214,20 +220,58 @@ final readonly class TcxFileParser implements ActivityFileParser
         return [$laps, $streams, $startTimestamp];
     }
 
-    private function buildLap(int $index, \SimpleXMLElement $lap, float $elevationGain, int $activeSeconds, ?float $trackpointDistance): ParsedActivityLap
+    /**
+     * Files that only summarise an activity (e.g. Mi Fitness workout exports) carry no
+     * trackpoints at all. The TCX schema still types <Activity><Id> as a dateTime, and some
+     * exports record the instant on the first lap as a StartTime attribute instead.
+     */
+    private function resolveStartTimestampFromSummary(\SimpleXMLElement $activityXml): ?int
+    {
+        $candidates = [$this->stringChild($activityXml, 'Id') ?? ''];
+        foreach ($activityXml->Lap as $lap) {
+            if (isset($lap['StartTime'])) {
+                $candidates[] = (string) $lap['StartTime'];
+            }
+            break;
+        }
+
+        foreach ($candidates as $candidate) {
+            $candidate = trim($candidate);
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/', $candidate)) {
+                // Not an ISO-8601 instant, some tools store a uuid or a device name here.
+                continue;
+            }
+
+            try {
+                return SerializableDateTime::fromString($candidate)->getTimestamp();
+            } catch (\DateMalformedStringException) {
+                continue;
+            }
+        }
+
+        return null;
+    }
+
+    private function buildLap(int $index, \SimpleXMLElement $lap, float $elevationGain, ?int $activeSeconds, ?float $trackpointDistance): ParsedActivityLap
     {
         $totalTime = $this->floatChild($lap, 'TotalTimeSeconds');
         $totalTimeSeconds = null !== $totalTime ? (int) round($totalTime) : 0;
 
         // Elapsed time keeps the file's reported total (including pauses/gaps). Moving time is
         // capped at the active time so a recording gap (e.g. two merged rides) can never inflate it.
-        $movingTime = null !== $totalTime ? min($totalTimeSeconds, $activeSeconds) : 0;
+        // Without any timed trackpoint there is no active time to cap it by, so the reported
+        // total is the only moving-time estimate the file offers.
+        $movingTime = null !== $totalTime ? min($totalTimeSeconds, $activeSeconds ?? $totalTimeSeconds) : 0;
 
         // Prefer the recorded cumulative-distance stream; the lap summary field can be wrong in
         // merged files. Fall back to the summary when trackpoints carry no distance.
         $distance = $trackpointDistance ?? $this->floatChild($lap, 'DistanceMeters') ?? 0.0;
 
-        $averageHeartRate = $this->intChild($lap->AverageHeartRateBpm, 'Value');
+        $averageHeartRate = $this->intChild($lap->AverageHeartRateBpm, 'Value')
+            // Exports that only summarise a lap put its heart rate directly on the lap,
+            // either as a nested Value or as a bare number.
+            ?? $this->intChild($lap->HeartRateBpm, 'Value')
+            ?? $this->intChild($lap, 'HeartRateBpm');
 
         return ParsedActivityLap::create(
             lapNumber: $index + 1,
@@ -286,6 +330,23 @@ final readonly class TcxFileParser implements ActivityFileParser
         }
 
         return false;
+    }
+
+    /**
+     * When no trackpoint carries a heart rate, the lap summaries are all the file has to say
+     * about it. The FIT parser reads its summary averages the same way.
+     */
+    private function summaryAverageHeartRate(ActivityLaps $laps): ?int
+    {
+        $heartRates = array_filter(
+            $laps->map(static fn (ActivityLap $lap): ?int => $lap->getAverageHeartRate()),
+            static fn (?int $heartRate): bool => null !== $heartRate,
+        );
+        if ([] === $heartRates) {
+            return null;
+        }
+
+        return (int) round(array_sum($heartRates) / count($heartRates));
     }
 
     private function sumCalories(\SimpleXMLElement $activity): ?int

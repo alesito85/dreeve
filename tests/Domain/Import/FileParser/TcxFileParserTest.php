@@ -110,6 +110,51 @@ class TcxFileParserTest extends ActivityFileParserTestCase
         $this->assertSame(42, $activity->getCalories());
     }
 
+    public function testParseSummaryOnlyFileFallsBackToTheSummaries(): void
+    {
+        $parsed = $this->parser->parse($this->rawFileFromFixture('activity-mi-fitness.tcx'));
+        $activity = $parsed->getActivity();
+
+        // An empty Sport attribute resolves to the generic workout type.
+        $this->assertSame(SportType::WORKOUT, $activity->getSportType());
+        // <Activity><Id> is the only instant this file has.
+        $this->assertSame('2021-09-08 17:12:44', $activity->getStartDate()->toUtc()->format('Y-m-d H:i:s'));
+        // Without a single timed trackpoint the lap total is the only moving-time estimate.
+        $this->assertSame(1802, $activity->getElapsedTimeInSeconds());
+        $this->assertSame(1802, $activity->getMovingTimeInSeconds());
+        $this->assertSame(0.0, $activity->getDistance()->toFloat());
+        $this->assertSame(400, $activity->getCalories());
+        $this->assertSame(112, $activity->getAverageHeartRate());
+        $this->assertNull($parsed->getStreams()->filterOnType(StreamType::HEART_RATE));
+        $this->assertSame(112, $parsed->getLaps()->toArray()[0]->getAverageHeartRate());
+    }
+
+    public function testParseSummaryOnlyFilePrefersTheLapStartTimeOverAnIdThatIsNotADateTime(): void
+    {
+        $parsed = $this->parser->parse($this->rawFileFromContents('12784354', ' StartTime="2021-09-08T10:00:00Z"'));
+
+        $this->assertSame('2021-09-08 10:00:00', $parsed->getActivity()->getStartDate()->toUtc()->format('Y-m-d H:i:s'));
+    }
+
+    public function testParseSummaryOnlyFileWithoutAnyStartInstantThrows(): void
+    {
+        $rawActivityFile = $this->rawFileFromContents('not-a-date-time');
+
+        $this->expectException(CouldNotParseActivityFile::class);
+        $this->parser->parse($rawActivityFile);
+    }
+
+    private function rawFileFromContents(string $activityId, string $lapAttributes = ''): RawActivityFile
+    {
+        $contents = sprintf(
+            '<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"><Activities><Activity Sport=""><Id>%s</Id><Lap%s><TotalTimeSeconds>10</TotalTimeSeconds></Lap></Activity></Activities></TrainingCenterDatabase>',
+            $activityId,
+            $lapAttributes,
+        );
+
+        return RawActivityFile::from(Path::fromString('summary-only.tcx'), $contents);
+    }
+
     #[\Override]
     protected function setUp(): void
     {

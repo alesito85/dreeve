@@ -108,6 +108,42 @@ class ImportActivityFilesCommandHandlerTest extends ContainerTestCase
         );
     }
 
+    public function testHandleImportsSummaryOnlyTcxFile(): void
+    {
+        $this->watchStorage->write('watch/functional-training.tcx', $this->fixture('activity-mi-fitness.tcx'));
+
+        $output = new SpyOutput();
+        $this->handler->handle(new ImportActivityFiles($output, ImportedActivities::empty()));
+
+        $fileImports = $this->getConnection()
+            ->executeQuery('SELECT * FROM FileImport ORDER BY importedOn ASC')
+            ->fetchAllAssociative();
+        $this->assertCount(1, $fileImports);
+        $this->assertSame(FileImportStatus::SUCCESS->value, $fileImports[0]['status']);
+        $this->assertNotNull($fileImports[0]['activityId']);
+
+        $activityId = ActivityId::fromString($fileImports[0]['activityId']);
+        $activity = $this->getContainer()->get(ActivityRepository::class)->find($activityId);
+        $this->assertSame(SportType::WORKOUT, $activity->getSportType());
+        $this->assertSame(1802, $activity->getElapsedTimeInSeconds());
+        $this->assertSame(1802, $activity->getMovingTimeInSeconds());
+        $this->assertSame(112, $activity->getAverageHeartRate());
+        $this->assertCount(1, $this->getContainer()->get(ActivityLapRepository::class)->findBy($activityId));
+        // A summary-only file has no samples, so there is nothing to stream.
+        $this->assertNull($this->getContainer()->get(ActivityStreamRepository::class)
+            ->findByActivityId($activityId)
+            ->filterOnType(StreamType::HEART_RATE));
+
+        $this->assertSame(
+            implode("\n", [
+                'Importing activity files...',
+                '  => [1/1] Imported "functional-training.tcx" as activity "Evening Workout - 08-09-2021"',
+                '  => Imported 1, skipped 0, failed 0 activity file(s)',
+            ]),
+            (string) $output,
+        );
+    }
+
     public function testHandleImportsFileWithUppercaseExtension(): void
     {
         $this->watchStorage->write('watch/Ride_2026-07-02.TCX', $this->fixture('activity.tcx'));

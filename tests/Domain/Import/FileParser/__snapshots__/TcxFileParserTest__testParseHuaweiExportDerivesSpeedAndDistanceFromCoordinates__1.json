@@ -19,7 +19,7 @@
         "maxPower": null,
         "averageSpeed": 18.015,
         "maxSpeed": 18.036,
-        "averageHeartRate": null,
+        "averageHeartRate": 140,
         "maxHeartRate": null,
         "averageCadence": 73,
         "movingTimeInSeconds": 7,

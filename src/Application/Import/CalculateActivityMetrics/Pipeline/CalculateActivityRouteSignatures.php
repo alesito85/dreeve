@@ -7,7 +7,7 @@ namespace App\Application\Import\CalculateActivityMetrics\Pipeline;
 use App\Domain\Activity\ActivityRepository;
 use App\Domain\Activity\Route\Signature\ActivityRouteSignature;
 use App\Domain\Activity\Route\Signature\ActivityRouteSignatureRepository;
-use App\Domain\Activity\Route\Signature\RouteGrid;
+use App\Domain\Geography\Grid\RouteGrid;
 use App\Infrastructure\Console\ProgressIndicator;
 use App\Infrastructure\ValueObject\Geography\EncodedPolyline;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,7 +19,6 @@ final readonly class CalculateActivityRouteSignatures implements CalculateActivi
     public function __construct(
         private ActivityRepository $activityRepository,
         private ActivityRouteSignatureRepository $activityRouteSignatureRepository,
-        private RouteGrid $routeGrid,
     ) {
     }
 
@@ -40,9 +39,9 @@ final readonly class CalculateActivityRouteSignatures implements CalculateActivi
             $this->activityRouteSignatureRepository->deleteForActivity($activityId);
             $this->activityRouteSignatureRepository->add(ActivityRouteSignature::create(
                 activityId: $activityId,
-                polylineChecksum: $this->routeGrid->checksumFor($polyline),
-                cells: $this->routeGrid->cellsFor($polyline),
-                waypoints: $this->routeGrid->waypointsFor($polyline),
+                polylineChecksum: RouteGrid::checksumFor($polyline),
+                cells: RouteGrid::cellsFor($polyline),
+                waypoints: RouteGrid::waypointsFor($polyline),
             ));
 
             ++$activityWithRouteSignatureCalculatedCount;

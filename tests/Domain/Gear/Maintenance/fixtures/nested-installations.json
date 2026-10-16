@@ -1,0 +1,215 @@
+{
+  "enabled": true,
+  "components": [
+    {
+      "id": "gearComponent-wheelset",
+      "label": "wheelset",
+      "localImagePath": null,
+      "isRetired": false,
+      "notes": null,
+      "installations": [
+        {
+          "parent": "gear:gear-b1",
+          "from": null,
+          "until": "2025-03-15",
+          "sportTypes": [
+            "Ride",
+            "GravelRide"
+          ]
+        }
+      ],
+      "maintenance": []
+    },
+    {
+      "id": "gearComponent-tyres",
+      "label": "tyres",
+      "localImagePath": null,
+      "isRetired": false,
+      "notes": null,
+      "installations": [
+        {
+          "parent": "component:gearComponent-wheelset",
+          "from": null,
+          "until": null,
+          "sportTypes": []
+        }
+      ],
+      "maintenance": []
+    },
+    {
+      "id": "gearComponent-race-tyres",
+      "label": "race-tyres",
+      "localImagePath": null,
+      "isRetired": false,
+      "notes": null,
+      "installations": [
+        {
+          "parent": "component:gearComponent-wheelset",
+          "from": "2025-02-01",
+          "until": null,
+          "sportTypes": []
+        }
+      ],
+      "maintenance": []
+    },
+    {
+      "id": "gearComponent-spare-tyres",
+      "label": "spare-tyres",
+      "localImagePath": null,
+      "isRetired": false,
+      "notes": null,
+      "installations": [
+        {
+          "parent": "component:gearComponent-wheelset",
+          "from": "2025-04-01",
+          "until": null,
+          "sportTypes": []
+        }
+      ],
+      "maintenance": []
+    },
+    {
+      "id": "gearComponent-gravel-tyres",
+      "label": "gravel-tyres",
+      "localImagePath": null,
+      "isRetired": false,
+      "notes": null,
+      "installations": [
+        {
+          "parent": "component:gearComponent-wheelset",
+          "from": null,
+          "until": null,
+          "sportTypes": [
+            "GravelRide",
+            "VirtualRide"
+          ]
+        }
+      ],
+      "maintenance": []
+    },
+    {
+      "id": "gearComponent-indoor-tyres",
+      "label": "indoor-tyres",
+      "localImagePath": null,
+      "isRetired": false,
+      "notes": null,
+      "installations": [
+        {
+          "parent": "component:gearComponent-wheelset",
+          "from": null,
+          "until": null,
+          "sportTypes": [
+            "VirtualRide"
+          ]
+        }
+      ],
+      "maintenance": []
+    },
+    {
+      "id": "gearComponent-tube",
+      "label": "tube",
+      "localImagePath": null,
+      "isRetired": false,
+      "notes": null,
+      "installations": [
+        {
+          "parent": "component:gearComponent-tyres",
+          "from": null,
+          "until": null,
+          "sportTypes": []
+        }
+      ],
+      "maintenance": []
+    },
+    {
+      "id": "gearComponent-trainer",
+      "label": "trainer",
+      "localImagePath": null,
+      "isRetired": false,
+      "notes": null,
+      "installations": [
+        {
+          "parent": "gear:gear-b1",
+          "from": null,
+          "until": null,
+          "sportTypes": [
+            "VirtualRide"
+          ]
+        },
+        {
+          "parent": "gear:gear-b2",
+          "from": "2025-06-01",
+          "until": null,
+          "sportTypes": [
+            "VirtualRide"
+          ]
+        }
+      ],
+      "maintenance": []
+    },
+    {
+      "id": "gearComponent-cassette",
+      "label": "cassette",
+      "localImagePath": null,
+      "isRetired": false,
+      "notes": null,
+      "installations": [
+        {
+          "parent": "component:gearComponent-trainer",
+          "from": null,
+          "until": null,
+          "sportTypes": []
+        }
+      ],
+      "maintenance": []
+    },
+    {
+      "id": "gearComponent-orphan",
+      "label": "orphan",
+      "localImagePath": null,
+      "isRetired": false,
+      "notes": null,
+      "installations": [
+        {
+          "parent": "component:gearComponent-does-not-exist",
+          "from": null,
+          "until": null,
+          "sportTypes": []
+        }
+      ],
+      "maintenance": []
+    },
+    {
+      "id": "gearComponent-loop-a",
+      "label": "loop-a",
+      "localImagePath": null,
+      "isRetired": false,
+      "notes": null,
+      "installations": [
+        {
+          "parent": "component:gearComponent-loop-b",
+          "from": null,
+          "until": null,
+          "sportTypes": []
+        }
+      ],
+      "maintenance": []
+    },
+    {
+      "id": "gearComponent-loop-b",
+      "label": "loop-b",
+      "localImagePath": null,
+      "isRetired": false,
+      "notes": null,
+      "installations": [
+        {
+          "parent": "component:gearComponent-loop-a",
+          "from": null,
+          "until": null,
+          "sportTypes": []
+        }
+      ],
+      "maintenance": []
+    }
+  ]
+}

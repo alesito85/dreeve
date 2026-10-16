@@ -13,7 +13,7 @@
     <meta name="apple-mobile-web-app-title" content="Dreeve">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="js-dist-url" content="/js/dist/">
-    <meta name="js-dist-version" content="v5.4.4">
+    <meta name="js-dist-version" content="v5.6.0">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/manifest/icon-apple-180.maskable.png">
     <link href="/manifest.json" rel="manifest" crossorigin="use-credentials">
     <link rel="icon" type="image/x-icon" href="/assets/images/logo.svg">
@@ -23,11 +23,11 @@
             document.documentElement.setAttribute('data-sidebar-collapsed', '');
         }
     </script>
-    <link href="/css/dist/tailwind.min.css?v5.4.4" rel="stylesheet">
-    <link rel="preload" href="/libraries/leaflet/leaflet.min.css?v5.4.4" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="/libraries/leaflet/leaflet-gesture-handling.min.css?v5.4.4" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="/libraries/clusterize/clusterize.min.css?v5.4.4" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="/libraries/lightgallery/lightgallery-bundle.min.css?v5.4.4" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link href="/css/dist/tailwind.min.css?v5.6.0" rel="stylesheet">
+    <link rel="preload" href="/libraries/leaflet/leaflet.min.css?v5.6.0" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/libraries/leaflet/leaflet-gesture-handling.min.css?v5.6.0" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/libraries/clusterize/clusterize.min.css?v5.6.0" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/libraries/lightgallery/lightgallery-bundle.min.css?v5.6.0" as="style" onload="this.onload=null;this.rel='stylesheet'">
 </head>
 <body class="bg-gray-50">
 <div class="antialiased">
@@ -245,8 +245,8 @@
     <div>
         <div class="sidebar-collapsed:hidden">
             <div class="flex items-center justify-center gap-x-1">
-                <span class="bg-gray-100 text-gray-600 font-medium px-2.5 py-0.5 rounded-sm">v5.4.4</span>
-                <span class="hidden" data-latest-version data-current-version="v5.4.4">
+                <span class="bg-gray-100 text-gray-600 font-medium px-2.5 py-0.5 rounded-sm">v5.6.0</span>
+                <span class="hidden" data-latest-version data-current-version="v5.6.0">
                 (latest: <a class="underline" href="https://github.com/dreeveapp/dreeve/releases/tag/%5BLATEST_VERSION%5D">[LATEST_VERSION]</a>)
             </span>
             </div>
@@ -292,244 +292,401 @@
             </a>
         </li>
     </ul>
-    <!-- GEAR STATS -->
-    <div class="grid grid-cols-1 mb-4">
-        <!-- STATS PER GEAR -->
-        <div class="mb-4 p-4 bg-white border border-gray-200 rounded-lg shadow-xs">
-            <div class="mb-4 flex items-center justify-between">
-                <h3 class="text-lg font-semibold">
-                    Gear stats
-                </h3>
+    <!-- GEAR -->
+            <div class="mb-4 p-4 bg-white border border-gray-200 rounded-lg shadow-xs">
+            <div class="mb-4 flex items-center gap-2">
+                <h3 class="text-lg font-semibold">Active gear</h3>
+                <span class="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">3</span>
             </div>
-            <div class="relative overflow-x-auto">
-                <table id="table-gear" class="data-table" data-accordion="table-gear" data-active-classes="text-gray-500" data-inactive-classes="text-gray-500">
-                    <thead>
-                    <tr>
-                        <th rowspan="2" scope="col" class="sticky left-0 bg-gray-50">
-
-                        </th>
-                        <th rowspan="2" scope="col">
-                            # workouts
-                        </th>
-                        <th rowspan="2" scope="col">
-                            Dist.
-                        </th>
-                        <th rowspan="2" scope="col">
-                            Elev.
-                        </th>
-                        <th rowspan="2" scope="col">
-                            Moving time
-                        </th>
-                        <th rowspan="2" scope="col">
-                            Speed
-                        </th>
-                        <th rowspan="2" scope="col">
-                            Cal.
-                        </th>
-                        <th rowspan="2" scope="col">
-                            Purchase price
-                        </th>
-                        <th colspan="3" scope="col">
-                            Relative cost
-                            <div class="font-normal normal-case">
-                                per hour /
-                                per activity /
-                                per km
+            <div class="grid items-center gap-x-4 grid-cols-[minmax(0,1fr)_6rem_0.75rem] lg:grid-cols-[minmax(0,1fr)_6rem_9rem_9rem_7rem_0.75rem] px-4 py-3 bg-gray-50 text-gray-500 text-xxs uppercase font-semibold">
+                <div>Gear</div>
+                <div>Distance</div>
+                <div class="hidden lg:block">Moving time</div>
+                <div class="hidden lg:block">Last 12 months</div>
+                <div class="hidden lg:block">Last used</div>
+                <div></div>
+            </div>
+                                            <details class="group/row border-t border-gray-100">
+        <summary class="grid items-center gap-x-4 grid-cols-[minmax(0,1fr)_6rem_0.75rem] lg:grid-cols-[minmax(0,1fr)_6rem_9rem_9rem_7rem_0.75rem] list-none cursor-pointer px-4 py-2.5 hover:bg-gray-50 select-none">
+            <div class="min-w-0">
+                <div class="text-sm font-medium text-gray-900 truncate">Unspecified</div>
+                <div class="text-xs text-gray-500 truncate">Virtual Rides, Rides &middot; 5 workouts</div>
+            </div>
+            <div class="text-sm font-bold text-gray-900">24<span class="text-xxs ml-px whitespace-nowrap">km</span>
+</div>
+            <div class="hidden lg:flex items-baseline gap-2">
+                <span class="text-sm font-bold text-gray-900">2<span class="text-xxs ml-px">h</span></span>
+                <span class="text-xs text-gray-500 tabular-nums">19%</span>
+            </div>
+                                        <div class="hidden lg:flex items-end gap-px h-8">
+                                                                    <div class="flex-1 h-full flex items-end" title="Nov 2022 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Dec 2022 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Jan 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Feb 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Mar 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Apr 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="May 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Jun 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Jul 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Aug 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Sep 2023 &middot; 24 km">
+                            <div class="w-full rounded-t-xs bg-primary" style="height: 100%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Oct 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                    </div>
+                        <div class="hidden lg:block text-sm text-gray-500">12-09-23</div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-3 text-gray-400 transition-transform group-open/row:rotate-180" viewbox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m1 1 4 4 4-4"></path>
+            </svg>
+        </summary>
+        <div class="grid grid-cols-1 gap-5 px-8 py-5 border-t border-gray-100">
+            <div>
+                <div class="mb-2 text-xs font-semibold text-gray-700">Usage</div>
+                <div class="grid grid-cols-3 lg:grid-cols-6 gap-x-2 gap-y-3">
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">workouts</div>
+                            <div class="text-sm font-bold text-gray-900">5</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Avg distance</div>
+                            <div class="text-sm font-bold text-gray-900">5<span class="text-xxs ml-px whitespace-nowrap">km</span>
+</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Elevation</div>
+                            <div class="text-sm font-bold text-gray-900">314<span class="text-xxs ml-px whitespace-nowrap">m</span>
+</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Moving time</div>
+                            <div class="text-sm font-bold text-gray-900">2h 9m</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Avg speed</div>
+                            <div class="text-sm font-bold text-gray-900">11.3<span class="text-xxs ml-px whitespace-nowrap">km/h</span>
+</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Calories</div>
+                            <div class="text-sm font-bold text-gray-900">1&nbsp;347<span class="text-xxs ml-px">kcal</span>
+</div>
+                        </div>
+                                    </div>
+            </div>
+            <div>
+                <div class="mb-2 text-xs font-semibold text-gray-700">Cost</div>
+                                    <div class="text-xs text-gray-500">No purchase price set</div>
                             </div>
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                                                        <tr class="group/row">
-            <th scope="row" class="px-2 py-2 sticky left-0 font-medium bg-white whitespace-nowrap">
-                <a href="/activities?filters%5Bgear%5D=gear-b12659861" class="font-medium text-blue-600 hover:underline">
-                    Retro Race Bike
-                </a>
-            </th>
-            <td class="truncate">
-                8
-            </td>
-            <td class="truncate">
-                                    34<span class="text-xxs ml-px">km avg</span> /
-                    275<span class="text-xxs ml-px">km total</span>
-                            </td>
-            <td class="truncate">
-                1&nbsp;698<span class="text-xxs ml-px whitespace-nowrap">m</span>
-            </td>
-            <td class="truncate" title="7.4h">
-                7h 22m
-            </td>
-            <td class="truncate">
-                37.4<span class="text-xxs ml-px whitespace-nowrap">km/h</span>
-            </td>
-            <td class="truncate">
-                4&nbsp;756<span class="text-xxs ml-px">kcal</span>
-            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-        </tr>
-    
-                                                        <tr class="group/row">
-            <th scope="row" class="px-2 py-2 sticky left-0 font-medium bg-white whitespace-nowrap">
-                <a href="/activities?filters%5Bgear%5D=gear-b12659862" class="font-medium text-blue-600 hover:underline">
-                    Zwift hub
-                </a>
-            </th>
-            <td class="truncate">
-                1
-            </td>
-            <td class="truncate">
-                                    12<span class="text-xxs ml-px">km avg</span> /
-                    12<span class="text-xxs ml-px">km total</span>
-                            </td>
-            <td class="truncate">
-                15<span class="text-xxs ml-px whitespace-nowrap">m</span>
-            </td>
-            <td class="truncate" title="0.5h">
-                31m
-            </td>
-            <td class="truncate">
-                23.3<span class="text-xxs ml-px whitespace-nowrap">km/h</span>
-            </td>
-            <td class="truncate">
-                293<span class="text-xxs ml-px">kcal</span>
-            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-        </tr>
-    
-                                                        <tr class="group/row">
-            <th scope="row" class="px-2 py-2 sticky left-0 font-medium bg-white whitespace-nowrap">
-                <a href="/activities?filters%5Bgear%5D=gear-none" class="font-medium text-blue-600 hover:underline">
-                    Unspecified
-                </a>
-            </th>
-            <td class="truncate">
-                5
-            </td>
-            <td class="truncate">
-                                    5<span class="text-xxs ml-px">km avg</span> /
-                    24<span class="text-xxs ml-px">km total</span>
-                            </td>
-            <td class="truncate">
-                314<span class="text-xxs ml-px whitespace-nowrap">m</span>
-            </td>
-            <td class="truncate" title="2.2h">
-                2h 9m
-            </td>
-            <td class="truncate">
-                11.3<span class="text-xxs ml-px whitespace-nowrap">km/h</span>
-            </td>
-            <td class="truncate">
-                1&nbsp;347<span class="text-xxs ml-px">kcal</span>
-            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-        </tr>
-    
-                                                                <tr class="group/row cursor-pointer" id="table-retired-gear-header" data-accordion-target="#table-retired-gear-content" aria-expanded="false" aria-controls="table-retired-gear-content">
-                            <td class="sticky left-0 whitespace-nowrap">
-                                <div class="flex items-center justify-center gap-x-2 text-gray-700 hover:underline">
-                                    <svg data-accordion-icon class="size-2 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewbox="0 0 10 6">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"></path>
-                                    </svg>
-                                    <div>Retired gear</div>
-                                </div>
-                            </td>
-                            <td colspan="9"></td>
-                        </tr>
-                        </tbody>
-                        <tbody class="hidden" id="table-retired-gear-content" aria-labelledby="table-retired-gear-header">
-                                                                <tr class="group/row">
-            <th scope="row" class="px-2 py-2 sticky left-0 font-medium bg-white whitespace-nowrap">
-                <a href="/activities?filters%5Bgear%5D=gear-b12659562" class="font-medium text-blue-600 hover:underline">
-                    Zwift One &#9760;&#65039;
-                </a>
-            </th>
-            <td class="truncate">
-                1
-            </td>
-            <td class="truncate">
-                                    0<span class="text-xxs ml-px">km</span>
-                            </td>
-            <td class="truncate">
-                278<span class="text-xxs ml-px whitespace-nowrap">m</span>
-            </td>
-            <td class="truncate" title="1.1h">
-                1h 3m
-            </td>
-            <td class="truncate">
-                0.0<span class="text-xxs ml-px whitespace-nowrap">km/h</span>
-            </td>
-            <td class="truncate">
-                695<span class="text-xxs ml-px">kcal</span>
-            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-            <td class="truncate">
-                                                    -
-                            </td>
-        </tr>
-    
-                                                </tbody>
-                                    </table>
-            </div>
         </div>
+    </details>
+    
+                                            <details class="group/row border-t border-gray-100">
+        <summary class="grid items-center gap-x-4 grid-cols-[minmax(0,1fr)_6rem_0.75rem] lg:grid-cols-[minmax(0,1fr)_6rem_9rem_9rem_7rem_0.75rem] list-none cursor-pointer px-4 py-2.5 hover:bg-gray-50 select-none">
+            <div class="min-w-0">
+                <div class="text-sm font-medium text-gray-900 truncate">Retro Race Bike</div>
+                <div class="text-xs text-gray-500 truncate">Virtual Rides, Runs, Rides &middot; 8 workouts</div>
+            </div>
+            <div class="text-sm font-bold text-gray-900">275<span class="text-xxs ml-px whitespace-nowrap">km</span>
+</div>
+            <div class="hidden lg:flex items-baseline gap-2">
+                <span class="text-sm font-bold text-gray-900">7<span class="text-xxs ml-px">h</span></span>
+                <span class="text-xs text-gray-500 tabular-nums">66%</span>
+            </div>
+                                        <div class="hidden lg:flex items-end gap-px h-8">
+                                                                    <div class="flex-1 h-full flex items-end" title="Nov 2022 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Dec 2022 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Jan 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Feb 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Mar 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Apr 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="May 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Jun 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Jul 2023 &middot; 158 km">
+                            <div class="w-full rounded-t-xs bg-primary" style="height: 100%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Aug 2023 &middot; 67 km">
+                            <div class="w-full rounded-t-xs bg-primary" style="height: 42.4%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Sep 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Oct 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                    </div>
+                        <div class="hidden lg:block text-sm text-gray-500">31-08-23</div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-3 text-gray-400 transition-transform group-open/row:rotate-180" viewbox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m1 1 4 4 4-4"></path>
+            </svg>
+        </summary>
+        <div class="grid grid-cols-1 gap-5 px-8 py-5 border-t border-gray-100">
+            <div>
+                <div class="mb-2 text-xs font-semibold text-gray-700">Usage</div>
+                <div class="grid grid-cols-3 lg:grid-cols-6 gap-x-2 gap-y-3">
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">workouts</div>
+                            <div class="text-sm font-bold text-gray-900">8</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Avg distance</div>
+                            <div class="text-sm font-bold text-gray-900">34<span class="text-xxs ml-px whitespace-nowrap">km</span>
+</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Elevation</div>
+                            <div class="text-sm font-bold text-gray-900">1&nbsp;698<span class="text-xxs ml-px whitespace-nowrap">m</span>
+</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Moving time</div>
+                            <div class="text-sm font-bold text-gray-900">7h 22m</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Avg speed</div>
+                            <div class="text-sm font-bold text-gray-900">37.4<span class="text-xxs ml-px whitespace-nowrap">km/h</span>
+</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Calories</div>
+                            <div class="text-sm font-bold text-gray-900">4&nbsp;756<span class="text-xxs ml-px">kcal</span>
+</div>
+                        </div>
+                                    </div>
+            </div>
+            <div>
+                <div class="mb-2 text-xs font-semibold text-gray-700">Cost</div>
+                                    <div class="text-xs text-gray-500">No purchase price set</div>
+                            </div>
+        </div>
+    </details>
+    
+                                            <details class="group/row border-t border-gray-100">
+        <summary class="grid items-center gap-x-4 grid-cols-[minmax(0,1fr)_6rem_0.75rem] lg:grid-cols-[minmax(0,1fr)_6rem_9rem_9rem_7rem_0.75rem] list-none cursor-pointer px-4 py-2.5 hover:bg-gray-50 select-none">
+            <div class="min-w-0">
+                <div class="text-sm font-medium text-gray-900 truncate">Zwift hub</div>
+                <div class="text-xs text-gray-500 truncate">Rides &middot; 1 workouts</div>
+            </div>
+            <div class="text-sm font-bold text-gray-900">12<span class="text-xxs ml-px whitespace-nowrap">km</span>
+</div>
+            <div class="hidden lg:flex items-baseline gap-2">
+                <span class="text-sm font-bold text-gray-900">1<span class="text-xxs ml-px">h</span></span>
+                <span class="text-xs text-gray-500 tabular-nums">5%</span>
+            </div>
+                                        <div class="hidden lg:flex items-end gap-px h-8">
+                                                                    <div class="flex-1 h-full flex items-end" title="Nov 2022 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Dec 2022 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Jan 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Feb 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Mar 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Apr 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="May 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Jun 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Jul 2023 &middot; 12 km">
+                            <div class="w-full rounded-t-xs bg-primary" style="height: 100%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Aug 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Sep 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                                                    <div class="flex-1 h-full flex items-end" title="Oct 2023 &middot; 0 km">
+                            <div class="w-full rounded-t-xs bg-gray-200" style="height: 5%"></div>
+                        </div>
+                                    </div>
+                        <div class="hidden lg:block text-sm text-gray-500">28-07-23</div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-3 text-gray-400 transition-transform group-open/row:rotate-180" viewbox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m1 1 4 4 4-4"></path>
+            </svg>
+        </summary>
+        <div class="grid grid-cols-1 gap-5 px-8 py-5 border-t border-gray-100">
+            <div>
+                <div class="mb-2 text-xs font-semibold text-gray-700">Usage</div>
+                <div class="grid grid-cols-3 lg:grid-cols-6 gap-x-2 gap-y-3">
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">workouts</div>
+                            <div class="text-sm font-bold text-gray-900">1</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Avg distance</div>
+                            <div class="text-sm font-bold text-gray-900">12<span class="text-xxs ml-px whitespace-nowrap">km</span>
+</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Elevation</div>
+                            <div class="text-sm font-bold text-gray-900">15<span class="text-xxs ml-px whitespace-nowrap">m</span>
+</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Moving time</div>
+                            <div class="text-sm font-bold text-gray-900">31m</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Avg speed</div>
+                            <div class="text-sm font-bold text-gray-900">23.3<span class="text-xxs ml-px whitespace-nowrap">km/h</span>
+</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Calories</div>
+                            <div class="text-sm font-bold text-gray-900">293<span class="text-xxs ml-px">kcal</span>
+</div>
+                        </div>
+                                    </div>
+            </div>
+            <div>
+                <div class="mb-2 text-xs font-semibold text-gray-700">Cost</div>
+                                    <div class="text-xs text-gray-500">No purchase price set</div>
+                            </div>
+        </div>
+    </details>
+    
+                    </div>
+        <!-- RETIRED GEAR -->
+            <details class="group/section p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-xs">
+            <summary class="list-none cursor-pointer flex items-center justify-between select-none">
+                <div class="flex items-center gap-2">
+                    <h3 class="text-lg font-semibold">Retired</h3>
+                    <span class="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">1</span>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-3 text-gray-400 transition-transform group-open/section:rotate-180" viewbox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m1 1 4 4 4-4"></path>
+                </svg>
+            </summary>
+            <div class="mt-4 grid items-center gap-x-4 grid-cols-[minmax(0,1fr)_6rem_0.75rem] lg:grid-cols-[minmax(0,1fr)_6rem_9rem_9rem_7rem_0.75rem] px-4 py-3 bg-gray-50 text-gray-500 text-xxs uppercase font-semibold">
+                <div>Gear</div>
+                <div>Distance</div>
+                <div class="hidden lg:block">Moving time</div>
+                <div class="hidden lg:block">Last 12 months</div>
+                <div class="hidden lg:block">Last used</div>
+                <div></div>
+            </div>
+            <div>
+                                                    <details class="group/row border-t border-gray-100">
+        <summary class="grid items-center gap-x-4 grid-cols-[minmax(0,1fr)_6rem_0.75rem] lg:grid-cols-[minmax(0,1fr)_6rem_9rem_9rem_7rem_0.75rem] list-none cursor-pointer px-4 py-2.5 hover:bg-gray-50 select-none">
+            <div class="min-w-0">
+                <div class="text-sm font-medium text-gray-900 truncate">Zwift One</div>
+                <div class="text-xs text-gray-500 truncate">Virtual Rides &middot; 1 workouts</div>
+            </div>
+            <div class="text-sm font-bold text-gray-900">0<span class="text-xxs ml-px whitespace-nowrap">km</span>
+</div>
+            <div class="hidden lg:flex items-baseline gap-2">
+                <span class="text-sm font-bold text-gray-900">1<span class="text-xxs ml-px">h</span></span>
+                <span class="text-xs text-gray-500 tabular-nums">9%</span>
+            </div>
+                                        <div class="hidden lg:block text-sm text-gray-400">-</div>
+                        <div class="hidden lg:block text-sm text-gray-500">30-07-23</div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-3 text-gray-400 transition-transform group-open/row:rotate-180" viewbox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m1 1 4 4 4-4"></path>
+            </svg>
+        </summary>
+        <div class="grid grid-cols-1 gap-5 px-8 py-5 border-t border-gray-100">
+            <div>
+                <div class="mb-2 text-xs font-semibold text-gray-700">Usage</div>
+                <div class="grid grid-cols-3 lg:grid-cols-6 gap-x-2 gap-y-3">
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">workouts</div>
+                            <div class="text-sm font-bold text-gray-900">1</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Avg distance</div>
+                            <div class="text-sm font-bold text-gray-900">0<span class="text-xxs ml-px whitespace-nowrap">km</span>
+</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Elevation</div>
+                            <div class="text-sm font-bold text-gray-900">278<span class="text-xxs ml-px whitespace-nowrap">m</span>
+</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Moving time</div>
+                            <div class="text-sm font-bold text-gray-900">1h 3m</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Avg speed</div>
+                            <div class="text-sm font-bold text-gray-900">0.0<span class="text-xxs ml-px whitespace-nowrap">km/h</span>
+</div>
+                        </div>
+                                            <div>
+                            <div class="text-xxs uppercase font-semibold text-gray-400 tracking-wider">Calories</div>
+                            <div class="text-sm font-bold text-gray-900">695<span class="text-xxs ml-px">kcal</span>
+</div>
+                        </div>
+                                    </div>
+            </div>
+            <div>
+                <div class="mb-2 text-xs font-semibold text-gray-700">Cost</div>
+                                    <div class="text-xs text-gray-500">No purchase price set</div>
+                            </div>
+        </div>
+    </details>
+    
+                            </div>
+        </details>
+        <!-- GEAR CHARTS -->
+    <div class="grid grid-cols-1 mb-4">
         <!-- DISTANCE PER MONTH PER GEAR -->
         <div class="mb-4  p-4 bg-white border border-gray-200 rounded-lg shadow-xs ">
             <div class="mb-4 flex items-center">
                 <h3 class="text-lg font-semibold">
                     Distance per month per gear
                 </h3>
-                <button data-popover-target="popover-distance-per-month" data-popover-placement="right" type="button">
-                    <svg class="size-4 ml-1 text-gray-400 hover:text-gray-500" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path></svg>
-                    <span class="sr-only">Show information</span>
-                </button>
-                <div data-popover id="popover-distance-per-month" role="tooltip" class="w-50 lg:w-md inline-block text-sm">
-                    <p class="p-3">
-                        Gear that hasn't been used in the last three months, is disabled by default.
-                    </p>
-                </div>
             </div>
             <div class="relative overflow-x-auto">
-                <div class="h-96" data-echarts-options='{"animation":true,"grid":{"left":"3%","right":"4%","bottom":"50px","containLabel":true},"tooltip":{"trigger":"axis","axisPointer":{"type":"none"}},"legend":{"selected":{"Retro Race Bike":true,"Zwift hub":false,"Zwift One \u2620\ufe0f":false},"data":[{"name":"Retro Race Bike"},{"name":"Zwift hub"},{"name":"Zwift One \u2620\ufe0f"}],"type":"scroll","pageButtonItemGap":2,"pageIconSize":10},"xAxis":[{"type":"category","axisTick":{"show":false},"data":["July 2020","August 2020","September 2020","October 2020","November 2020","December 2020","January 2021","February 2021","March 2021","April 2021","May 2021","June 2021","July 2021","August 2021","September 2021","October 2021","November 2021","December 2021","January 2022","February 2022","March 2022","April 2022","May 2022","June 2022","July 2022","August 2022","September 2022","October 2022","November 2022","December 2022","January 2023","February 2023","March 2023","April 2023","May 2023","June 2023","July 2023","August 2023","September 2023","October 2023"]}],"yAxis":[{"type":"value"}],"dataZoom":[{"type":"slider","startValue":36,"endValue":40,"minValueSpan":4,"maxValueSpan":4,"brushSelect":false,"zoomLock":true}],"series":[{"name":"Retro Race Bike","type":"bar","barGap":0,"itemStyle":{"color":"#5470c6"},"emphasis":{"focus":"series"},"label":{"show":true,"position":"insideBottom","verticalAlign":"middle","align":"left","color":"#000","rotate":90,"distance":15,"formatter":"{distance|{c} km} - {a}","rich":{"distance":{"fontSize":14,"fontWeight":"bold"}}},"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,0,0,0,0,0,0,0,0,0,0,158,67,0,0]},{"name":"Zwift hub","type":"bar","barGap":0,"itemStyle":{"color":"#91cc75"},"emphasis":{"focus":"series"},"label":{"show":true,"position":"insideBottom","verticalAlign":"middle","align":"left","color":"#000","rotate":90,"distance":15,"formatter":"{distance|{c} km} - {a}","rich":{"distance":{"fontSize":14,"fontWeight":"bold"}}},"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0]},{"name":"Zwift One \u2620\ufe0f","type":"bar","barGap":0,"itemStyle":{"color":"#ea7ccc"},"emphasis":{"focus":"series"},"label":{"show":true,"position":"insideBottom","verticalAlign":"middle","align":"left","color":"#000","rotate":90,"distance":15,"formatter":"{distance|{c} km} - {a}","rich":{"distance":{"fontSize":14,"fontWeight":"bold"}}},"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}]}'></div>
+                <div class="h-96" data-echarts-options='{"animation":true,"grid":{"left":"3%","right":"4%","bottom":"50px","containLabel":true},"tooltip":{"trigger":"axis","axisPointer":{"type":"shadow"},"formatter":"callback:formatStackedDistanceTooltip"},"legend":{"type":"scroll","pageButtonItemGap":2,"pageIconSize":10},"xAxis":[{"type":"category","axisTick":{"show":false},"data":["July 2020","August 2020","September 2020","October 2020","November 2020","December 2020","January 2021","February 2021","March 2021","April 2021","May 2021","June 2021","July 2021","August 2021","September 2021","October 2021","November 2021","December 2021","January 2022","February 2022","March 2022","April 2022","May 2022","June 2022","July 2022","August 2022","September 2022","October 2022","November 2022","December 2022","January 2023","February 2023","March 2023","April 2023","May 2023","June 2023","July 2023","August 2023","September 2023","October 2023"]}],"yAxis":[{"type":"value"}],"dataZoom":[{"type":"slider","startValue":16,"endValue":39,"brushSelect":false}],"series":[{"name":"Retro Race Bike","type":"bar","stack":"distance","barMaxWidth":28,"itemStyle":{"color":"#5470c6"},"emphasis":{"focus":"series"},"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,0,0,0,0,0,0,0,0,0,0,158,67,0,0]},{"name":"Zwift hub","type":"bar","stack":"distance","barMaxWidth":28,"itemStyle":{"color":"#91cc75"},"emphasis":{"focus":"series"},"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0]},{"name":"Zwift One \u2620\ufe0f","type":"bar","stack":"distance","barMaxWidth":28,"itemStyle":{"color":"#ea7ccc"},"emphasis":{"focus":"series"},"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}]}'></div>
             </div>
         </div>
         <!-- DISTANCE OVER TIME PER GEAR -->
@@ -561,10 +718,10 @@
     window.dreeve = {"countries":{"AF":"Afghanistan","AX":"\u00c5land Islands","AL":"Albania","DZ":"Algeria","AS":"American Samoa","AD":"Andorra","AO":"Angola","AI":"Anguilla","AQ":"Antarctica","AG":"Antigua & Barbuda","AR":"Argentina","AM":"Armenia","AW":"Aruba","AU":"Australia","AT":"Austria","AZ":"Azerbaijan","BS":"Bahamas","BH":"Bahrain","BD":"Bangladesh","BB":"Barbados","BY":"Belarus","BE":"Belgium","BZ":"Belize","BJ":"Benin","BM":"Bermuda","BT":"Bhutan","BO":"Bolivia","BA":"Bosnia & Herzegovina","BW":"Botswana","BV":"Bouvet Island","BR":"Brazil","IO":"British Indian Ocean Territory","VG":"British Virgin Islands","BN":"Brunei","BG":"Bulgaria","BF":"Burkina Faso","BI":"Burundi","KH":"Cambodia","CM":"Cameroon","CA":"Canada","CV":"Cape Verde","BQ":"Caribbean Netherlands","KY":"Cayman Islands","CF":"Central African Republic","TD":"Chad","CL":"Chile","CN":"China","CX":"Christmas Island","CC":"Cocos (Keeling) Islands","CO":"Colombia","KM":"Comoros","CG":"Congo - Brazzaville","CD":"Congo - Kinshasa","CK":"Cook Islands","CR":"Costa Rica","CI":"C\u00f4te d\u2019Ivoire","HR":"Croatia","CU":"Cuba","CW":"Cura\u00e7ao","CY":"Cyprus","CZ":"Czechia","DK":"Denmark","DJ":"Djibouti","DM":"Dominica","DO":"Dominican Republic","EC":"Ecuador","EG":"Egypt","SV":"El Salvador","GQ":"Equatorial Guinea","ER":"Eritrea","EE":"Estonia","SZ":"Eswatini","ET":"Ethiopia","FK":"Falkland Islands","FO":"Faroe Islands","FJ":"Fiji","FI":"Finland","FR":"France","GF":"French Guiana","PF":"French Polynesia","TF":"French Southern Territories","GA":"Gabon","GM":"Gambia","GE":"Georgia","DE":"Germany","GH":"Ghana","GI":"Gibraltar","GR":"Greece","GL":"Greenland","GD":"Grenada","GP":"Guadeloupe","GU":"Guam","GT":"Guatemala","GG":"Guernsey","GN":"Guinea","GW":"Guinea-Bissau","GY":"Guyana","HT":"Haiti","HM":"Heard & McDonald Islands","HN":"Honduras","HK":"Hong Kong SAR China","HU":"Hungary","IS":"Iceland","IN":"India","ID":"Indonesia","IR":"Iran","IQ":"Iraq","IE":"Ireland","IM":"Isle of Man","IL":"Israel","IT":"Italy","JM":"Jamaica","JP":"Japan","JE":"Jersey","JO":"Jordan","KZ":"Kazakhstan","KE":"Kenya","KI":"Kiribati","KW":"Kuwait","KG":"Kyrgyzstan","LA":"Laos","LV":"Latvia","LB":"Lebanon","LS":"Lesotho","LR":"Liberia","LY":"Libya","LI":"Liechtenstein","LT":"Lithuania","LU":"Luxembourg","MO":"Macao SAR China","MG":"Madagascar","MW":"Malawi","MY":"Malaysia","MV":"Maldives","ML":"Mali","MT":"Malta","MH":"Marshall Islands","MQ":"Martinique","MR":"Mauritania","MU":"Mauritius","YT":"Mayotte","MX":"Mexico","FM":"Micronesia","MD":"Moldova","MC":"Monaco","MN":"Mongolia","ME":"Montenegro","MS":"Montserrat","MA":"Morocco","MZ":"Mozambique","MM":"Myanmar (Burma)","NA":"Namibia","NR":"Nauru","NP":"Nepal","NL":"Netherlands","NC":"New Caledonia","NZ":"New Zealand","NI":"Nicaragua","NE":"Niger","NG":"Nigeria","NU":"Niue","NF":"Norfolk Island","KP":"North Korea","MK":"North Macedonia","MP":"Northern Mariana Islands","NO":"Norway","OM":"Oman","PK":"Pakistan","PW":"Palau","PS":"Palestinian Territories","PA":"Panama","PG":"Papua New Guinea","PY":"Paraguay","PE":"Peru","PH":"Philippines","PN":"Pitcairn Islands","PL":"Poland","PT":"Portugal","PR":"Puerto Rico","QA":"Qatar","RE":"R\u00e9union","RO":"Romania","RU":"Russia","RW":"Rwanda","WS":"Samoa","SM":"San Marino","ST":"S\u00e3o Tom\u00e9 & Pr\u00edncipe","SA":"Saudi Arabia","SN":"Senegal","RS":"Serbia","SC":"Seychelles","SL":"Sierra Leone","SG":"Singapore","SX":"Sint Maarten","SK":"Slovakia","SI":"Slovenia","SB":"Solomon Islands","SO":"Somalia","ZA":"South Africa","GS":"South Georgia & South Sandwich Islands","KR":"South Korea","SS":"South Sudan","ES":"Spain","LK":"Sri Lanka","BL":"St. Barth\u00e9lemy","SH":"St. Helena","KN":"St. Kitts & Nevis","LC":"St. Lucia","MF":"St. Martin","PM":"St. Pierre & Miquelon","VC":"St. Vincent & Grenadines","SD":"Sudan","SR":"Suriname","SJ":"Svalbard & Jan Mayen","SE":"Sweden","CH":"Switzerland","SY":"Syria","TW":"Taiwan","TJ":"Tajikistan","TZ":"Tanzania","TH":"Thailand","TL":"Timor-Leste","TG":"Togo","TK":"Tokelau","TO":"Tonga","TT":"Trinidad & Tobago","TN":"Tunisia","TR":"T\u00fcrkiye","TM":"Turkmenistan","TC":"Turks & Caicos Islands","TV":"Tuvalu","UM":"U.S. Outlying Islands","VI":"U.S. Virgin Islands","UG":"Uganda","UA":"Ukraine","AE":"United Arab Emirates","GB":"United Kingdom","US":"United States","UY":"Uruguay","UZ":"Uzbekistan","VU":"Vanuatu","VA":"Vatican City","VE":"Venezuela","VN":"Vietnam","WF":"Wallis & Futuna","EH":"Western Sahara","YE":"Yemen","ZM":"Zambia","ZW":"Zimbabwe"},"appUrl":{"basePath":""},"unitSystem":{"name":"metric","paceSymbol":"\/km","distanceSymbol":"km","elevationSymbol":"m"},"leafletConfig":{"polylineColor":"#fc6719","tileLayerUrls":["https:\/\/tile.openstreetmap.org\/{z}\/{x}\/{y}.png"],"enableGreyScale":true,"requireCtrlToZoom":true}};
     window.dreeve.placeholderBrokenImage = "/assets/placeholder-broken.webp";
     window.dreeve.echartsUrls = [
-        "/libraries/echarts/echarts.min.js?v5.4.4",
-        "/libraries/echarts/echarts.world.min.js?v5.4.4",
+        "/libraries/echarts/echarts.min.js?v5.6.0",
+        "/libraries/echarts/echarts.world.min.js?v5.6.0",
     ];
 </script>
-<script src="/js/dist/app.min.js?v5.4.4" type="module"></script>
+<script src="/js/dist/app.min.js?v5.6.0" type="module"></script>
 </body>
 </html>

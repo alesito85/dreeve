@@ -8,8 +8,9 @@ use App\Application\Navigation\NavigationSection;
 use App\Application\PageRenderer;
 use App\Domain\Gear\Gear;
 use App\Domain\Gear\GearRepository;
-use App\Domain\Gear\Gears;
 use App\Domain\Gear\Maintenance\GearComponent;
+use App\Domain\Gear\Maintenance\GearComponentRepository;
+use App\Domain\Gear\Maintenance\GearComponents;
 use App\Domain\Gear\Maintenance\GearMaintenanceRepository;
 use App\Domain\Gear\Maintenance\Task\Progress\MaintenanceTaskProgressCalculator;
 use App\Infrastructure\Cache\Cacheability;
@@ -28,6 +29,7 @@ final readonly class GearMaintenanceRequestHandler
 {
     public function __construct(
         private GearMaintenanceRepository $gearMaintenanceRepository,
+        private GearComponentRepository $gearComponentRepository,
         private GearRepository $gearRepository,
         private MaintenanceTaskProgressCalculator $maintenanceTaskProgressCalculator,
         private Clock $clock,
@@ -66,29 +68,45 @@ final readonly class GearMaintenanceRequestHandler
             ]);
         }
 
-        $gearsThatAreAttachedToComponents = Gears::empty();
-        $gearIdsThatAreAttachedToComponents = [];
+        $now = $this->clock->getCurrentDateTimeImmutable();
+        $gearComponents = $this->gearComponentRepository->findAll();
+        $gearsWithComponents = [];
+        $componentsNotFitted = GearComponents::empty();
+        $parentComponentLabels = [];
         /** @var GearComponent $gearComponent */
-        foreach ($gearMaintenanceConfig->getGearComponents() as $gearComponent) {
-            foreach ($gearComponent->getAttachedTo() as $attachedToGearId) {
-                if (!($gear = $gears->getByGearId($attachedToGearId)) instanceof Gear) {
-                    continue;
-                }
-                if (in_array((string) $gear->getId(), $gearIdsThatAreAttachedToComponents)) {
+        foreach ($gearComponents->withoutRetired() as $gearComponent) {
+            $parentComponents = $gearComponents->getParentComponentsOf($gearComponent, $now);
+            if (!$parentComponents->isEmpty()) {
+                $parentComponentLabels[(string) $gearComponent->getId()] = implode(', ', $parentComponents->map(
+                    static fn (GearComponent $parentComponent): string => (string) $parentComponent->getLabel(),
+                ));
+            }
+
+            $currentGearIds = $gearComponents->getGearIdsCurrentlyUsing($gearComponent, $now);
+            if ($currentGearIds->isEmpty()) {
+                $componentsNotFitted->add($gearComponent);
+            }
+
+            foreach ($currentGearIds as $gearId) {
+                if (!($gear = $gears->getByGearId($gearId)) instanceof Gear) {
                     continue;
                 }
                 if ($gear->isRetired() && $gearMaintenanceConfig->ignoreRetiredGear()) {
                     continue;
                 }
 
-                $gearsThatAreAttachedToComponents->add($gear);
-                $gearIdsThatAreAttachedToComponents[] = (string) $gear->getId();
+                $gearsWithComponents[(string) $gear->getId()] ??= [
+                    'gear' => $gear,
+                    'components' => GearComponents::empty(),
+                ];
+                $gearsWithComponents[(string) $gear->getId()]['components']->add($gearComponent);
             }
         }
 
         return $this->twig->load('html/gear/maintenance/gear-maintenance.html.twig')->render([
-            'gearsAttachedToComponents' => $gearsThatAreAttachedToComponents,
-            'gearComponents' => $gearMaintenanceConfig->getGearComponents(),
+            'gearsWithComponents' => array_values($gearsWithComponents),
+            'componentsNotFitted' => $componentsNotFitted,
+            'parentComponentLabels' => $parentComponentLabels,
             'gearIdsThatHaveDueTasks' => $this->maintenanceTaskProgressCalculator->getGearIdsThatHaveDueTasks(),
             'maintenanceTaskStatuses' => $this->maintenanceTaskProgressCalculator->calculateStatuses(),
             'isFeatureEnabled' => true,

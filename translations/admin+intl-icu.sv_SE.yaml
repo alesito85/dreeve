@@ -7,20 +7,20 @@ AM/PM: AM/PM
 'API key': 'API key'
 Actions: Actions
 Active: Active
-'Activities excluded from peak power outputs': 'Activities excluded from peak power outputs'
 'Activities scanned': 'Activities scanned'
 'Activities to skip during import': 'Activities to skip during import'
 'Activities to update': 'Activities to update'
 'Activities will appear here once they are imported.': 'Activities will appear here once they are imported.'
 Activity: Activity
 'Activity ID': 'Activity ID'
-'Activity IDs to exclude when calculating peak power outputs.': 'Activity IDs to exclude when calculating peak power outputs.'
+'Activity description': 'Activity description'
 'Activity management': 'Activity management'
 'Activity name': 'Activity name'
 'Activity visibilities to import': 'Activity visibilities to import'
 'Add Eddington': 'Add Eddington'
 'Add FTP': 'Add FTP'
 'Add a component to start tracking maintenance.': 'Add a component to start tracking maintenance.'
+'Add a row for every period the component was fitted. Leave the end date empty while it is still fitted.': 'Add a row for every period the component was fitted. Leave the end date empty while it is still fitted.'
 'Add a rule to start automating your activity details.': 'Add a rule to start automating your activity details.'
 'Add a widget': 'Add a widget'
 'Add action': 'Add action'
@@ -32,6 +32,7 @@ Activity: Activity
 'Add condition': 'Add condition'
 'Add gear': 'Add gear'
 'Add goal': 'Add goal'
+'Add installation': 'Add installation'
 'Add max heart rate': 'Add max heart rate'
 'Add resting heart rate': 'Add resting heart rate'
 'Add rule': 'Add rule'
@@ -51,6 +52,7 @@ Admin: Admin
 'All efforts on this segment are deleted as well. This action cannot be undone.': 'All efforts on this segment are deleted as well. This action cannot be undone.'
 'All sport types': 'All sport types'
 'All sport types must belong to the same activity type.': 'All sport types must belong to the same activity type.'
+'Allow visitors to download original activity files': 'Allow visitors to download original activity files'
 'Allowed IP addresses for the admin panel': 'Allowed IP addresses for the admin panel'
 'Also exposes the workout assistant in the web interface. Requires the AI integration above to be enabled. Use caution when enabling this if your app is publicly accessible.': 'Also exposes the workout assistant in the web interface. Requires the AI integration above to be enabled. Use caution when enabling this if your app is publicly accessible.'
 'Any IP address': 'Any IP address'
@@ -82,6 +84,7 @@ Apply: Tillämpa
 'Base URI': 'Base URI'
 'Before you can use the app, we need to know a few things about you. These are used to calculate your heart rate zones and training load. You can fine-tune all other settings later on.': 'Before you can use the app, we need to know a few things about you. These are used to calculate your heart rate zones and training load. You can fine-tune all other settings later on.'
 Birthday: Birthday
+'By default only you can download the original FIT, TCX or GPX file from an activity page. Original files can contain more detail than the page shows.': 'By default only you can download the original FIT, TCX or GPX file from an activity page. Original files can contain more detail than the page shows.'
 'Calculate energy (kJ)': 'Calculate energy (kJ)'
 Cancel: Cancel
 'Challenge name': 'Challenge name'
@@ -161,6 +164,9 @@ Endpoint: Endpoint
 'Enter your password': 'Enter your password'
 'Enter your username': 'Enter your username'
 Every: Every
+'Exclude from': 'Exclude from'
+'Excluded activities are left out of these statistics, but still show up everywhere else.': 'Excluded activities are left out of these statistics, but still show up everywhere else.'
+'Excluded from': 'Excluded from'
 FTP: FTP
 'FTP history (cycling)': 'FTP history (cycling)'
 'FTP history (running)': 'FTP history (running)'
@@ -217,6 +223,7 @@ Import: Import
 'Imports new Strava activities.': 'Imports new Strava activities.'
 'Include retired gear': 'Include retired gear'
 Info: Info
+'Installed on': 'Installed on'
 Integrations: Integrations
 'Intro text': 'Intro text'
 'Invalid CSRF token.': 'Invalid CSRF token.'
@@ -278,6 +285,8 @@ Monday: Monday
 'No unit': 'No unit'
 'Normal date format': 'Normal date format'
 'Not configured, the API is closed': 'Not configured, the API is closed'
+'Not fitted': 'Not fitted'
+Notes: Notes
 'Notification services': 'Notification services'
 'Notify when an import was successful': 'Notify when an import was successful'
 'Number of activities to display': 'Number of activities to display'
@@ -330,6 +339,7 @@ Remove: Remove
 'Remove command': 'Remove command'
 'Remove condition': 'Remove condition'
 'Remove goal': 'Remove goal'
+'Remove installation': 'Remove installation'
 'Remove task': 'Remove task'
 'Remove tile layer': 'Remove tile layer'
 'Remove widget': 'Remove widget'
@@ -345,6 +355,7 @@ Resetting...: Resetting...
 'Resting heart rate formula': 'Resting heart rate formula'
 'Restrict to date range': 'Restrict to date range'
 Retired: Retired
+'Retired components keep their history, but are hidden and no longer tracked.': 'Retired components keep their history, but are hidden and no longer tracked.'
 'Retry weather and reverse geocoding': 'Retry weather and reverse geocoding'
 'Return to app': 'Return to app'
 Ride: Ride
@@ -370,6 +381,7 @@ Security: Security
 'Select at least one sensor.': 'Select at least one sensor.'
 'Select at least one sport type.': 'Select at least one sport type.'
 'Select at least one weekday.': 'Select at least one weekday.'
+'Select gear or component': 'Select gear or component'
 'Select gear...': 'Select gear...'
 'Select sensors': 'Select sensors'
 'Select sport types': 'Select sport types'
@@ -379,6 +391,7 @@ Security: Security
 'Sends a notification when gear maintenance is due. Requires a configured notification service.': 'Sends a notification when gear maintenance is due. Requires a configured notification service.'
 Sensors: Sensors
 'Sensors are only recorded for activities imported from FIT files. Activities from Strava, GPX or TCX never match this condition.': 'Sensors are only recorded for activities imported from FIT files. Activities from Strava, GPX or TCX never match this condition.'
+'Serial number, size, where you bought it, ...': 'Serial number, size, where you bought it, ...'
 'Set description': 'Set description'
 'Set its status to Retired instead to hide it from your active gear.': 'Set its status to Retired instead to hide it from your active gear.'
 'Set name': 'Set name'
@@ -500,6 +513,7 @@ URL: URL
 Unit: Unit
 'Unit system': 'Unit system'
 'Unsupported file type': 'Unsupported file type'
+Until: Until
 'Upload activity files': 'Upload activity files'
 'Upload failed': 'Upload failed'
 'Upload files': 'Upload files'

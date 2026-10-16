@@ -12,9 +12,11 @@ use App\Domain\Calendar\Months;
 use App\Domain\Gear\DistanceOverTimePerGearChart;
 use App\Domain\Gear\DistancePerMonthPerGearChart;
 use App\Domain\Gear\FindGearStatsPerDay\FindGearStatsPerDay;
+use App\Domain\Gear\FindGearUsagePerMonth\FindGearUsagePerMonth;
 use App\Domain\Gear\Gear;
 use App\Domain\Gear\GearId;
 use App\Domain\Gear\GearRepository;
+use App\Domain\Gear\Gears;
 use App\Domain\Gear\GearType;
 use App\Domain\Settings\SettingsRepository;
 use App\Domain\Theme\Theme;
@@ -76,6 +78,7 @@ final readonly class GearStatsRequestHandler
         $activities = $this->activityRepository->findAll();
         $allUsedGear = $this->gearRepository->findAllUsed();
         $gearStats = $this->queryBus->ask(new FindGearStatsPerDay());
+        $gearUsage = $this->queryBus->ask(new FindGearUsagePerMonth());
         $allMonths = Months::create(
             startDate: $activities->getFirstActivityStartDate(),
             endDate: $now
@@ -100,14 +103,21 @@ final readonly class GearStatsRequestHandler
             ));
         }
 
+        $retiredGear = $allUsedGear->filter(fn (Gear $gear): bool => $gear->isRetired());
+        $allGear = Gears::fromArray([...$activeGear, ...$retiredGear]);
+        $mostRecentlyUsedFirst = fn (Gear $a, Gear $b): int => $gearUsage->getFor($b->getId())->getLastUsedOn() <=> $gearUsage->getFor($a->getId())->getLastUsedOn();
+
         return $this->twig->load('html/gear/gear.html.twig')->render([
-            'activeGear' => $activeGear,
-            'retiredGear' => $allUsedGear->filter(fn (Gear $gear): bool => $gear->isRetired()),
+            'gearUsage' => $gearUsage,
+            'retiredGear' => $retiredGear->usort($mostRecentlyUsedFirst),
+            'gearInUse' => $activeGear->usort($mostRecentlyUsedFirst),
+            'totalMovingTime' => Seconds::from((int) $allGear->sum(fn (Gear $gear): int => $gear->getMovingTime()->toInt())),
+            'lastTwelveMonths' => Months::lastXMonths(12, $now),
             'unitSystem' => $unitSystem,
             'distancePerMonthPerGearChart' => Json::encode(
                 DistancePerMonthPerGearChart::create(
                     gearCollection: $allUsedGear,
-                    activityCollection: $activities,
+                    gearUsage: $gearUsage,
                     unitSystem: $unitSystem,
                     months: $allMonths,
                     theme: $this->theme,

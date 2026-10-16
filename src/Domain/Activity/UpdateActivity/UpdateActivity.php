@@ -13,6 +13,7 @@ use App\Domain\Gear\GearId;
 use App\Domain\Image\NewImage;
 use App\Domain\Image\ProvideLocalImageFromDropZonePayload;
 use App\Domain\Image\RemovedImage;
+use App\Domain\Settings\ActivityExclusion;
 use App\Infrastructure\CQRS\Command\Deserialize\CouldNotDeserializeCommand;
 use App\Infrastructure\CQRS\Command\Deserialize\DeserializableCommand;
 use App\Infrastructure\CQRS\Command\Deserialize\ProvidesCommandName;
@@ -25,6 +26,7 @@ final readonly class UpdateActivity extends DomainCommand implements Deserializa
     use ProvidesCommandName;
 
     /**
+     * @param array<string, bool> $exclusions
      * @param array<NewImage>     $newImages
      * @param array<RemovedImage> $removedImages
      */
@@ -39,6 +41,7 @@ final readonly class UpdateActivity extends DomainCommand implements Deserializa
         private ?int $calories,
         private bool $isCommute,
         private bool $isGroupActivity,
+        private array $exclusions,
         private array $newImages,
         private array $removedImages,
     ) {
@@ -76,6 +79,14 @@ final readonly class UpdateActivity extends DomainCommand implements Deserializa
 
         [$newImages, $removedImages] = self::parseImages($payload, 'images');
 
+        $excludedFrom = is_array($payload['excludedFrom'] ?? null) ? $payload['excludedFrom'] : [];
+        $exclusions = [];
+        foreach (ActivityExclusion::cases() as $exclusion) {
+            if (array_key_exists($exclusion->value, $excludedFrom)) {
+                $exclusions[$exclusion->value] = filter_var($excludedFrom[$exclusion->value], FILTER_VALIDATE_BOOLEAN);
+            }
+        }
+
         return new self(
             activityId: ActivityId::fromString($payload['activityId']),
             name: ActivityName::fromString($name),
@@ -87,6 +98,7 @@ final readonly class UpdateActivity extends DomainCommand implements Deserializa
             calories: self::parseCalories($payload),
             isCommute: filter_var($payload['isCommute'] ?? false, FILTER_VALIDATE_BOOLEAN),
             isGroupActivity: filter_var($payload['isGroupActivity'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            exclusions: $exclusions,
             newImages: $newImages,
             removedImages: $removedImages,
         );
@@ -140,6 +152,11 @@ final readonly class UpdateActivity extends DomainCommand implements Deserializa
     public function isGroupActivity(): bool
     {
         return $this->isGroupActivity;
+    }
+
+    public function isExcludedFrom(ActivityExclusion $exclusion): ?bool
+    {
+        return $this->exclusions[$exclusion->value] ?? null;
     }
 
     /**

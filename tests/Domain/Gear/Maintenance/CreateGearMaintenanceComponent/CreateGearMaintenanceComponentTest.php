@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Domain\Gear\Maintenance\CreateGearMaintenanceComponent;
 
 use App\Domain\Gear\GearId;
+use App\Domain\Gear\GearIds;
 use App\Domain\Gear\Maintenance\CreateGearMaintenanceComponent\CreateGearMaintenanceComponent;
 use App\Infrastructure\CQRS\Command\Deserialize\CouldNotDeserializeCommand;
 use Money\Money;
@@ -17,7 +18,7 @@ class CreateGearMaintenanceComponentTest extends TestCase
     {
         $command = CreateGearMaintenanceComponent::fromPayload([
             'label' => '  Chain  ',
-            'attachedTo' => ['b1', 'g2'],
+            'installations' => [['parent' => 'gear:gear-b1'], ['parent' => 'gear:gear-g2']],
             'purchasePriceAmount' => '123.45',
             'purchasePriceCurrency' => 'EUR',
             'maintenanceTasks' => [
@@ -30,17 +31,31 @@ class CreateGearMaintenanceComponentTest extends TestCase
         $this->assertNull($command->getNewImage());
         $this->assertEquals(Money::EUR(12345), $command->getPurchasePrice());
         $this->assertEquals(
-            [GearId::fromUnprefixed('b1'), GearId::fromUnprefixed('g2')],
-            $command->getAttachedTo()->toArray(),
+            GearIds::fromArray([GearId::fromUnprefixed('b1'), GearId::fromUnprefixed('g2')]),
+            $command->getInstallations()->getGearIds(),
         );
         $this->assertCount(2, $command->getMaintenanceTasks());
+        $this->assertFalse($command->isRetired());
+    }
+
+    public function testFromPayloadWhenRetired(): void
+    {
+        $command = CreateGearMaintenanceComponent::fromPayload([
+            'label' => 'Chain',
+            'isRetired' => 'true',
+            'maintenanceTasks' => [
+                ['label' => 'Lube', 'interval' => ['value' => 500, 'unit' => 'km']],
+            ],
+        ]);
+
+        $this->assertTrue($command->isRetired());
     }
 
     public function testFromPayloadWithNewImage(): void
     {
         $command = CreateGearMaintenanceComponent::fromPayload([
             'label' => 'Chain',
-            'attachedTo' => ['b1'],
+            'installations' => [['parent' => 'gear:gear-b1']],
             'localImagePath' => json_encode([
                 ['status' => 'new', 'filename' => 'chain.png', 'content' => base64_encode('image-content')],
             ]),
@@ -73,7 +88,7 @@ class CreateGearMaintenanceComponentTest extends TestCase
         yield 'image file type is unsupported' => [
             [
                 'label' => 'Chain',
-                'attachedTo' => ['b1'],
+                'installations' => [['parent' => 'gear:gear-b1']],
                 'localImagePath' => json_encode([
                     ['status' => 'new', 'filename' => 'chain.gif', 'content' => base64_encode('image-content')],
                 ]),
@@ -86,7 +101,7 @@ class CreateGearMaintenanceComponentTest extends TestCase
 
         yield 'label is missing' => [
             [
-                'attachedTo' => ['b1'],
+                'installations' => [['parent' => 'gear:gear-b1']],
                 'maintenanceTasks' => [
                     ['label' => 'Lube', 'interval' => ['value' => 500, 'unit' => 'km']],
                 ],
@@ -94,19 +109,10 @@ class CreateGearMaintenanceComponentTest extends TestCase
             'A non-empty "label" is required.',
         ];
 
-        yield 'maintenanceTasks is empty' => [
-            [
-                'label' => 'Chain',
-                'attachedTo' => ['b1'],
-                'maintenanceTasks' => [],
-            ],
-            'At least one maintenance task is required.',
-        ];
-
         yield 'maintenance task ids are duplicated' => [
             [
                 'label' => 'Chain',
-                'attachedTo' => ['b1'],
+                'installations' => [['parent' => 'gear:gear-b1']],
                 'maintenanceTasks' => [
                     ['id' => 'maintenanceTask-chain-lubed', 'label' => 'Lube', 'interval' => ['value' => 500, 'unit' => 'km']],
                     ['id' => 'maintenanceTask-chain-lubed', 'label' => 'Replace', 'interval' => ['value' => 1000, 'unit' => 'km']],

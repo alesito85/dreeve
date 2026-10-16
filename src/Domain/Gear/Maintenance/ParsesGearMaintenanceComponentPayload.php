@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace App\Domain\Gear\Maintenance;
 
-use App\Domain\Gear\GearId;
-use App\Domain\Gear\GearIds;
+use App\Domain\Activity\SportType\SportType;
+use App\Domain\Activity\SportType\SportTypes;
+use App\Domain\Gear\Maintenance\Installation\GearComponentInstallation;
+use App\Domain\Gear\Maintenance\Installation\GearComponentInstallations;
+use App\Domain\Gear\Maintenance\Installation\InstallationParent;
 use App\Domain\Gear\Maintenance\Task\IntervalUnit;
 use App\Domain\Gear\Maintenance\Task\MaintenanceTask;
 use App\Domain\Gear\Maintenance\Task\MaintenanceTaskId;
 use App\Domain\Gear\Maintenance\Task\MaintenanceTasks;
 use App\Infrastructure\CQRS\Command\Deserialize\CouldNotDeserializeCommand;
 use App\Infrastructure\ValueObject\String\Name;
+use App\Infrastructure\ValueObject\Time\SerializableDateTime;
 
 trait ParsesGearMaintenanceComponentPayload
 {
@@ -30,22 +34,98 @@ trait ParsesGearMaintenanceComponentPayload
     /**
      * @param array<string, mixed> $payload
      */
-    private static function parseAttachedTo(array $payload): GearIds
+    private static function parseNotes(array $payload): ?string
     {
-        if (!isset($payload['attachedTo']) || !is_array($payload['attachedTo'])) {
-            throw CouldNotDeserializeCommand::invalidPayload('An "attachedTo" array is required.');
+        $notes = $payload['notes'] ?? null;
+        if (null === $notes) {
+            return null;
+        }
+        if (!is_string($notes)) {
+            throw CouldNotDeserializeCommand::invalidPayload('"notes" must be a string.');
         }
 
-        return GearIds::fromArray(array_map(
-            static function (mixed $gearId): GearId {
-                if (!is_string($gearId) || '' === trim($gearId)) {
-                    throw CouldNotDeserializeCommand::invalidPayload('Each "attachedTo" entry must be a non-empty string.');
+        return '' === trim($notes) ? null : trim($notes);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private static function parseInstallations(array $payload): GearComponentInstallations
+    {
+        if (!isset($payload['installations'])) {
+            return GearComponentInstallations::empty();
+        }
+        if (!is_array($payload['installations'])) {
+            throw CouldNotDeserializeCommand::invalidPayload('"installations" must be an array.');
+        }
+
+        $installations = GearComponentInstallations::empty();
+        foreach ($payload['installations'] as $installation) {
+            if (!is_array($installation)) {
+                throw CouldNotDeserializeCommand::invalidPayload('Each installation must be an object.');
+            }
+            if (!isset($installation['parent']) || !is_string($installation['parent']) || '' === trim($installation['parent'])) {
+                throw CouldNotDeserializeCommand::invalidPayload('A non-empty "parent" is required for each installation.');
+            }
+            try {
+                $parent = InstallationParent::fromString(trim($installation['parent']));
+            } catch (\InvalidArgumentException) {
+                throw CouldNotDeserializeCommand::invalidPayload(sprintf('Invalid installation parent "%s".', $installation['parent']));
+            }
+
+            $from = self::parseInstallationDate($installation, 'from');
+            $until = self::parseInstallationDate($installation, 'until');
+            if ($from instanceof SerializableDateTime && $until instanceof SerializableDateTime && $until->isBeforeOrOn($from)) {
+                throw CouldNotDeserializeCommand::invalidPayload('The "until" date of an installation must be after its "from" date.');
+            }
+
+            $installations->add(GearComponentInstallation::create(
+                parent: $parent,
+                from: $from,
+                until: $until,
+                sportTypes: self::parseInstallationSportTypes($installation),
+            ));
+        }
+
+        return $installations;
+    }
+
+    /**
+     * @param array<string, mixed> $installation
+     */
+    private static function parseInstallationSportTypes(array $installation): SportTypes
+    {
+        $sportTypes = $installation['sportTypes'] ?? [];
+        if (!is_array($sportTypes)) {
+            throw CouldNotDeserializeCommand::invalidPayload('The "sportTypes" of an installation must be an array.');
+        }
+
+        return SportTypes::fromArray(array_map(
+            static function (mixed $sportType): SportType {
+                if (!is_string($sportType) || !($parsed = SportType::tryFrom($sportType))) {
+                    throw CouldNotDeserializeCommand::invalidPayload(sprintf('Invalid sport type "%s".', is_scalar($sportType) ? $sportType : gettype($sportType)));
                 }
 
-                return GearId::fromUnprefixed(trim($gearId));
+                return $parsed;
             },
-            array_values($payload['attachedTo']),
+            array_values($sportTypes),
         ));
+    }
+
+    /**
+     * @param array<string, mixed> $installation
+     */
+    private static function parseInstallationDate(array $installation, string $key): ?SerializableDateTime
+    {
+        $date = $installation[$key] ?? null;
+        if (null === $date || '' === $date) {
+            return null;
+        }
+        if (!is_string($date) || !($parsed = \DateTimeImmutable::createFromFormat('!Y-m-d', $date)) || $parsed->format('Y-m-d') !== $date) {
+            throw CouldNotDeserializeCommand::invalidPayload(sprintf('Each installation "%s" date must be formatted as YYYY-MM-DD.', $key));
+        }
+
+        return SerializableDateTime::fromDateTimeImmutable($parsed);
     }
 
     /**
@@ -53,8 +133,11 @@ trait ParsesGearMaintenanceComponentPayload
      */
     private static function parseMaintenanceTasks(array $payload, bool $generateMissingIds): MaintenanceTasks
     {
-        if (!isset($payload['maintenanceTasks']) || !is_array($payload['maintenanceTasks']) || [] === $payload['maintenanceTasks']) {
-            throw CouldNotDeserializeCommand::invalidPayload('At least one maintenance task is required.');
+        if (!isset($payload['maintenanceTasks'])) {
+            return MaintenanceTasks::empty();
+        }
+        if (!is_array($payload['maintenanceTasks'])) {
+            throw CouldNotDeserializeCommand::invalidPayload('"maintenanceTasks" must be an array.');
         }
 
         $maintenanceTasks = MaintenanceTasks::empty();

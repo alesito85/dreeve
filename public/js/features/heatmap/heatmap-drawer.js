@@ -2,6 +2,7 @@ import {pointToLineDistance, point, lineString} from "../../../libraries/turf";
 import L from 'leaflet';
 import {createFlyToPlacesControl, createMapToolsControl} from "../maps/leaflet-controls";
 import HeatmapCountriesLayer from "./heatmap-countries-layer";
+import HeatmapTilesLayer from "./heatmap-tiles-layer";
 import '../maps/ctrl-scroll-zoom';
 
 export default class HeatmapDrawer {
@@ -16,6 +17,7 @@ export default class HeatmapDrawer {
         this.placesControl = null;
         this.mapToolsControl = null;
         this.mainFeatureGroup = L.featureGroup();
+        this.routesVisible = true;
         this.routePolylines = [];
         this.map = L.map(this.wrapper, {
             ctrlScrollZoom: this.config.requireCtrlToZoom,
@@ -45,9 +47,35 @@ export default class HeatmapDrawer {
         this.countriesLayer = countriesUrl
             ? new HeatmapCountriesLayer(this.map, countriesUrl, this.config.polylineColor)
             : null;
+        this.filtersNode = this.wrapper.closest('.heatmap-wrapper')?.querySelector('[data-heatmap-filters]');
+        const tilesUrl = this.wrapper.getAttribute('data-leaflet-tiles');
+        this.tilesLabel = this.wrapper.getAttribute('data-leaflet-tiles-label');
+        this.tilesLayer = tilesUrl
+            ? new HeatmapTilesLayer(
+                this.map,
+                tilesUrl,
+                this.config.polylineColor,
+                this.wrapper.closest('.heatmap-wrapper')?.querySelector('[data-heatmap-tiles-stats]'),
+            )
+            : null;
 
         this.map.on("click", (e) => this._handleMapClick(e));
         this.map.on("popupclose", () => this._resetRouteStyles());
+    }
+
+    _setFiltersDisabled(disabled) {
+        if (this.filtersNode) this.filtersNode.disabled = disabled;
+    }
+
+    _setRoutesVisible(visible) {
+        this.routesVisible = visible;
+        if (visible) {
+            this.mainFeatureGroup.addTo(this.map);
+            return;
+        }
+
+        this.map.closePopup();
+        this.map.removeLayer(this.mainFeatureGroup);
     }
 
     _resetRouteStyles() {
@@ -57,6 +85,10 @@ export default class HeatmapDrawer {
     }
 
     _handleMapClick(e) {
+        if (!this.routesVisible) {
+            return;
+        }
+
         const clickPoint = point([e.latlng.lng, e.latlng.lat]);
         const containerPoint = this.map.latLngToContainerPoint(e.latlng);
         const metersPerPixel = this.map.distance(e.latlng, this.map.containerPointToLatLng(containerPoint.add([1, 0])));
@@ -169,7 +201,9 @@ export default class HeatmapDrawer {
             });
         });
         this.countriesLayer?.setActiveCountryCodes([...countryBounds.keys()]);
-        this.mainFeatureGroup.addTo(this.map);
+        if (this.routesVisible) {
+            this.mainFeatureGroup.addTo(this.map);
+        }
 
         this.placesControl = createFlyToPlacesControl({places});
         this.map.addControl(this.placesControl);
@@ -177,11 +211,26 @@ export default class HeatmapDrawer {
         if (!this.mapToolsControl) {
             this.mapToolsControl = createMapToolsControl({
                 showReset: false,
-                toggles: this.countriesLayer ? [{
-                    icon: HeatmapCountriesLayer.ICON,
-                    title: this.countriesLabel,
-                    onToggle: (active) => this.countriesLayer.setEnabled(active),
-                }] : [],
+                toggles: [
+                    this.countriesLayer ? {
+                        icon: HeatmapCountriesLayer.ICON,
+                        title: this.countriesLabel,
+                        onToggle: (active) => this.countriesLayer.setEnabled(active),
+                    } : null,
+                    this.tilesLayer ? {
+                        icon: HeatmapTilesLayer.ICON,
+                        title: this.tilesLabel,
+                        onToggle: (active) => {
+                            this._setRoutesVisible(!active);
+                            this._setFiltersDisabled(active);
+                            return this.tilesLayer.setEnabled(active).catch(error => {
+                                this._setRoutesVisible(true);
+                                this._setFiltersDisabled(false);
+                                throw error;
+                            });
+                        },
+                    } : null,
+                ].filter(Boolean),
             });
             this.map.addControl(this.mapToolsControl);
         }

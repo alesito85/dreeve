@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Gear\Maintenance\UpdateGearMaintenanceComponent;
 
-use App\Domain\Gear\GearIds;
 use App\Domain\Gear\Maintenance\GearComponentId;
+use App\Domain\Gear\Maintenance\Installation\GearComponentInstallations;
 use App\Domain\Gear\Maintenance\ParsesGearMaintenanceComponentPayload;
 use App\Domain\Gear\Maintenance\Task\MaintenanceTasks;
 use App\Domain\Gear\ProvidePurchasePriceFromPayload;
@@ -29,11 +29,13 @@ final readonly class UpdateGearMaintenanceComponent extends DomainCommand implem
     private function __construct(
         private GearComponentId $gearComponentId,
         private Name $label,
-        private GearIds $attachedTo,
+        private GearComponentInstallations $installations,
         private ?NewImage $newImage,
         private ?RemovedImage $removedImage,
         private ?Money $purchasePrice,
         private MaintenanceTasks $maintenanceTasks,
+        private bool $isRetired,
+        private ?string $notes,
     ) {
     }
 
@@ -48,11 +50,13 @@ final readonly class UpdateGearMaintenanceComponent extends DomainCommand implem
         return new self(
             gearComponentId: GearComponentId::fromString(trim($payload['gearComponentId'])),
             label: self::parseLabel($payload),
-            attachedTo: self::parseAttachedTo($payload),
+            installations: self::parseInstallations($payload),
             newImage: $newImages[0] ?? null,
             removedImage: $removedImages[0] ?? null,
             purchasePrice: self::parsePurchasePrice($payload),
             maintenanceTasks: self::parseMaintenanceTasks($payload, generateMissingIds: true),
+            isRetired: filter_var($payload['isRetired'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            notes: self::parseNotes($payload),
         );
     }
 
@@ -66,9 +70,9 @@ final readonly class UpdateGearMaintenanceComponent extends DomainCommand implem
         return $this->label;
     }
 
-    public function getAttachedTo(): GearIds
+    public function getInstallations(): GearComponentInstallations
     {
-        return $this->attachedTo;
+        return $this->installations;
     }
 
     public function getNewImage(): ?NewImage
@@ -89,5 +93,15 @@ final readonly class UpdateGearMaintenanceComponent extends DomainCommand implem
     public function getMaintenanceTasks(): MaintenanceTasks
     {
         return $this->maintenanceTasks;
+    }
+
+    public function isRetired(): bool
+    {
+        return $this->isRetired;
+    }
+
+    public function getNotes(): ?string
+    {
+        return $this->notes;
     }
 }

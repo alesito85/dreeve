@@ -6,6 +6,7 @@
 '> 2.0: High monotony, increased risk': '> 2.0: 单调性高，风险增加'
 'A 6-hour week scores higher than a 5-hour week.': 'A 6-hour week scores higher than a 5-hour week.'
 'A file that belongs to this activity was imported more than once, so the data it replaced is kept here. Switching to a version replays the file it came from and keeps what it replaces as a new version.': '属于此活动的文件被导入了多次，因此它替换掉的数据会保留在这里。切换到某个版本会重新处理它来自的文件，并把被替换的数据保存为新版本。'
+'A cluster tile is a visited tile whose four neighbours are visited too': 集群方块是指四个相邻方块也都已访问的已访问方块
 'A high intensity score means a larger share of your training is hard rather than easy.': 'A high intensity score means a larger share of your training is hard rather than easy.'
 'A high score means you concentrate more training into fewer, heavier days.': 'A high score means you concentrate more training into fewer, heavier days.'
 'A:C Ratio': 'A:C 比值'
@@ -14,6 +15,7 @@
 'ATL (Fatigue)': 'ATL (疲劳)'
 'Accumulated fatigue': 'Accumulated fatigue'
 'Active days': 训练天数
+'Active gear': 'Active gear'
 Activities: 活动
 Activity: 活动
 'Activity count': 活动量
@@ -40,6 +42,7 @@ Aug: 八月
 Average: Average
 'Average gradient': 'Average gradient'
 'Average power': '平均功率'
+'Avg distance': 'Avg distance'
 'Avg gradient': 'Avg gradient'
 'Avg pace': 'Avg pace'
 'Avg speed': 'Avg speed'
@@ -70,6 +73,7 @@ Challenges: 挑战
 'Chronic Training Load (Fitness) - 42-day exponentially weighted average of your daily training load. Represents long-term training adaptation.': '长期训练负荷（体能）— 42天训练的负荷指数加权平均值。代表长期训练适应情况。'
 'Clear all filters': 'Clear all filters'
 'Clear chat': 'Clear chat'
+'Cluster tiles': 集群方块
 Columns: Columns
 'Combined pedal smoothness': 综合踩踏顺畅度
 Commute: Commute
@@ -83,6 +87,7 @@ Components: Components
 'Congrats! You achieved {numberOfPRs} PRs in this activity.': 'Congrats! You achieved {numberOfPRs} PRs in this activity.'
 'Consider reducing load': 'Consider reducing load'
 Consistency: Consistency
+Cost: Cost
 Country: Country
 Cricket: Cricket
 Crossfit: 交叉健身
@@ -98,7 +103,9 @@ Dashboard: 仪表板
 'Data this version has that the one before it does not': '此版本拥有而上一版本没有的数据'
 Date: 日期
 Day: Day
+'Days completed': 'Days completed'
 'Days needed': 所需天数
+'Days to go': 'Days to go'
 'Daytime stats': 白天统计
 Dec: 十二月
 'Decreased compared to yesterday': 'Decreased compared to yesterday'
@@ -115,6 +122,7 @@ Distance: 距离
 'Distance over time per gear': 每个装备随时间变化的距离
 'Distance per month per gear': 每个装备每月的距离
 'Doing a mix of cycling, running, swimming, and strength work increases your variety score.': 'Doing a mix of cycling, running, swimming, and strength work increases your variety score.'
+Download: Download
 Duration: Duration
 'Dusting off the record books...': 'Dusting off the record books...'
 'E-Bike Ride': 'E-Bike Ride'
@@ -143,6 +151,8 @@ Energy: Energy
 Evening: 晚上
 'Excludes commutes': 筛除通勤
 'Excludes group activities': 'Excludes group activities'
+'Explorer tiles': 探索方块
+'Explorer tiles include all your activities': 'Explorer tiles include all your activities'
 'FTP history': FTP历史
 Fastest: Fastest
 Favourite: 收藏夹
@@ -168,8 +178,6 @@ Fri.: Fri.
 GAP: GAP
 Gear: 装备
 'Gear maintenance': 装备维护
-'Gear stats': 装备统计
-"Gear that hasn't been used in the last three months, is disabled by default.": 过去三个月未使用的装备默认禁用。
 'Gear that is retired is disabled by default.': 退役的装备默认禁用。
 'Go to activity': 前往活动
 Goal: Goal
@@ -196,6 +204,7 @@ High: 高
 'High fatigue levels may increase injury or burnout risk. Consider reducing load and prioritizing recovery': 'High fatigue levels may increase injury or burnout risk. Consider reducing load and prioritizing recovery'
 'High monotony - increase variety': 单调性高——增加多样性
 'High risk': 'High risk'
+'Highlight explorer tiles': 高亮显示探索过的方块
 'Highlight visited countries': 高亮显示去过的国家
 'Highly recovered and ready to perform': 'Highly recovered and ready to perform'
 Hike: Hike
@@ -214,6 +223,7 @@ Imperial: Imperial
 'Increased compared to yesterday': 'Increased compared to yesterday'
 'Individual thresholds vary based on fitness level.': 个人阈值因体能水平而异。
 'Inline Skate': 直排轮滑
+'Installed on {component}': 'Installed on {component}'
 Intensity: Intensity
 Jan: 一月
 Jul: 七月
@@ -223,6 +233,7 @@ KOM: 赛段王
 Kayaking: 皮划艇
 'Kite Surf': 风筝冲浪
 Lap: 圈
+'Last 12 months': 'Last 12 months'
 'Last 30 days': 'Last 30 days'
 'Last 7 days training load': 最近7天训练负荷
 'Last activity': 'Last activity'
@@ -230,6 +241,7 @@ Lap: 圈
 'Last effort date': 'Last effort date'
 'Last maintenance': 最后维护
 'Last month': 'Last month'
+'Last used': 'Last used'
 'Last week': 'Last week'
 'Last {numberOfDays} days': '最近{numberOfDays}天'
 Left: 左
@@ -255,9 +267,12 @@ Maintenance: 维护
 'Manage recording devices': 'Manage recording devices'
 'Manage segments': 'Manage segments'
 'Map settings': 'Map settings'
+'Map tiles at zoom level 14 that your activities passed through': '你的活动经过的 14 级缩放地图方块'
 Mar: 三月
 Max: 最大
+'Max cluster': 最大集群
 'Max gradient': 'Max gradient'
+'Max square': 最大方块
 May: 五月
 Medium: 中等
 Metric: Metric
@@ -289,11 +304,14 @@ Neutral: Neutral
 Night: 夜晚
 'No activities': 没有活动
 'No data available': 没有可用数据
+'No maintenance tasks': 'No maintenance tasks'
 'No milestones achieved yet': 'No milestones achieved yet'
 'No other options to compare with': 无可供比较的其他选项
+'No purchase price set': 'No purchase price set'
 None: 无
 'Nordic Ski': 北欧滑雪
 'Normalized power': 'Normalized power'
+'Not fitted': 'Not fitted'
 'Not supported': 不支持
 Nov: 十一月
 Now: Now
@@ -308,6 +326,7 @@ Oct: 十月
 "Oops, looks like you've wandered off the map! 🗺️": "Oops, looks like you've wandered off the map! 🗺️"
 'Open Water Swim': 'Open Water Swim'
 'Optimal training range': 最佳训练范围
+'Original file': 'Original file'
 Other: 其他
 'Outdoor Sports': 户外运动
 Over-fatigued: Over-fatigued
@@ -339,6 +358,7 @@ Power: 功率
 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.': '消耗了约{caloriesBurned}卡路里，或大约{numberOfPizzaSlices}片披萨🍕。'
 'Prev year': 去年
 Previous: Previous
+Progress: Progress
 'Purchase price': 'Purchase price'
 Race: 比赛
 'Racing Score': 赛车成绩
@@ -346,6 +366,8 @@ Race: 比赛
 'Racquet Ball': 壁球
 Rank: Rank
 Ranking: Ranking
+'Reached a max cluster of {tileCount} tiles': 'Reached a max cluster of {tileCount} tiles'
+'Reached a {size}×{size} max square': 'Reached a {size}×{size} max square'
 'Reached {threshold} hours total moving time': 'Reached {threshold} hours total moving time'
 'Reached {threshold} total distance': 'Reached {threshold} total distance'
 'Reached {threshold} total elevation': 'Reached {threshold} total elevation'
@@ -354,18 +376,18 @@ Ranking: Ranking
 'Recalculating your suffer score...': 'Recalculating your suffer score...'
 Recent: Recent
 'Recent effort': 'Recent effort'
+'Recording device': 'Recording device'
 'Recording devices': 'Recording devices'
 'Recovery Timeline': 'Recovery Timeline'
 'Recovery forecast': 'Recovery forecast'
 'Reduced carbon emission by commuting': 通勤减少的碳排放
 'Register maintenance': 'Register maintenance'
-'Relative cost': 相对成本
 'Replaced on': '替换于'
 'Rest Days': 休息日
 'Rest days': 休息日
 'Rest days in last 7 days': 最近7天的休息日
 'Rest days vs. active days': '休息日 训练如 对比'
-'Retired gear': 退役装备
+Retired: Retired
 Rewind: 回顾
 'Rewind comparisons are only available on larger screens.': 回顾对比仅适用于大屏幕。
 Ride: Ride
@@ -423,6 +445,7 @@ Surfing: 冲浪
 'TSB positive in': 'TSB positive in'
 'Table Tennis': 乒乓球
 'Taper sweet-spot (+15)': '最佳减量期 (+15)'
+Target: Target
 'Team Sports': 'Team Sports'
 Temperature: Temperature
 'Temperature sensor': 'Temperature sensor'
@@ -516,8 +539,11 @@ Tennis: 网球
 "That's {number} days of at least {distance}": "That's {number} days of at least {distance}"
 "That's {percentage}% of all countries 🌍": "That's {percentage}% of all countries 🌍"
 'The Eddington number in the context of cycling or running is defined as the maximum number E such that the athlete has covered at least E km on at least E days.': 'The Eddington number in the context of cycling or running is defined as the maximum number E such that the athlete has covered at least E km on at least E days.'
+'The largest connected group of cluster tiles': 'The largest connected group of cluster tiles'
+'The largest square of visited tiles': 'The largest square of visited tiles'
 "The page you're looking for doesn't exist or may have been moved.": "The page you're looking for doesn't exist or may have been moved."
 'These badges are dynamically created. You can use them in any &lt;img&gt; tag': '徽章为动态生成，您可在任意 &lt;img&gt; 标签中使用'
+'These components are not installed on any gear at the moment.': 'These components are not installed on any gear at the moment.'
 Thinking...: 思考中...
 'This chart summarizes how you train. Each axis reflects a different normalized training habit, so higher values mean stronger emphasis.': 'This chart summarizes how you train. Each axis reflects a different normalized training habit, so higher values mean stronger emphasis.'
 'This feature is currently disabled': 功能当前被禁用
@@ -525,6 +551,7 @@ Thinking...: 思考中...
 'This week': 'This week'
 Thu: 周四
 Thu.: Thu.
+'Tiles visited for the first time in this activity': 'Tiles visited for the first time in this activity'
 Time: 时间
 'Time in gear': 'Time in gear'
 'Time in zone': 'Time in zone'
@@ -553,6 +580,8 @@ Tue.: Tue.
 'Unchanged compared to yesterday': 'Unchanged compared to yesterday'
 Unspecified: 未指定
 'Upcoming maintenance': 'Upcoming maintenance'
+'Upcoming numbers': 'Upcoming numbers'
+Usage: Usage
 'User badge': 用户徽章
 'Velo Mobile': 'Velo Mobile'
 'Velo Mobiles': 躺车
@@ -567,6 +596,7 @@ Unspecified: 未指定
 'Virtual Run': 'Virtual Run'
 'Virtual Runs': 虚拟跑步
 'Virtual workout assistant': 虚拟锻炼助手
+'Visited tiles': 已访问方块
 Volleyball: Volleyball
 Volume: Volume
 Wakeboarding: Wakeboarding
@@ -667,6 +697,7 @@ workouts: 锻炼
 '{numberOfResults} results': '{numberOfResults} results'
 '{numberOfResults} routes': '{numberOfResults} routes'
 '{numberOfRoutes} nearby route(s)': '{numberOfRoutes} nearby route(s)'
+'{numberOfTiles} new tile(s)': '{numberOfTiles} new tile(s)'
 '{numberOfWeeks} weeks': '{numberOfWeeks} weeks'
 '{threshold} hours using {gearName}': '{threshold} hours using {gearName}'
 '{threshold} total distance using {gearName}': '{threshold} total distance using {gearName}'

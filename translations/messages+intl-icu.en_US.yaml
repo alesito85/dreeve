@@ -6,6 +6,7 @@
 '> 2.0: High monotony, increased risk': '> 2.0: High monotony, increased risk'
 'A 6-hour week scores higher than a 5-hour week.': 'A 6-hour week scores higher than a 5-hour week.'
 'A file that belongs to this activity was imported more than once, so the data it replaced is kept here. Switching to a version replays the file it came from and keeps what it replaces as a new version.': 'A file that belongs to this activity was imported more than once, so the data it replaced is kept here. Switching to a version replays the file it came from and keeps what it replaces as a new version.'
+'A cluster tile is a visited tile whose four neighbours are visited too': 'A cluster tile is a visited tile whose four neighbours are visited too'
 'A high intensity score means a larger share of your training is hard rather than easy.': 'A high intensity score means a larger share of your training is hard rather than easy.'
 'A high score means you concentrate more training into fewer, heavier days.': 'A high score means you concentrate more training into fewer, heavier days.'
 'A:C Ratio': 'A:C Ratio'
@@ -14,6 +15,7 @@
 'ATL (Fatigue)': 'ATL (Fatigue)'
 'Accumulated fatigue': 'Accumulated fatigue'
 'Active days': 'Active days'
+'Active gear': 'Active gear'
 Activities: Activities
 Activity: Activity
 'Activity count': 'Activity count'
@@ -40,6 +42,7 @@ Aug: Aug
 Average: Average
 'Average gradient': 'Average gradient'
 'Average power': 'Average power'
+'Avg distance': 'Avg distance'
 'Avg gradient': 'Avg gradient'
 'Avg pace': 'Avg pace'
 'Avg speed': 'Avg speed'
@@ -70,6 +73,7 @@ Challenges: Challenges
 'Chronic Training Load (Fitness) - 42-day exponentially weighted average of your daily training load. Represents long-term training adaptation.': 'Chronic Training Load (Fitness) - 42-day exponentially weighted average of your daily training load. Represents long-term training adaptation.'
 'Clear all filters': 'Clear all filters'
 'Clear chat': 'Clear chat'
+'Cluster tiles': 'Cluster tiles'
 Columns: Columns
 'Combined pedal smoothness': 'Combined pedal smoothness'
 Commute: Commute
@@ -83,6 +87,7 @@ Components: Components
 'Congrats! You achieved {numberOfPRs} PRs in this activity.': 'Congrats! You achieved {numberOfPRs} PRs in this activity.'
 'Consider reducing load': 'Consider reducing load'
 Consistency: Consistency
+Cost: Cost
 Country: Country
 Cricket: Cricket
 Crossfit: Crossfit
@@ -98,7 +103,9 @@ Dashboard: Dashboard
 'Data this version has that the one before it does not': 'Data this version has that the one before it does not'
 Date: Date
 Day: Day
+'Days completed': 'Days completed'
 'Days needed': 'Days needed'
+'Days to go': 'Days to go'
 'Daytime stats': 'Daytime stats'
 Dec: Dec
 'Decreased compared to yesterday': 'Decreased compared to yesterday'
@@ -115,6 +122,7 @@ Distance: Distance
 'Distance over time per gear': 'Distance over time per gear'
 'Distance per month per gear': 'Distance per month per gear'
 'Doing a mix of cycling, running, swimming, and strength work increases your variety score.': 'Doing a mix of cycling, running, swimming, and strength work increases your variety score.'
+Download: Download
 Duration: Duration
 'Dusting off the record books...': 'Dusting off the record books...'
 'E-Bike Ride': 'E-Bike Ride'
@@ -143,6 +151,8 @@ Energy: Energy
 Evening: Evening
 'Excludes commutes': 'Excludes commutes'
 'Excludes group activities': 'Excludes group activities'
+'Explorer tiles': 'Explorer tiles'
+'Explorer tiles include all your activities': 'Explorer tiles include all your activities'
 'FTP history': 'FTP history'
 Fastest: Fastest
 Favourite: Favourite
@@ -168,8 +178,6 @@ Fri.: Fri.
 GAP: GAP
 Gear: Gear
 'Gear maintenance': 'Gear maintenance'
-'Gear stats': 'Gear stats'
-"Gear that hasn't been used in the last three months, is disabled by default.": "Gear that hasn't been used in the last three months, is disabled by default."
 'Gear that is retired is disabled by default.': 'Gear that is retired is disabled by default.'
 'Go to activity': 'Go to activity'
 Goal: Goal
@@ -196,6 +204,7 @@ High: High
 'High fatigue levels may increase injury or burnout risk. Consider reducing load and prioritizing recovery': 'High fatigue levels may increase injury or burnout risk. Consider reducing load and prioritizing recovery'
 'High monotony - increase variety': 'High monotony - increase variety'
 'High risk': 'High risk'
+'Highlight explorer tiles': 'Highlight explorer tiles'
 'Highlight visited countries': 'Highlight visited countries'
 'Highly recovered and ready to perform': 'Highly recovered and ready to perform'
 Hike: Hike
@@ -214,6 +223,7 @@ Imperial: Imperial
 'Increased compared to yesterday': 'Increased compared to yesterday'
 'Individual thresholds vary based on fitness level.': 'Individual thresholds vary based on fitness level.'
 'Inline Skate': 'Inline Skate'
+'Installed on {component}': 'Installed on {component}'
 Intensity: Intensity
 Jan: Jan
 Jul: Jul
@@ -223,6 +233,7 @@ KOM: KOM
 Kayaking: Kayaking
 'Kite Surf': 'Kite Surf'
 Lap: Lap
+'Last 12 months': 'Last 12 months'
 'Last 30 days': 'Last 30 days'
 'Last 7 days training load': 'Last 7 days training load'
 'Last activity': 'Last activity'
@@ -230,6 +241,7 @@ Lap: Lap
 'Last effort date': 'Last effort date'
 'Last maintenance': 'Last maintenance'
 'Last month': 'Last month'
+'Last used': 'Last used'
 'Last week': 'Last week'
 'Last {numberOfDays} days': 'Last {numberOfDays} days'
 Left: Left
@@ -255,9 +267,12 @@ Maintenance: Maintenance
 'Manage recording devices': 'Manage recording devices'
 'Manage segments': 'Manage segments'
 'Map settings': 'Map settings'
+'Map tiles at zoom level 14 that your activities passed through': 'Map tiles at zoom level 14 that your activities passed through'
 Mar: Mar
 Max: Max
+'Max cluster': 'Max cluster'
 'Max gradient': 'Max gradient'
+'Max square': 'Max square'
 May: May
 Medium: Medium
 Metric: Metric
@@ -289,11 +304,14 @@ Neutral: Neutral
 Night: Night
 'No activities': 'No activities'
 'No data available': 'No data available'
+'No maintenance tasks': 'No maintenance tasks'
 'No milestones achieved yet': 'No milestones achieved yet'
 'No other options to compare with': 'No other options to compare with'
+'No purchase price set': 'No purchase price set'
 None: None
 'Nordic Ski': 'Nordic Ski'
 'Normalized power': 'Normalized power'
+'Not fitted': 'Not fitted'
 'Not supported': 'Not supported'
 Nov: Nov
 Now: Now
@@ -308,6 +326,7 @@ Oct: Oct
 "Oops, looks like you've wandered off the map! 🗺️": "Oops, looks like you've wandered off the map! 🗺️"
 'Open Water Swim': 'Open Water Swim'
 'Optimal training range': 'Optimal training range'
+'Original file': 'Original file'
 Other: Other
 'Outdoor Sports': 'Outdoor Sports'
 Over-fatigued: Over-fatigued
@@ -339,6 +358,7 @@ Power: Power
 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.': 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.'
 'Prev year': 'Prev year'
 Previous: Previous
+Progress: Progress
 'Purchase price': 'Purchase price'
 Race: Race
 'Racing Score': 'Racing Score'
@@ -346,6 +366,8 @@ Race: Race
 'Racquet Ball': 'Racquet Ball'
 Rank: Rank
 Ranking: Ranking
+'Reached a max cluster of {tileCount} tiles': 'Reached a max cluster of {tileCount} tiles'
+'Reached a {size}×{size} max square': 'Reached a {size}×{size} max square'
 'Reached {threshold} hours total moving time': 'Reached {threshold} hours total moving time'
 'Reached {threshold} total distance': 'Reached {threshold} total distance'
 'Reached {threshold} total elevation': 'Reached {threshold} total elevation'
@@ -354,18 +376,18 @@ Ranking: Ranking
 'Recalculating your suffer score...': 'Recalculating your suffer score...'
 Recent: Recent
 'Recent effort': 'Recent effort'
+'Recording device': 'Recording device'
 'Recording devices': 'Recording devices'
 'Recovery Timeline': 'Recovery Timeline'
 'Recovery forecast': 'Recovery forecast'
 'Reduced carbon emission by commuting': 'Reduced carbon emission by commuting'
 'Register maintenance': 'Register maintenance'
-'Relative cost': 'Relative cost'
 'Replaced on': 'Replaced on'
 'Rest Days': 'Rest Days'
 'Rest days': 'Rest days'
 'Rest days in last 7 days': 'Rest days in last 7 days'
 'Rest days vs. active days': 'Rest days vs. active days'
-'Retired gear': 'Retired gear'
+Retired: Retired
 Rewind: Rewind
 'Rewind comparisons are only available on larger screens.': 'Rewind comparisons are only available on larger screens.'
 Ride: Ride
@@ -423,6 +445,7 @@ Surfing: Surfing
 'TSB positive in': 'TSB positive in'
 'Table Tennis': 'Table Tennis'
 'Taper sweet-spot (+15)': 'Taper sweet-spot (+15)'
+Target: Target
 'Team Sports': 'Team Sports'
 Temperature: Temperature
 'Temperature sensor': 'Temperature sensor'
@@ -516,8 +539,11 @@ Tennis: Tennis
 "That's {number} days of at least {distance}": "That's {number} days of at least {distance}"
 "That's {percentage}% of all countries 🌍": "That's {percentage}% of all countries 🌍"
 'The Eddington number in the context of cycling or running is defined as the maximum number E such that the athlete has covered at least E km on at least E days.': 'The Eddington number in the context of cycling or running is defined as the maximum number E such that the athlete has covered at least E km on at least E days.'
+'The largest connected group of cluster tiles': 'The largest connected group of cluster tiles'
+'The largest square of visited tiles': 'The largest square of visited tiles'
 "The page you're looking for doesn't exist or may have been moved.": "The page you're looking for doesn't exist or may have been moved."
 'These badges are dynamically created. You can use them in any &lt;img&gt; tag': 'These badges are dynamically created. You can use them in any &lt;img&gt; tag'
+'These components are not installed on any gear at the moment.': 'These components are not installed on any gear at the moment.'
 Thinking...: Thinking...
 'This chart summarizes how you train. Each axis reflects a different normalized training habit, so higher values mean stronger emphasis.': 'This chart summarizes how you train. Each axis reflects a different normalized training habit, so higher values mean stronger emphasis.'
 'This feature is currently disabled': 'This feature is currently disabled'
@@ -525,6 +551,7 @@ Thinking...: Thinking...
 'This week': 'This week'
 Thu: Thu
 Thu.: Thu.
+'Tiles visited for the first time in this activity': 'Tiles visited for the first time in this activity'
 Time: Time
 'Time in gear': 'Time in gear'
 'Time in zone': 'Time in zone'
@@ -553,6 +580,8 @@ Tue.: Tue.
 'Unchanged compared to yesterday': 'Unchanged compared to yesterday'
 Unspecified: Unspecified
 'Upcoming maintenance': 'Upcoming maintenance'
+'Upcoming numbers': 'Upcoming numbers'
+Usage: Usage
 'User badge': 'User badge'
 'Velo Mobile': 'Velo Mobile'
 'Velo Mobiles': 'Velo Mobiles'
@@ -567,6 +596,7 @@ Unspecified: Unspecified
 'Virtual Run': 'Virtual Run'
 'Virtual Runs': 'Virtual Runs'
 'Virtual workout assistant': 'Virtual workout assistant'
+'Visited tiles': 'Visited tiles'
 Volleyball: Volleyball
 Volume: Volume
 Wakeboarding: Wakeboarding
@@ -667,6 +697,7 @@ workouts: workouts
 '{numberOfResults} results': '{numberOfResults} results'
 '{numberOfResults} routes': '{numberOfResults} routes'
 '{numberOfRoutes} nearby route(s)': '{numberOfRoutes} nearby route(s)'
+'{numberOfTiles} new tile(s)': '{numberOfTiles} new tile(s)'
 '{numberOfWeeks} weeks': '{numberOfWeeks} weeks'
 '{threshold} hours using {gearName}': '{threshold} hours using {gearName}'
 '{threshold} total distance using {gearName}': '{threshold} total distance using {gearName}'

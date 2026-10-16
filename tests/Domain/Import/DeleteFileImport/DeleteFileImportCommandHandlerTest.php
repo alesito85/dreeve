@@ -39,6 +39,24 @@ class DeleteFileImportCommandHandlerTest extends ContainerTestCase
         );
     }
 
+    public function testItIgnoresAnUnknownFileImport(): void
+    {
+        $this->fileImportRepository->add(
+            FileImportBuilder::fromDefaults()
+                ->withFileImportId(FileImportId::fromUnprefixed('1'))
+                ->build()
+        );
+
+        $this->commandBus->dispatch(DeleteFileImport::fromPayload([
+            'fileImportId' => (string) FileImportId::fromUnprefixed('nope'),
+        ]));
+
+        $this->assertSame(
+            [(string) FileImportId::fromUnprefixed('1')],
+            $this->getConnection()->executeQuery('SELECT fileImportId FROM FileImport')->fetchFirstColumn(),
+        );
+    }
+
     #[\Override]
     protected function setUp(): void
     {

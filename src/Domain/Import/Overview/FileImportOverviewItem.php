@@ -22,6 +22,7 @@ final readonly class FileImportOverviewItem implements Item
         private ?string $errorMessage,
         private ?ActivityId $activityId,
         private ?string $activityName,
+        private ?SerializableDateTime $activityStartDate,
         private bool $hasFileContents,
         private int $revisionCount,
     ) {
@@ -36,6 +37,7 @@ final readonly class FileImportOverviewItem implements Item
         ?string $errorMessage,
         ?ActivityId $activityId,
         ?string $activityName,
+        ?SerializableDateTime $activityStartDate,
         bool $hasFileContents,
         int $revisionCount,
     ): self {
@@ -48,6 +50,7 @@ final readonly class FileImportOverviewItem implements Item
             errorMessage: $errorMessage,
             activityId: $activityId,
             activityName: $activityName,
+            activityStartDate: $activityStartDate,
             hasFileContents: $hasFileContents,
             revisionCount: $revisionCount,
         );
@@ -66,6 +69,7 @@ final readonly class FileImportOverviewItem implements Item
             errorMessage: null,
             activityId: null,
             activityName: null,
+            activityStartDate: null,
             hasFileContents: false,
             revisionCount: 0,
         );
@@ -134,6 +138,11 @@ final readonly class FileImportOverviewItem implements Item
     public function getActivityName(): ?string
     {
         return $this->activityName;
+    }
+
+    public function getActivityStartDate(): ?SerializableDateTime
+    {
+        return $this->activityStartDate;
     }
 
     public function getImportedOn(): ?SerializableDateTime

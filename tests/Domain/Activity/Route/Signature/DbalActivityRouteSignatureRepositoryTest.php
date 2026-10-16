@@ -8,9 +8,9 @@ use App\Domain\Activity\ActivityRepository;
 use App\Domain\Activity\ActivityWithRawData;
 use App\Domain\Activity\Route\Signature\ActivityRouteSignatureRepository;
 use App\Domain\Activity\Route\Signature\DbalActivityRouteSignatureRepository;
-use App\Domain\Activity\Route\Signature\RouteCells;
-use App\Domain\Activity\Route\Signature\RouteGrid;
-use App\Domain\Activity\Route\Signature\RouteWaypoints;
+use App\Domain\Geography\Grid\RouteCells;
+use App\Domain\Geography\Grid\RouteGrid;
+use App\Domain\Geography\Grid\RouteWaypoints;
 use App\Infrastructure\Exception\EntityNotFound;
 use App\Infrastructure\Serialization\Json;
 use App\Infrastructure\ValueObject\Geography\EncodedPolyline;
@@ -20,7 +20,6 @@ use App\Tests\Domain\Activity\ActivityBuilder;
 class DbalActivityRouteSignatureRepositoryTest extends ContainerTestCase
 {
     private ActivityRouteSignatureRepository $activityRouteSignatureRepository;
-    private RouteGrid $routeGrid;
 
     public function testAdd(): void
     {
@@ -96,7 +95,7 @@ class DbalActivityRouteSignatureRepositoryTest extends ContainerTestCase
         $this->activityRouteSignatureRepository->add(
             ActivityRouteSignatureBuilder::fromDefaults()
                 ->withActivityId(ActivityId::fromUnprefixed('up-to-date'))
-                ->withPolylineChecksum($this->routeGrid->checksumFor(EncodedPolyline::fromString($polyline)))
+                ->withPolylineChecksum(RouteGrid::checksumFor(EncodedPolyline::fromString($polyline)))
                 ->build()
         );
 
@@ -160,10 +159,6 @@ class DbalActivityRouteSignatureRepositoryTest extends ContainerTestCase
     {
         parent::setUp();
 
-        $this->routeGrid = new RouteGrid();
-        $this->activityRouteSignatureRepository = new DbalActivityRouteSignatureRepository(
-            $this->getConnection(),
-            $this->routeGrid,
-        );
+        $this->activityRouteSignatureRepository = new DbalActivityRouteSignatureRepository($this->getConnection());
     }
 }

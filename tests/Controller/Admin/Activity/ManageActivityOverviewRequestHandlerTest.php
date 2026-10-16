@@ -63,11 +63,18 @@ class ManageActivityOverviewRequestHandlerTest extends AdminWebTestCase
         $this->assertCount(1, $form->filter('select[name="filters[gear]"]'));
         $this->assertCount(1, $form->filter('select[name="filters[device]"]'));
         $this->assertCount(1, $form->filter('select[name="filters[importSource]"]'));
+        $this->assertSame(
+            ['peakPowerOutputs' => 'Peak power outputs', 'bestEfforts' => 'Best efforts'],
+            array_combine(
+                $form->filter('select[name="filters[excludedFrom]"] option:not([value=""])')->each(fn ($option) => $option->attr('value')),
+                $form->filter('select[name="filters[excludedFrom]"] option:not([value=""])')->each(fn ($option) => $option->text()),
+            ),
+        );
         $this->assertCount(1, $form->filter('button[type="submit"]'));
         $this->assertCount(0, $form->filter('a.btn--secondary'));
 
         $gearOption = $form->filter('select[name="filters[gear]"] option:not([value=""])');
-        $this->assertCount(1, $gearOption);
+        $this->assertCount(2, $gearOption);
         $this->assertSame((string) GearId::fromUnprefixed('99'), $gearOption->attr('value'));
         $this->assertSame('Trail Shoes', $gearOption->text());
     }
@@ -176,6 +183,38 @@ class ManageActivityOverviewRequestHandlerTest extends AdminWebTestCase
         yield 'an invalid sport type value is silently ignored' => [
             'bogus', 3, null,
         ];
+    }
+
+    public function testFiltersTheTableOnUnspecifiedGear(): void
+    {
+        $this->seedActivities(3);
+        $this->seedActivity();
+        $this->client->loginUser($this->adminUser());
+
+        $crawler = $this->client->request('GET', '/admin/activities?filters[gear]=gear-none');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertCount(0, $crawler->filter('table.data-table tbody tr td:not([colspan])'));
+        $this->assertSame(
+            'gear-none',
+            $crawler->filter('select[name="filters[gear]"] option[selected]')->attr('value')
+        );
+    }
+
+    public function testFiltersTheTableOnUnspecifiedDevice(): void
+    {
+        $this->seedActivities(3);
+        $this->seedActivity();
+        $this->client->loginUser($this->adminUser());
+
+        $crawler = $this->client->request('GET', '/admin/activities?filters[device]=recordingDevice-none');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertCount(3, $crawler->filter('table.data-table tbody tr'));
+        $this->assertSame(
+            'recordingDevice-none',
+            $crawler->filter('select[name="filters[device]"] option[selected]')->attr('value')
+        );
     }
 
     public function testRendersTheFilterFormWhenActiveFiltersMatchNothing(): void

@@ -5,11 +5,16 @@ namespace App\Tests\Domain\Gear\Maintenance\Task\Progress;
 use App\Domain\Activity\ActivityId;
 use App\Domain\Activity\ActivityRepository;
 use App\Domain\Activity\ActivityWithRawData;
+use App\Domain\Activity\SportType\SportTypes;
 use App\Domain\Gear\GearId;
 use App\Domain\Gear\GearIdRepository;
-use App\Domain\Gear\GearIds;
 use App\Domain\Gear\GearRepository;
+use App\Domain\Gear\Maintenance\GearComponent;
+use App\Domain\Gear\Maintenance\GearComponentId;
+use App\Domain\Gear\Maintenance\GearComponentRepository;
 use App\Domain\Gear\Maintenance\GearMaintenanceRepository;
+use App\Domain\Gear\Maintenance\Installation\UsageWindow;
+use App\Domain\Gear\Maintenance\Installation\UsageWindows;
 use App\Domain\Gear\Maintenance\Log\GearMaintenanceLog;
 use App\Domain\Gear\Maintenance\Log\GearMaintenanceLogRepository;
 use App\Domain\Gear\Maintenance\Task\IntervalUnit;
@@ -18,10 +23,12 @@ use App\Domain\Gear\Maintenance\Task\Progress\MaintenanceTaskProgress;
 use App\Domain\Gear\Maintenance\Task\Progress\MaintenanceTaskProgressCalculator;
 use App\Domain\Gear\Maintenance\Task\Progress\ProgressCalculationContext;
 use App\Infrastructure\Measurement\Length\Kilometer;
+use App\Infrastructure\Serialization\Json;
 use App\Infrastructure\ValueObject\Time\SerializableDateTime;
 use App\Tests\ContainerTestCase;
 use App\Tests\Domain\Activity\ActivityBuilder;
 use App\Tests\Domain\Gear\GearBuilder;
+use App\Tests\Infrastructure\Time\Clock\PausedClock;
 use App\Tests\ProvideGearMaintenanceConfig;
 
 class MaintenanceTaskProgressCalculatorTest extends ContainerTestCase
@@ -37,17 +44,45 @@ class MaintenanceTaskProgressCalculatorTest extends ContainerTestCase
                 new ProgressCalculationTwo(),
             ],
                 $this->getContainer()->get(GearMaintenanceRepository::class),
+                $this->getContainer()->get(GearComponentRepository::class),
                 $this->getContainer()->get(GearMaintenanceLogRepository::class),
                 $this->getContainer()->get(GearIdRepository::class),
+                PausedClock::on(SerializableDateTime::some()),
             )->calculateProgressFor(
                 ProgressCalculationContext::from(
-                    gearIds: GearIds::fromArray([GearId::fromUnprefixed('test')]),
+                    usageWindows: UsageWindows::fromArray([UsageWindow::create(gearId: GearId::fromUnprefixed('test'), from: null, until: null, sportTypes: SportTypes::empty())]),
                     lastTaggedOn: SerializableDateTime::fromString('2025-01-03'),
                     intervalUnit: IntervalUnit::EVERY_X_DAYS,
                     intervalValue: 4,
                 )
             )
         );
+    }
+
+    public function testCalculateStatusesForTasksThatWereNeverPerformed(): void
+    {
+        $this->importGearMaintenanceConfigFromArray(Json::decode(file_get_contents(__DIR__.'/fixtures/never-logged-tasks.json')));
+        foreach ([['before-install', '2024-12-01 10:00:00', 100], ['after-install', '2025-02-01 10:00:00', 40]] as [$activityId, $startDateTime, $distance]) {
+            $this->getContainer()->get(ActivityRepository::class)->add(ActivityWithRawData::fromState(
+                ActivityBuilder::fromDefaults()
+                    ->withActivityId(ActivityId::fromUnprefixed($activityId))
+                    ->withGearId(GearId::fromUnprefixed('bike-a'))
+                    ->withStartDateTime(SerializableDateTime::fromString($startDateTime))
+                    ->withDistance(Kilometer::from($distance))
+                    ->build(),
+                []
+            ));
+        }
+
+        $statuses = $this->getContainer()->get(MaintenanceTaskProgressCalculator::class)->calculateStatuses();
+
+        $newChainReplace = $statuses->getForTask(MaintenanceTaskId::fromUnprefixed('new-chain-replace'));
+        $this->assertNull($newChainReplace->getLastPerformedOn());
+        $this->assertSame('40 km', $newChainReplace->getProgress()->getDescription());
+        $this->assertNotNull($statuses->getForTask(MaintenanceTaskId::fromUnprefixed('new-chain-inspect'))->getProgress());
+
+        $this->assertSame('140 km', $statuses->getForTask(MaintenanceTaskId::fromUnprefixed('old-cassette-replace'))->getProgress()->getDescription());
+        $this->assertNull($statuses->getForTask(MaintenanceTaskId::fromUnprefixed('old-cassette-inspect'))->getProgress());
     }
 
     public function testGetGearIdsThatHaveDueTasks(): void
@@ -72,6 +107,20 @@ class MaintenanceTaskProgressCalculatorTest extends ContainerTestCase
             [GearId::fromUnprefixed('g1233776'), GearId::fromUnprefixed('g10130856')],
             $this->getContainer()->get(MaintenanceTaskProgressCalculator::class)->getGearIdsThatHaveDueTasks()->toArray()
         );
+    }
+
+    public function testRetiredComponentsAreNotTracked(): void
+    {
+        $this->importGearMaintenanceConfig();
+        $gearComponentRepository = $this->getContainer()->get(GearComponentRepository::class);
+        $chain = Json::decode(Json::encode($gearComponentRepository->find(GearComponentId::fromString('gearComponent-chain'))));
+        $gearComponentRepository->update(GearComponent::fromArray([...$chain, 'isRetired' => true]));
+        $this->rideSinceTheChainWasLubed(Kilometer::from(600));
+
+        $calculator = $this->getContainer()->get(MaintenanceTaskProgressCalculator::class);
+        $this->assertNull($calculator->calculateStatuses()->getForTask(MaintenanceTaskId::fromUnprefixed('chain-lubed')));
+        $this->assertNotNull($calculator->calculateStatuses()->getForTask(MaintenanceTaskId::fromUnprefixed('di-2-charged')));
+        $this->assertEmpty($calculator->getGearIdsThatHaveDueTasks()->toArray());
     }
 
     public function testGetGearIdsThatHaveDueTasksWhenNothingIsDue(): void
@@ -127,11 +176,13 @@ class MaintenanceTaskProgressCalculatorTest extends ContainerTestCase
         new MaintenanceTaskProgressCalculator(
             [],
             $this->getContainer()->get(GearMaintenanceRepository::class),
+            $this->getContainer()->get(GearComponentRepository::class),
             $this->getContainer()->get(GearMaintenanceLogRepository::class),
             $this->getContainer()->get(GearIdRepository::class),
+            PausedClock::on(SerializableDateTime::some()),
         )->calculateProgressFor(
             ProgressCalculationContext::from(
-                gearIds: GearIds::fromArray([GearId::fromUnprefixed('test')]),
+                usageWindows: UsageWindows::fromArray([UsageWindow::create(gearId: GearId::fromUnprefixed('test'), from: null, until: null, sportTypes: SportTypes::empty())]),
                 lastTaggedOn: SerializableDateTime::fromString('2025-01-03'),
                 intervalUnit: IntervalUnit::EVERY_X_DAYS,
                 intervalValue: 4,

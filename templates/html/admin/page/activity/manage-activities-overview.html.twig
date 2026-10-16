@@ -46,6 +46,7 @@
                         {% for gear in gearOptions %}
                             <option value="{{ gear.getId() }}" {{ gear.getId() == filters.getGearId() ? 'selected' }}>{{ gear.getName() }}</option>
                         {% endfor %}
+                        <option value="gear-none" {{ 'gear-none' == filters.getGearId() ? 'selected' }}>{{ "Unspecified"|trans }}</option>
                     </select>
                 </div>
                 <div>
@@ -55,6 +56,7 @@
                         {% for device in deviceOptions %}
                             <option value="{{ device.getName() }}" {{ device.getName() == filters.getDevice() ? 'selected' }}>{{ device.getName() }}</option>
                         {% endfor %}
+                        <option value="recordingDevice-none" {{ 'recordingDevice-none' == filters.getDevice() ? 'selected' }}>{{ "Unspecified"|trans }}</option>
                     </select>
                 </div>
                 <div>
@@ -63,6 +65,15 @@
                         <option value="">{{ "All"|trans }}</option>
                         {% for importSource in importSourceOptions %}
                             <option value="{{ importSource.value }}" {{ importSource == filters.getImportSource() ? 'selected' }}>{{ importSource.label() }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-excluded-from" class="mt-0! text-xs text-gray-500">{{ "Excluded from"|trans({}, 'admin') }}</label>
+                    <select id="filter-excluded-from" name="filters[excludedFrom]">
+                        <option value="">{{ "All"|trans }}</option>
+                        {% for exclusion in exclusionOptions %}
+                            <option value="{{ exclusion.value }}" {{ exclusion == filters.getExcludedFrom() ? 'selected' }}>{{ exclusion|trans }}</option>
                         {% endfor %}
                     </select>
                 </div>

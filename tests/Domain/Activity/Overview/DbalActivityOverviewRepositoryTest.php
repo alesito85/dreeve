@@ -19,6 +19,8 @@ use App\Domain\Activity\SportType\SportType;
 use App\Domain\Gear\DbalGearRepository;
 use App\Domain\Gear\GearId;
 use App\Domain\Gear\GearRepository;
+use App\Domain\Settings\SettingsName;
+use App\Domain\Settings\SettingsRepository;
 use App\Infrastructure\Eventing\EventBus;
 use App\Infrastructure\Repository\Pagination;
 use App\Infrastructure\ValueObject\Geography\Coordinate;
@@ -347,10 +349,24 @@ class DbalActivityOverviewRepositoryTest extends ContainerTestCase
             1,
         ];
 
+        yield 'the unspecified gear filter narrows the items to activities without gear' => [
+            ['gear' => 'gear-none'],
+            Pagination::fromOffsetAndLimit(0, 10),
+            ['Newest'],
+            1,
+        ];
+
         yield 'a device filter narrows the items' => [
             ['device' => 'Wahoo Elemnt'],
             Pagination::fromOffsetAndLimit(0, 10),
             ['Middle'],
+            1,
+        ];
+
+        yield 'the unspecified device filter narrows the items to activities without a device' => [
+            ['device' => 'recordingDevice-none'],
+            Pagination::fromOffsetAndLimit(0, 10),
+            ['Newest'],
             1,
         ];
 
@@ -359,6 +375,20 @@ class DbalActivityOverviewRepositoryTest extends ContainerTestCase
             Pagination::fromOffsetAndLimit(0, 10),
             ['Oldest'],
             1,
+        ];
+
+        yield 'an excluded from filter narrows the items to the excluded activities' => [
+            ['excludedFrom' => 'peakPowerOutputs'],
+            Pagination::fromOffsetAndLimit(0, 10),
+            ['Middle'],
+            1,
+        ];
+
+        yield 'an excluded from filter without excluded activities yields an empty overview' => [
+            ['excludedFrom' => 'bestEfforts'],
+            Pagination::fromOffsetAndLimit(0, 10),
+            [],
+            0,
         ];
 
         yield 'filters combine' => [
@@ -419,6 +449,7 @@ class DbalActivityOverviewRepositoryTest extends ContainerTestCase
                 ->build(),
             [],
         ));
+        $this->getContainer()->get(SettingsRepository::class)->save(SettingsName::ACTIVITIES_EXCLUDED_FROM_PEAK_POWER_OUTPUTS, ['activity-2']);
     }
 
     private function seedSearchableActivities(): void
@@ -462,7 +493,8 @@ class DbalActivityOverviewRepositoryTest extends ContainerTestCase
             new SpyEventBus(),
         );
         $this->activityOverviewRepository = new DbalActivityOverviewRepository(
-            $this->getConnection()
+            $this->getConnection(),
+            $this->getContainer()->get(SettingsRepository::class),
         );
         $this->gearRepository = new DbalGearRepository(
             $this->getConnection(),

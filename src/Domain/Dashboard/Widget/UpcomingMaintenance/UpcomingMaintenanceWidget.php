@@ -12,8 +12,9 @@ use App\Domain\Dashboard\Widget\WidgetConfiguration;
 use App\Domain\Dashboard\Widget\WidgetRenderer;
 use App\Domain\Gear\GearIdRepository;
 use App\Domain\Gear\GearIds;
-use App\Domain\Gear\Maintenance\GearComponent;
+use App\Domain\Gear\Maintenance\GearComponentRepository;
 use App\Domain\Gear\Maintenance\GearMaintenanceRepository;
+use App\Domain\Gear\Maintenance\Task\Progress\MaintenanceTaskProgress;
 use App\Domain\Gear\Maintenance\Task\Progress\MaintenanceTaskProgressCalculator;
 use App\Infrastructure\Cache\Tag\CacheTags;
 use App\Infrastructure\Cache\Tag\RootCacheTag;
@@ -25,6 +26,7 @@ final readonly class UpcomingMaintenanceWidget implements Widget, DependsOnCurre
     public function __construct(
         private TranslatorInterface $translator,
         private GearMaintenanceRepository $gearMaintenanceRepository,
+        private GearComponentRepository $gearComponentRepository,
         private MaintenanceTaskProgressCalculator $maintenanceTaskProgressCalculator,
         private GearIdRepository $gearIdRepository,
         private WidgetRenderer $widgetRenderer,
@@ -85,14 +87,15 @@ final readonly class UpcomingMaintenanceWidget implements Widget, DependsOnCurre
             : GearIds::empty();
 
         $upcomingMaintenanceTasks = [];
-        foreach ($gearMaintenanceConfig->getGearComponents() as $gearComponent) {
-            if ($this->isOnlyAttachedToRetiredGear($gearComponent, $retiredGearIds)) {
+        $gearComponents = $this->gearComponentRepository->findAll();
+        foreach ($gearComponents->withoutRetired() as $gearComponent) {
+            if ($this->isOnlyAttachedToRetiredGear($gearComponents->getGearIdsCurrentlyUsing($gearComponent, $now), $retiredGearIds)) {
                 continue;
             }
 
             foreach ($gearComponent->getMaintenanceTasks() as $maintenanceTask) {
-                // A task that was never performed has no anchor date, so there is no countdown to show.
-                if (!($progress = $maintenanceTaskStatuses->getForTask($maintenanceTask->getId())?->getProgress()) instanceof \App\Domain\Gear\Maintenance\Task\Progress\MaintenanceTaskProgress) {
+                // A calendar-day task that was never performed on an undated installation has no anchor date, so there is no countdown to show.
+                if (!($progress = $maintenanceTaskStatuses->getForTask($maintenanceTask->getId())?->getProgress()) instanceof MaintenanceTaskProgress) {
                     continue;
                 }
 
@@ -120,9 +123,9 @@ final readonly class UpcomingMaintenanceWidget implements Widget, DependsOnCurre
         ]);
     }
 
-    private function isOnlyAttachedToRetiredGear(GearComponent $gearComponent, GearIds $retiredGearIds): bool
+    private function isOnlyAttachedToRetiredGear(GearIds $currentGearIds, GearIds $retiredGearIds): bool
     {
-        foreach ($gearComponent->getAttachedTo() as $gearId) {
+        foreach ($currentGearIds as $gearId) {
             if (!$retiredGearIds->has($gearId)) {
                 return false;
             }

@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace App\Tests\Domain\Gear\Maintenance\UpdateGearMaintenanceComponent;
 
+use App\Domain\Gear\Maintenance\GearComponentRepository;
 use App\Domain\Gear\Maintenance\UpdateGearMaintenanceComponent\UpdateGearMaintenanceComponent;
 use App\Infrastructure\CQRS\Command\Bus\CommandBus;
-use App\Infrastructure\KeyValue\Key;
-use App\Infrastructure\KeyValue\KeyValue;
-use App\Infrastructure\KeyValue\KeyValueStore;
-use App\Infrastructure\KeyValue\Value;
+use App\Infrastructure\CQRS\Command\CouldNotProcessCommand;
 use App\Infrastructure\Serialization\Json;
 use App\Tests\ContainerTestCase;
 use App\Tests\ProvideGearMaintenanceConfig;
 use League\Flysystem\FilesystemOperator;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class UpdateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
 {
     use ProvideGearMaintenanceConfig;
 
     private CommandBus $commandBus;
-    private KeyValueStore $keyValueStore;
     private FilesystemOperator $fileStorage;
 
     public function testItUpdatesExistingComponentAndLeavesOthersUntouched(): void
@@ -30,30 +28,125 @@ class UpdateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
         $this->commandBus->dispatch(UpdateGearMaintenanceComponent::fromPayload([
             'gearComponentId' => 'gearComponent-chain',
             'label' => 'Updated chain',
-            'attachedTo' => ['b9'],
+            'installations' => [['parent' => 'gear:gear-b9']],
             'maintenanceTasks' => [
                 ['id' => 'maintenanceTask-chain-lubed', 'label' => 'Lube', 'interval' => ['value' => 600, 'unit' => 'km']],
             ],
         ]));
 
-        $config = Json::decode((string) $this->keyValueStore->find(Key::GEAR_MAINTENANCE));
+        $components = Json::decode(Json::encode($this->getContainer()->get(GearComponentRepository::class)->findAll()));
 
-        $this->assertCount(2, $config['components']);
-        $this->assertSame('gearComponent-chain', $config['components'][0]['id']);
+        $this->assertCount(2, $components);
 
-        $chain = $this->findComponentById($config['components'], 'gearComponent-chain');
+        $chain = $this->findComponentById($components, 'gearComponent-chain');
         $this->assertNotNull($chain);
         $this->assertSame('Updated chain', $chain['label']);
-        $this->assertSame(['b9'], $chain['attachedTo']);
+        $this->assertSame([
+            ['parent' => 'gear:gear-b9', 'from' => null, 'until' => null, 'sportTypes' => []],
+        ], $chain['installations']);
 
         $this->assertSame('files/gear-maintenance/chain.png', $chain['localImagePath']);
         $this->assertCount(1, $chain['maintenance']);
         $this->assertSame('maintenanceTask-chain-lubed', $chain['maintenance'][0]['id']);
         $this->assertSame(600, $chain['maintenance'][0]['interval']['value']);
 
-        $di2 = $this->findComponentById($config['components'], 'gearComponent-di-2');
+        $di2 = $this->findComponentById($components, 'gearComponent-di-2');
         $this->assertNotNull($di2);
         $this->assertSame('DI2 Battery', $di2['label']);
+    }
+
+    public function testItRemovesAllMaintenanceTasks(): void
+    {
+        $this->importGearMaintenanceConfig();
+
+        $this->commandBus->dispatch(UpdateGearMaintenanceComponent::fromPayload([
+            'gearComponentId' => 'gearComponent-chain',
+            'label' => 'Chain',
+            'installations' => [['parent' => 'gear:gear-b9']],
+        ]));
+
+        $components = Json::decode(Json::encode($this->getContainer()->get(GearComponentRepository::class)->findAll()));
+
+        $chain = $this->findComponentById($components, 'gearComponent-chain');
+        $this->assertNotNull($chain);
+        $this->assertSame([], $chain['maintenance']);
+    }
+
+    public function testItRejectsAnUnknownComponent(): void
+    {
+        $this->expectExceptionObject(CouldNotProcessCommand::withReason('The component does not exist.'));
+
+        $this->commandBus->dispatch(UpdateGearMaintenanceComponent::fromPayload([
+            'gearComponentId' => 'gearComponent-does-not-exist',
+            'label' => 'Chain',
+            'installations' => [['parent' => 'gear:gear-b1']],
+            'maintenanceTasks' => [
+                ['id' => 'maintenanceTask-chain-lubed', 'label' => 'Lube', 'interval' => ['value' => 500, 'unit' => 'km']],
+            ],
+        ]));
+    }
+
+    public function testItInstallsAComponentOnAnotherComponent(): void
+    {
+        $this->importGearMaintenanceConfig();
+
+        $this->commandBus->dispatch(UpdateGearMaintenanceComponent::fromPayload([
+            'gearComponentId' => 'gearComponent-di-2',
+            'label' => 'DI2 Battery',
+            'installations' => [['parent' => 'component:gearComponent-chain']],
+            'maintenanceTasks' => [
+                ['id' => 'maintenanceTask-di-2-charged', 'label' => 'Charge', 'interval' => ['value' => 11, 'unit' => 'hours']],
+            ],
+        ]));
+
+        $components = Json::decode(Json::encode($this->getContainer()->get(GearComponentRepository::class)->findAll()));
+        $this->assertSame(
+            [['parent' => 'component:gearComponent-chain', 'from' => null, 'until' => null, 'sportTypes' => []]],
+            $this->findComponentById($components, 'gearComponent-di-2')['installations'],
+        );
+    }
+
+    /**
+     * @param list<array<string, mixed>> $chainInstallations
+     */
+    #[DataProvider('provideInstallationLoops')]
+    public function testItRejectsInstallationLoops(array $chainInstallations): void
+    {
+        $this->importGearMaintenanceConfig();
+        $this->commandBus->dispatch(UpdateGearMaintenanceComponent::fromPayload([
+            'gearComponentId' => 'gearComponent-di-2',
+            'label' => 'DI2 Battery',
+            'installations' => [['parent' => 'component:gearComponent-chain']],
+            'maintenanceTasks' => [
+                ['id' => 'maintenanceTask-di-2-charged', 'label' => 'Charge', 'interval' => ['value' => 11, 'unit' => 'hours']],
+            ],
+        ]));
+        $componentsBefore = Json::encode($this->getContainer()->get(GearComponentRepository::class)->findAll());
+
+        try {
+            $this->commandBus->dispatch(UpdateGearMaintenanceComponent::fromPayload([
+                'gearComponentId' => 'gearComponent-chain',
+                'label' => 'Some cool chain',
+                'installations' => $chainInstallations,
+                'maintenanceTasks' => [
+                    ['id' => 'maintenanceTask-chain-lubed', 'label' => 'Lube', 'interval' => ['value' => 500, 'unit' => 'km']],
+                ],
+            ]));
+            $this->fail('Expected the installation loop to be rejected');
+        } catch (CouldNotProcessCommand $exception) {
+            $this->assertSame('A component cannot be installed on itself or on one of its own parts.', $exception->getMessage());
+        }
+
+        $this->assertSame($componentsBefore, Json::encode($this->getContainer()->get(GearComponentRepository::class)->findAll()));
+    }
+
+    /**
+     * @return iterable<string, array{list<array<string, mixed>>}>
+     */
+    public static function provideInstallationLoops(): iterable
+    {
+        yield 'installed on itself' => [[['parent' => 'component:gearComponent-chain']]];
+        yield 'installed on one of its own parts' => [[['parent' => 'gear:gear-b1'], ['parent' => 'component:gearComponent-di-2']]];
     }
 
     public function testItReplacesImageAndDeletesPreviousFile(): void
@@ -64,7 +157,7 @@ class UpdateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
         $this->commandBus->dispatch(UpdateGearMaintenanceComponent::fromPayload([
             'gearComponentId' => 'gearComponent-chain',
             'label' => 'Chain',
-            'attachedTo' => ['b1'],
+            'installations' => [['parent' => 'gear:gear-b1']],
             'localImagePath' => json_encode([
                 ['status' => 'removed', 'path' => '/files/gear-maintenance/old.png'],
                 ['status' => 'new', 'filename' => 'new.png', 'content' => base64_encode('new-content')],
@@ -74,9 +167,9 @@ class UpdateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
             ],
         ]));
 
-        $config = Json::decode((string) $this->keyValueStore->find(Key::GEAR_MAINTENANCE));
+        $components = Json::decode(Json::encode($this->getContainer()->get(GearComponentRepository::class)->findAll()));
 
-        $this->assertSame('files/gear-maintenance/0025176c-5652-11ee-923d-02424dd627d5.png', $config['components'][0]['localImagePath']);
+        $this->assertSame('files/gear-maintenance/0025176c-5652-11ee-923d-02424dd627d5.png', $components[0]['localImagePath']);
         $this->assertFalse($this->fileStorage->fileExists('gear-maintenance/old.png'));
         $this->assertTrue($this->fileStorage->fileExists('gear-maintenance/0025176c-5652-11ee-923d-02424dd627d5.png'));
         $this->assertSame('new-content', $this->fileStorage->read('gear-maintenance/0025176c-5652-11ee-923d-02424dd627d5.png'));
@@ -90,7 +183,7 @@ class UpdateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
         $this->commandBus->dispatch(UpdateGearMaintenanceComponent::fromPayload([
             'gearComponentId' => 'gearComponent-chain',
             'label' => 'Chain',
-            'attachedTo' => ['b1'],
+            'installations' => [['parent' => 'gear:gear-b1']],
             'localImagePath' => json_encode([
                 ['status' => 'removed', 'path' => '/files/gear-maintenance/old.png'],
             ]),
@@ -99,29 +192,28 @@ class UpdateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
             ],
         ]));
 
-        $config = Json::decode((string) $this->keyValueStore->find(Key::GEAR_MAINTENANCE));
+        $components = Json::decode(Json::encode($this->getContainer()->get(GearComponentRepository::class)->findAll()));
 
-        $this->assertNull($config['components'][0]['localImagePath']);
+        $this->assertNull($components[0]['localImagePath']);
         $this->assertFalse($this->fileStorage->fileExists('gear-maintenance/old.png'));
     }
 
     private function seedComponentWithImage(string $localImagePath): void
     {
-        $this->keyValueStore->save(KeyValue::fromState(
-            Key::GEAR_MAINTENANCE,
-            Value::fromString(Json::encode([
-                'enabled' => true,
-                'components' => [[
-                    'id' => 'gearComponent-chain',
-                    'label' => 'Chain',
-                    'localImagePath' => $localImagePath,
-                    'attachedTo' => ['b1'],
-                    'maintenance' => [
-                        ['id' => 'maintenanceTask-chain-lubed', 'label' => 'Lube', 'interval' => ['value' => 500, 'unit' => 'km']],
-                    ],
-                ]],
-            ])),
-        ));
+        $this->importGearMaintenanceConfigFromArray([
+            'enabled' => true,
+            'components' => [[
+                'id' => 'gearComponent-chain',
+                'label' => 'Chain',
+                'localImagePath' => $localImagePath,
+                'isRetired' => false,
+                'notes' => null,
+                'installations' => [['parent' => 'gear:gear-b1', 'from' => null, 'until' => null, 'sportTypes' => []]],
+                'maintenance' => [
+                    ['id' => 'maintenanceTask-chain-lubed', 'label' => 'Lube', 'interval' => ['value' => 500, 'unit' => 'km']],
+                ],
+            ]],
+        ]);
     }
 
     /**
@@ -146,7 +238,6 @@ class UpdateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
         parent::setUp();
 
         $this->commandBus = $this->getContainer()->get(CommandBus::class);
-        $this->keyValueStore = $this->getContainer()->get(KeyValueStore::class);
         $this->fileStorage = $this->getContainer()->get('file.storage');
     }
 }

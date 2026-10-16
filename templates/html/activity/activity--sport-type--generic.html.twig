@@ -53,6 +53,7 @@
                             {{ "Group activity"|trans }}
                 </span>
                     {% endif %}
+                    <span class="inline-flex" data-async-content-url="{{ relativeUrl(path('activity_explorer_tiles', {'activityId': activity.getId()})) }}"></span>
                     {% set weather = activity.getWeather() %}
                     {% if weather %}
                         <span class="inline-flex items-center gap-1.5">
@@ -71,12 +72,41 @@
                 </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-                {% if hasGpxLink %}
-                    <a href="{{ relativeUrl(path('activity_gpx', {'activityId': activity.getId()})) }}" download="{{ gpxFileName }}" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 shadow-xs rounded-lg px-3 py-1.5 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                {% set gpxUrl = relativeUrl(path('activity_gpx', {'activityId': activity.getId()})) %}
+                {%- set originalFileUrl = relativeUrl(path('activity_original_file', {'activityId': activity.getId()})) %}
+                {%- set downloadButtonClasses = 'hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 shadow-xs rounded-lg px-3 py-1.5 transition' %}
+                {%- set downloadIcon %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                    </svg>
+                {% endset %}
+                {%- if hasGpxLink and hasOriginalFileLink %}
+                    <button id="activityDownloadButton" data-dropdown="activityDownloadDropdown" data-dropdown-placement="bottom-end" data-dropdown-offset-distance="6" type="button" class="unstyled cursor-pointer {{ downloadButtonClasses }}">
+                        {{ downloadIcon }}
+                        {{ "Download"|trans }}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6"/>
                         </svg>
+                    </button>
+                    <div id="activityDownloadDropdown" class="hidden z-20 w-48 rounded-lg border border-gray-200 bg-white p-1 shadow-xl">
+                        <ul aria-labelledby="activityDownloadButton">
+                            <li>
+                                <a href="{{ gpxUrl }}" download="{{ gpxFileName }}" data-close-dropdown class="flex w-full items-center rounded-md px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">GPX</a>
+                            </li>
+                            <li>
+                                <a href="{{ originalFileUrl }}" data-close-dropdown class="flex w-full items-center rounded-md px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">{{ "Original file"|trans }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                {% elseif hasGpxLink %}
+                    <a href="{{ gpxUrl }}" download="{{ gpxFileName }}" class="{{ downloadButtonClasses }}">
+                        {{ downloadIcon }}
                         GPX
+                    </a>
+                {% elseif hasOriginalFileLink %}
+                    <a href="{{ originalFileUrl }}" class="{{ downloadButtonClasses }}">
+                        {{ downloadIcon }}
+                        {{ "Original file"|trans }}
                     </a>
                 {% endif %}
             </div>
@@ -436,8 +466,48 @@
             {% endblock splitsAndLaps %}
             <div data-async-content-url="{{ relativeUrl(path('activity_segments', {'activityId': activity.getId()})) }}"></div>
             <div data-async-content-url="{{ relativeUrl(path('activity_route_matches', {'activityId': activity.getId()})) }}"></div>
-            {% if activity.getSportType().supportsShiftingStats() %}
-                <div data-async-content-url="{{ relativeUrl(path('activity_shifting', {'activityId': activity.getId()})) }}"></div>
+            {% if not drivetrainUsages.isEmpty() %}
+                {% set frontRings = drivetrainUsages.getFrontRings() %}
+                {% set rearCogs = drivetrainUsages.getRearCogs() %}
+                <section class="rounded-lg bg-white border border-gray-200 shadow-xs p-5">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="size-8 rounded-lg bg-primary-soft text-primary flex items-center justify-center">
+                            {{ svg('cog', 'size-5') }}
+                        </div>
+                        <h3 class="font-bold text-gray-900">{{ "Shifting"|trans }}</h3>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="rounded-lg bg-gray-50 p-3">
+                            <div class="text-xxs uppercase text-gray-500 tracking-wider">{{ "Front shifts"|trans }}</div>
+                            <div class="text-3xl font-black text-gray-900 mt-0.5">{{ frontRings.getTotalShiftCount() }}</div>
+                        </div>
+                        <div class="rounded-lg bg-gray-50 p-3">
+                            <div class="text-xxs uppercase text-gray-500 tracking-wider">{{ "Rear shifts"|trans }}</div>
+                            <div class="text-3xl font-black text-gray-900 mt-0.5">{{ rearCogs.getTotalShiftCount() }}</div>
+                        </div>
+                    </div>
+                    {% for section in [{'label': "Front rings"|trans, 'usages': frontRings}, {'label': "Rear cogs"|trans, 'usages': rearCogs}] %}
+                        {% if not section.usages.isEmpty() %}
+                            <div class="flex items-center justify-between mb-1.5 {{ not loop.first ? 'mt-4' }}">
+                                <div class="text-xxs uppercase text-gray-500 font-semibold tracking-wider">{{ section.label }}</div>
+                                <div class="text-xxs uppercase text-gray-400 tracking-wider">{{ "Time in gear"|trans }}</div>
+                            </div>
+                            <div class="space-y-1.5">
+                                {% for drivetrainUsage in section.usages %}
+                                    {% set percentage = section.usages.getTimePercentageFor(drivetrainUsage) %}
+                                    <div class="flex items-center gap-2 text-xs">
+                                        <span class="w-8 text-gray-500 font-medium tabular-nums">{{ drivetrainUsage.getTeeth() }}T</span>
+                                        <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                            <div class="h-full min-w-[5px] bg-primary rounded-full" style="width: {{ percentage|round(1) }}%"></div>
+                                        </div>
+                                        <span class="w-10 text-right text-gray-500 tabular-nums">{{ percentage > 0 and percentage < 0.5 ? '<1' : percentage|round(0) }}%</span>
+                                        <span class="w-14 text-right text-gray-700 font-medium tabular-nums">{{ drivetrainUsage.getFormattedTime() }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </section>
             {% endif %}
         </section>
         {% include 'html/activity/activity-revisions.html.twig' with {

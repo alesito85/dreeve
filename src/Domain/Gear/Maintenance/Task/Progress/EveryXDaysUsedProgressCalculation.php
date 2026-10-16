@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Domain\Gear\Maintenance\Task\Progress;
 
 use App\Domain\Gear\Maintenance\Task\IntervalUnit;
-use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -24,19 +23,14 @@ final readonly class EveryXDaysUsedProgressCalculation implements MaintenanceTas
 
     public function calculate(ProgressCalculationContext $context): MaintenanceTaskProgress
     {
-        $query = '
-                SELECT strftime("%Y-%m-%d", startDateTime) AS day
+        [$usageWindowsSql, $parameters] = $context->getUsageWindows()->toSql(after: $context->getLastTaggedOn());
+        $query = sprintf('
+                SELECT strftime("%%Y-%%m-%%d", startDateTime) AS day
                 FROM Activity
-                WHERE gearId IN(:gearIds)
-                AND startDateTime > :lastTaggedOn
-                GROUP BY day';
+                WHERE %s
+                GROUP BY day', $usageWindowsSql);
 
-        $daysUsedSinceLastTagged = count($this->connection->fetchFirstColumn($query, [
-            'gearIds' => $context->getGearIds()->toArray(),
-            'lastTaggedOn' => (string) $context->getLastTaggedOn(),
-        ], [
-            'gearIds' => ArrayParameterType::STRING,
-        ]));
+        $daysUsedSinceLastTagged = count($this->connection->fetchFirstColumn($query, $parameters));
 
         $intervalValue = $context->getIntervalValue();
 

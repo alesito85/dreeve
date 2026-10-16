@@ -21,6 +21,8 @@ enum MilestoneCategory: string
     case GEAR_DISTANCE = 'gearDistance';
     case GEAR_ELEVATION = 'gearElevation';
     case GEAR_MOVING_TIME = 'gearMovingTime';
+    case EXPLORER_TILES_MAX_SQUARE = 'explorerTilesMaxSquare';
+    case EXPLORER_TILES_MAX_CLUSTER = 'explorerTilesMaxCluster';
 
     public function getFilterGroup(): MilestoneFilterGroup
     {
@@ -34,6 +36,7 @@ enum MilestoneCategory: string
             self::EDDINGTON => MilestoneFilterGroup::EDDINGTON,
             self::STREAK => MilestoneFilterGroup::STREAK,
             self::GEAR_DISTANCE, self::GEAR_ELEVATION, self::GEAR_MOVING_TIME => MilestoneFilterGroup::GEAR,
+            self::EXPLORER_TILES_MAX_SQUARE, self::EXPLORER_TILES_MAX_CLUSTER => MilestoneFilterGroup::EXPLORER_TILES,
         };
     }
 }

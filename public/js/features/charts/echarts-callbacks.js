@@ -5,7 +5,14 @@ export const resolveEchartsCallbacks = (obj) => {
 
     for (const key of Object.keys(obj)) {
         const value = obj[key];
-        if (typeof value === 'string' && value.startsWith(CALLBACK_PREFIX)) {
+        if (value && typeof value === 'object' && typeof value.callback === 'string') {
+            const {callback: callbackName, args} = value;
+            if (callbackName in window.dreeve.callbacks) {
+                obj[key] = (...params) => window.dreeve.callbacks[callbackName](args, ...params);
+            } else {
+                console.error(`ECharts callback "${callbackName}" not registered in window.dreeve.callbacks`);
+            }
+        } else if (typeof value === 'string' && value.startsWith(CALLBACK_PREFIX)) {
             const callbackName = value.slice(CALLBACK_PREFIX.length);
             if (callbackName in window.dreeve.callbacks) {
                 obj[key] = window.dreeve.callbacks[callbackName];
@@ -96,6 +103,10 @@ export const registerEchartsCallbacks = () => {
         symbolSize: (params) => {
             return (params[2] / 100) * 15 + 5;
         },
+        formatRounded: ({decimals, suffix}, value) => {
+            const rounded = Number(value).toFixed(decimals);
+            return suffix ? `${rounded} ${suffix}` : rounded;
+        },
         toInteger: (value) => {
             return value.toFixed(0);
         },
@@ -121,6 +132,15 @@ export const registerEchartsCallbacks = () => {
             }
             const elevationSymbol = window.dreeve.unitSystem.elevationSymbol;
             return `${value.toFixed(0)}${elevationSymbol}`;
+        },
+        formatStackedDistanceTooltip: (params) => {
+            if (!Array.isArray(params)) params = [params];
+            const distanceSymbol = window.dreeve.unitSystem.distanceSymbol;
+            const used = params.filter(p => p.value > 0).sort((a, b) => b.value - a.value);
+            const total = used.reduce((sum, p) => sum + p.value, 0);
+            return '<b>' + params[0].axisValue + ': ' + total + distanceSymbol + '</b>' + used
+                .map(p => '<br/>' + p.marker + ' ' + p.seriesName + ': <b>' + p.value + distanceSymbol + '</b> (' + Math.round(p.value / total * 100) + '%)')
+                .join('');
         },
         formatDateOnlyTooltip: (params) => {
             if (!Array.isArray(params)) params = [params];

@@ -4,7 +4,7 @@
             'url': 'eddington',
             'label': 'Eddington'|trans
         }], 'disableMargin': true} %}
-        <button data-popover-target="popover-eddington-info" type="button">
+        <button data-popover-target="popover-eddington-info" type="button" class="hidden sm:inline-flex">
             <svg class="size-4 ml-1 text-gray-400 hover:text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path></svg>
             <span class="sr-only">{{ "Show information"|trans }}</span>
         </button>
@@ -89,6 +89,47 @@
                                      <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-xs">
                                          <h3 class="font-bold mb-4">{{ "Eddington over time"|trans }}</h3>
                                          <div class="h-64" data-echarts-options='{{ eddingtonHistoryCharts[eddington.getId()] }}'></div>
+                                     </div>
+                                 </div>
+                                 <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-xs">
+                                     <h3 class="font-bold mb-4">{{ "Upcoming numbers"|trans }}</h3>
+                                     <div class="relative overflow-x-auto">
+                                         <table class="data-table">
+                                             <thead>
+                                             <tr>
+                                                 <th scope="col">{{ "Target"|trans }}</th>
+                                                 <th scope="col">{{ "Days completed"|trans }}</th>
+                                                 <th scope="col">{{ "Days to go"|trans }}</th>
+                                                 <th scope="col" class="w-1/2">{{ "Progress"|trans }}</th>
+                                             </tr>
+                                             </thead>
+                                             <tbody>
+                                             {% for upcomingNumber in eddington.getUpcomingNumbers() %}
+                                                 {% set timesCompleted = eddington.getTimesCompletedFor(upcomingNumber) %}
+                                                 <tr>
+                                                     <td class="font-medium text-gray-900 whitespace-nowrap">
+                                                         {{ upcomingNumber }}<span class="text-xxs ml-px">{{ eddington.getUnitSystem().distanceSymbol() }}</span>
+                                                     </td>
+                                                     <td>{{ timesCompleted }}</td>
+                                                     <td>{{ upcomingNumber - timesCompleted }}</td>
+                                                     <td>
+                                                         {% set relativeProgress = (timesCompleted / upcomingNumber * 100)|round %}
+                                                         <div class="w-full rounded-full bg-gray-200">
+                                                             {% if relativeProgress > 0 %}
+                                                                 <div class="rounded-full bg-primary p-0.5 text-center text-xs leading-none font-medium text-white no-dark" style="width: {{ max(10, relativeProgress) }}%">
+                                                                     {{ relativeProgress }}%
+                                                                 </div>
+                                                             {% else %}
+                                                                 <div class="rounded-full p-0.5 text-center text-xs leading-none font-medium" style="width: 10%">
+                                                                     0%
+                                                                 </div>
+                                                             {% endif %}
+                                                         </div>
+                                                     </td>
+                                                 </tr>
+                                             {% endfor %}
+                                             </tbody>
+                                         </table>
                                      </div>
                                  </div>
                              </div>

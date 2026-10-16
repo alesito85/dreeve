@@ -60,23 +60,89 @@
                     </div>
                 </div>
                 <div>
-                    <label>{{ "Attached to"|trans({}, 'admin') }}</label>
-                    <div class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 sm:grid-cols-3">
-                        {% for gear in gears %}
-                            <label class="flex items-center gap-2 text-sm cursor-pointer min-w-0">
-                                <input type="checkbox" name="attachedTo[]"
-                                       value="{{ gear.getId().toUnprefixedString() }}"
-                                       {{ component and component.isAttachedTo(gear.getId()) ? 'checked' }}>
-                                <span class="truncate min-w-0">{{ gear.getName() }}</span>
-                            </label>
-                        {% endfor %}
+                    <label for="component-notes">{{ "Notes"|trans({}, 'admin') }}</label>
+                    <textarea id="component-notes" name="notes" rows="3"
+                              placeholder="{{ "Serial number, size, where you bought it, ..."|trans({}, 'admin') }}">{{ component ? component.getNotes()|e }}</textarea>
+                </div>
+                <div class="flex items-start gap-2">
+                    <input type="checkbox" id="component-isRetired" name="isRetired" value="true" {{ component and component.isRetired() ? 'checked' }} class="mt-0.5">
+                    <div>
+                        <label for="component-isRetired" class="mt-0!">{{ "Retired"|trans({}, 'admin') }}</label>
+                        <p class="mt-0.5 text-xxs text-gray-500">
+                            {{ "Retired components keep their history, but are hidden and no longer tracked."|trans({}, 'admin') }}
+                        </p>
                     </div>
+                </div>
+                <div data-repeater data-repeater-min="0">
+                    <label>{{ "Attached to"|trans({}, 'admin') }}</label>
+                    <p class="mt-0.5 text-xxs text-gray-500">{{ "Add a row for every period the component was fitted. Leave the end date empty while it is still fitted."|trans({}, 'admin') }}</p>
+                    <div class="mt-2 flex flex-col gap-2"
+                         data-repeater-list
+                         data-repeater-initial="{{ (component ? component.getInstallations() : [])|json_encode|e('html_attr') }}">
+                    </div>
+                    <button type="button" data-repeater-add class="mt-2 btn--secondary inline-flex items-center gap-1.5">
+                        <svg class="size-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+                        </svg>
+                        <span>{{ "Add installation"|trans({}, 'admin') }}</span>
+                    </button>
+                    <template data-repeater-template>
+                        <div class="grid gap-2 sm:grid-cols-2 p-3 bg-gray-50 rounded-lg border border-gray-200" data-repeater-item>
+                            <div class="min-w-0">
+                                <label for="installations-__index__-parent" class="mt-0! text-xxs">{{ "Installed on"|trans({}, 'admin') }}</label>
+                                <select id="installations-__index__-parent" name="installations[__index__][parent]"
+                                        data-repeater-field="parent" required class="mt-0">
+                                    <option value="">{{ "Select gear or component"|trans({}, 'admin') }}</option>
+                                    <optgroup label="{{ "Gear"|trans }}">
+                                        {% for gear in gears %}
+                                            <option value="gear:{{ gear.getId() }}">{{ gear.getName() }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                    {% if parentComponents|length > 0 %}
+                                        <optgroup label="{{ "Components"|trans }}">
+                                            {% for parentComponent in parentComponents %}
+                                                <option value="component:{{ parentComponent.getId() }}">{{ parentComponent.getLabel() }}</option>
+                                            {% endfor %}
+                                        </optgroup>
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="min-w-0">
+                                <label class="mt-0! text-xxs">{{ "Sport types"|trans({}, 'admin') }}</label>
+                                {% include 'html/admin/component/checkbox-multiselect.html.twig' with {
+                                    name: 'installations[__index__][sportTypes][]',
+                                    options: sportTypeOptions(),
+                                    placeholder: "All sport types"|trans({}, 'admin'),
+                                    repeaterField: 'sportTypes',
+                                } only %}
+                            </div>
+                            <div>
+                                <label for="installations-__index__-from" class="mt-0! text-xxs">{{ "From"|trans({}, 'admin') }}</label>
+                                <input type="date" id="installations-__index__-from" name="installations[__index__][from]"
+                                       data-repeater-field="from" class="mt-0">
+                            </div>
+                            <div class="flex items-end gap-2">
+                                <div class="flex-1 min-w-0">
+                                    <label for="installations-__index__-until" class="mt-0! text-xxs">{{ "Until"|trans({}, 'admin') }}</label>
+                                    <input type="date" id="installations-__index__-until" name="installations[__index__][until]"
+                                           data-repeater-field="until" class="mt-0">
+                                </div>
+                                <button type="button" data-repeater-remove
+                                        class="grid place-items-center size-9 shrink-0 rounded-lg border border-gray-200 bg-white text-gray-400 transition-colors hover:text-red-600 hover:border-red-200"
+                                        aria-label="{{ "Remove installation"|trans({}, 'admin') }}">
+                                    <svg class="size-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
                 </div>
                 <div>
                     <label>{{ "Image"|trans({}, 'admin') }}</label>
                     {% include 'html/admin/component/image-dropzone-upload.html.twig' with { name: 'localImagePath', maxImages: 1, existingImages: existingImages } %}
                 </div>
-                <div data-repeater data-repeater-min="1">
+                <div data-repeater data-repeater-min="0">
                     <label>{{ "Maintenance tasks"|trans({}, 'admin') }}</label>
                     <p class="mt-0.5 text-xxs text-gray-500">{{ "Define what needs doing and how often."|trans({}, 'admin') }}</p>
                     <div class="mt-2 flex flex-col gap-2"

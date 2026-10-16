@@ -7,10 +7,10 @@ use App\Domain\Activity\ActivityId;
 use App\Domain\Activity\ActivityRepository;
 use App\Domain\Activity\ActivityWithRawData;
 use App\Domain\Activity\Route\Signature\ActivityRouteSignatureRepository;
-use App\Domain\Activity\Route\Signature\RouteCells;
 use App\Domain\Activity\SportType\SportType;
 use App\Domain\Activity\Stream\ActivityStreamRepository;
 use App\Domain\Activity\Stream\StreamType;
+use App\Domain\Geography\Grid\RouteCells;
 use App\Domain\Segment\SegmentId;
 use App\Domain\Segment\SegmentRepository;
 use App\Domain\Segment\SegmentType;
@@ -36,7 +36,7 @@ class CalculateCustomSegmentEffortsTest extends ContainerTestCase
     {
         $output = new SpyOutput();
         $segmentRepository = $this->getContainer()->get(SegmentRepository::class);
-        $segmentPolyline = EncodedPolyline::fromString(file_get_contents(self::FIXTURES.'segment-polyline.txt') ?: '');
+        $segmentPolyline = EncodedPolyline::fromString('_}gvH_glW?sk@{Ro^');
         $segmentRepository->add(SegmentBuilder::fromDefaults()
             ->withSegmentId(SegmentId::fromUnprefixed('custom'))
             ->withName(Name::fromString('Custom segment'))

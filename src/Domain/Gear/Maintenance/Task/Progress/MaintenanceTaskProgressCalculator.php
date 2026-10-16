@@ -6,10 +6,11 @@ namespace App\Domain\Gear\Maintenance\Task\Progress;
 
 use App\Domain\Gear\GearIdRepository;
 use App\Domain\Gear\GearIds;
-use App\Domain\Gear\Maintenance\GearMaintenanceConfig;
+use App\Domain\Gear\Maintenance\GearComponentRepository;
+use App\Domain\Gear\Maintenance\GearComponents;
 use App\Domain\Gear\Maintenance\GearMaintenanceRepository;
 use App\Domain\Gear\Maintenance\Log\GearMaintenanceLogRepository;
-use App\Infrastructure\ValueObject\Time\SerializableDateTime;
+use App\Infrastructure\Time\Clock\Clock;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 final readonly class MaintenanceTaskProgressCalculator
@@ -21,12 +22,14 @@ final readonly class MaintenanceTaskProgressCalculator
         #[AutowireIterator('app.maintenance_progress_calculation')]
         private iterable $maintenanceTaskProgressCalculations,
         private GearMaintenanceRepository $gearMaintenanceRepository,
+        private GearComponentRepository $gearComponentRepository,
         private GearMaintenanceLogRepository $gearMaintenanceLogRepository,
         private GearIdRepository $gearIdRepository,
+        private Clock $clock,
     ) {
     }
 
-    public function calculateProgressFor(ProgressCalculationContext $context): MaintenanceTaskProgress
+    public function calculateProgressFor(ProgressCalculationContext $context): ?MaintenanceTaskProgress
     {
         $intervalUnit = $context->getIntervalUnit();
 
@@ -48,7 +51,7 @@ final readonly class MaintenanceTaskProgressCalculator
             return MaintenanceTaskStatuses::empty();
         }
 
-        return $this->calculateStatusesFor($gearMaintenanceConfig);
+        return $this->calculateStatusesFor($this->gearComponentRepository->findAll());
     }
 
     public function getGearIdsThatHaveDueTasks(): GearIds
@@ -59,18 +62,21 @@ final readonly class MaintenanceTaskProgressCalculator
             return $gearIdsThatHaveDueTasks;
         }
 
-        $maintenanceTaskStatuses = $this->calculateStatusesFor($gearMaintenanceConfig);
+        $gearComponents = $this->gearComponentRepository->findAll();
+        $maintenanceTaskStatuses = $this->calculateStatusesFor($gearComponents);
         $retiredGearIds = $gearMaintenanceConfig->ignoreRetiredGear()
             ? $this->gearIdRepository->findRetired()
             : GearIds::empty();
 
-        foreach ($gearMaintenanceConfig->getGearComponents() as $gearComponent) {
+        $now = $this->clock->getCurrentDateTimeImmutable();
+        foreach ($gearComponents->withoutRetired() as $gearComponent) {
+            $currentGearIds = $gearComponents->getGearIdsCurrentlyUsing($gearComponent, $now);
             foreach ($gearComponent->getMaintenanceTasks() as $maintenanceTask) {
                 if (!$maintenanceTaskStatuses->getForTask($maintenanceTask->getId())?->isDue()) {
                     continue;
                 }
 
-                foreach ($gearComponent->getAttachedTo() as $gearId) {
+                foreach ($currentGearIds as $gearId) {
                     if ($retiredGearIds->has($gearId)) {
                         continue;
                     }
@@ -85,26 +91,27 @@ final readonly class MaintenanceTaskProgressCalculator
         return $gearIdsThatHaveDueTasks;
     }
 
-    private function calculateStatusesFor(GearMaintenanceConfig $gearMaintenanceConfig): MaintenanceTaskStatuses
+    private function calculateStatusesFor(GearComponents $gearComponents): MaintenanceTaskStatuses
     {
         $mostRecentPerMaintenanceTask = $this->gearMaintenanceLogRepository->findMostRecentPerMaintenanceTask();
 
         $maintenanceTaskStatuses = MaintenanceTaskStatuses::empty();
-        foreach ($gearMaintenanceConfig->getGearComponents() as $gearComponent) {
+        foreach ($gearComponents->withoutRetired() as $gearComponent) {
+            $usageWindows = $gearComponents->resolveUsageWindowsFor($gearComponent);
             foreach ($gearComponent->getMaintenanceTasks() as $maintenanceTask) {
                 $lastPerformedOn = $mostRecentPerMaintenanceTask[(string) $maintenanceTask->getId()] ?? null;
 
                 $maintenanceTaskStatuses->add(MaintenanceTaskStatus::from(
                     maintenanceTaskId: $maintenanceTask->getId(),
                     lastPerformedOn: $lastPerformedOn,
-                    progress: $lastPerformedOn instanceof SerializableDateTime ? $this->calculateProgressFor(
+                    progress: $this->calculateProgressFor(
                         ProgressCalculationContext::from(
-                            gearIds: $gearComponent->getAttachedTo(),
+                            usageWindows: $usageWindows,
                             lastTaggedOn: $lastPerformedOn,
                             intervalUnit: $maintenanceTask->getIntervalUnit(),
                             intervalValue: $maintenanceTask->getIntervalValue(),
                         )
-                    ) : null,
+                    ),
                 ));
             }
         }

@@ -7,20 +7,20 @@ AM/PM: AM/PM
 'API key': 'clé API'
 Actions: Actions
 Active: Actif
-'Activities excluded from peak power outputs': 'Activités exclues des puissances maximales'
 'Activities scanned': 'Activités analysées'
 'Activities to skip during import': "Activités à ignorer lors de l'import"
 'Activities to update': 'Activités à mettre à jour'
 'Activities will appear here once they are imported.': 'Les activités apparaîtront ici une fois importées.'
 Activity: Activité
 'Activity ID': "ID de l'activité"
-'Activity IDs to exclude when calculating peak power outputs.': 'ID des activités à exclure du calcul des puissances maximales.'
+'Activity description': "Description de l'activité"
 'Activity management': 'Gestion des activités'
 'Activity name': "Nom de l'activité"
 'Activity visibilities to import': 'Visibilités des activités à importer'
 'Add Eddington': 'Ajouter Eddington'
 'Add FTP': 'Ajouter FTP'
 'Add a component to start tracking maintenance.': 'Ajoutez un composant pour commencer le suivi de la maintenance.'
+'Add a row for every period the component was fitted. Leave the end date empty while it is still fitted.': 'Add a row for every period the component was fitted. Leave the end date empty while it is still fitted.'
 'Add a rule to start automating your activity details.': 'Ajoutez une règle pour commencer à automatiser les détails de vos activités.'
 'Add a widget': 'Ajouter un widget'
 'Add action': 'Ajouter une action'
@@ -32,6 +32,7 @@ Activity: Activité
 'Add condition': 'Ajouter une condition'
 'Add gear': 'Ajouter un matériel'
 'Add goal': 'Ajouter un objectif'
+'Add installation': 'Add installation'
 'Add max heart rate': 'Ajouter fréquence cardiaque maximale'
 'Add resting heart rate': 'Ajouter une fréquence cardiaque au repos'
 'Add rule': 'Ajouter une règle'
@@ -51,6 +52,7 @@ Admin: Admin
 'All efforts on this segment are deleted as well. This action cannot be undone.': 'All efforts on this segment are deleted as well. This action cannot be undone.'
 'All sport types': 'Tous les types de sport'
 'All sport types must belong to the same activity type.': "Tous les types de sport doivent appartenir au même type d'activité."
+'Allow visitors to download original activity files': 'Allow visitors to download original activity files'
 'Allowed IP addresses for the admin panel': "Adresses IP autorisées pour le panneau d'admin"
 'Also exposes the workout assistant in the web interface. Requires the AI integration above to be enabled. Use caution when enabling this if your app is publicly accessible.': "Affiche également l'assistant d'entraînement dans l'interface web. Nécessite que l'intégration IA ci-dessus soit activée. Soyez prudent en activant cette option si votre application est accessible publiquement."
 'Any IP address': "N'importe quelle adresse IP"
@@ -82,6 +84,7 @@ Apply: Appliquer
 'Base URI': 'URI de base'
 'Before you can use the app, we need to know a few things about you. These are used to calculate your heart rate zones and training load. You can fine-tune all other settings later on.': "Avant de pouvoir utiliser l'application, nous avons besoin de quelques informations sur vous. Elles servent à calculer vos zones de fréquence cardiaque et votre charge d'entraînement. Vous pourrez affiner tous les autres paramètres plus tard."
 Birthday: Anniversaire
+'By default only you can download the original FIT, TCX or GPX file from an activity page. Original files can contain more detail than the page shows.': 'By default only you can download the original FIT, TCX or GPX file from an activity page. Original files can contain more detail than the page shows.'
 'Calculate energy (kJ)': "Calculer l'energie (kJ)"
 Cancel: Annuler
 'Challenge name': 'Nom du challenge'
@@ -161,6 +164,9 @@ Endpoint: 'Point de passage'
 'Enter your password': 'Saisissez votre mot de passe'
 'Enter your username': "Saisissez votre nom d'utilisateur"
 Every: Chaque
+'Exclude from': 'Exclude from'
+'Excluded activities are left out of these statistics, but still show up everywhere else.': 'Excluded activities are left out of these statistics, but still show up everywhere else.'
+'Excluded from': 'Excluded from'
 FTP: FTP
 'FTP history (cycling)': 'Historique FTP (vélo)'
 'FTP history (running)': 'Historique FTP (course à pied)'
@@ -217,6 +223,7 @@ Import: Import
 'Imports new Strava activities.': 'Importe les nouvelles activités Strava.'
 'Include retired gear': 'Inclure le matériel décommissionné'
 Info: Info
+'Installed on': 'Installed on'
 Integrations: Intégrations
 'Intro text': "Texte d'introduction"
 'Invalid CSRF token.': 'Jeton CSRF invalide.'
@@ -278,6 +285,8 @@ Monday: Lundi
 'No unit': "Pas d'unité"
 'Normal date format': 'Format de date normal'
 'Not configured, the API is closed': "Non configurée, l'API est fermée"
+'Not fitted': 'Not fitted'
+Notes: Notes
 'Notification services': 'Services de notifications'
 'Notify when an import was successful': "Notifier lorsqu'un import a réussi"
 'Number of activities to display': "Nombre d'activités à afficher"
@@ -330,6 +339,7 @@ Remove: Supprimer
 'Remove command': 'Retirer la commande'
 'Remove condition': 'Retirer la condition'
 'Remove goal': "Retirer l'objectif"
+'Remove installation': 'Remove installation'
 'Remove task': 'Retirer la tâche'
 'Remove tile layer': 'Retirer la couche de tuiles'
 'Remove widget': 'Retirer le widget'
@@ -345,6 +355,7 @@ Resetting...: 'Réinitialisation en cours...'
 'Resting heart rate formula': 'Formule de la fréquence cardiaque au repos'
 'Restrict to date range': 'Restreindre à une plage de dates'
 Retired: Décommissionné
+'Retired components keep their history, but are hidden and no longer tracked.': 'Retired components keep their history, but are hidden and no longer tracked.'
 'Retry weather and reverse geocoding': 'Relancer la météo et le géocodage inversé'
 'Return to app': "Retour à l'application"
 Ride: Vélo
@@ -370,6 +381,7 @@ Security: Securité
 'Select at least one sensor.': 'Sélectionnez au moins un capteur.'
 'Select at least one sport type.': 'Sélectionnez au moins un type de sport.'
 'Select at least one weekday.': 'Sélectionnez au moins un jour de la semaine.'
+'Select gear or component': 'Select gear or component'
 'Select gear...': 'Selectionner un matériel'
 'Select sensors': 'Selectionner des capteurs'
 'Select sport types': 'Sélectionner les types de sport'
@@ -379,6 +391,7 @@ Security: Securité
 'Sends a notification when gear maintenance is due. Requires a configured notification service.': "Envoie une notification lorsqu'une maintenance du matériel est due. Nécessite un service de notification configuré."
 Sensors: Capteurs
 'Sensors are only recorded for activities imported from FIT files. Activities from Strava, GPX or TCX never match this condition.': 'Les capteurs ne sont enregistrés que pour les activités importées depuis des fichiers FIT. Les activités issues de Strava, GPX ou TCX ne remplissent jamais cette condition.'
+'Serial number, size, where you bought it, ...': 'Serial number, size, where you bought it, ...'
 'Set description': 'Définir description'
 'Set its status to Retired instead to hide it from your active gear.': 'Passez plutôt son statut à Décommissionné pour le masquer de votre matériel actif.'
 'Set name': 'Définir le nom'
@@ -500,6 +513,7 @@ URL: URL
 Unit: Unité
 'Unit system': "Système d'unité"
 'Unsupported file type': 'Type de fichier non supporté'
+Until: Until
 'Upload activity files': "Téléverser des fichiers d'activité"
 'Upload failed': 'Echec du téléversement'
 'Upload files': 'Téléverser des fichiers'

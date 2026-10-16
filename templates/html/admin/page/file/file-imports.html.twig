@@ -118,7 +118,9 @@
                                     {{ fileImport.getOriginalFilename() }}
                                 </td>
                                 <td class="whitespace-nowrap text-left">
-                                    {{ fileImport.getSource().label() }}
+                                    <span class="pill pill--neutral text-xs">
+                                        {{ fileImport.getSource().label() }}
+                                    </span>
                                 </td>
                                 <td class="whitespace-nowrap text-left">
                                     {% set activityId = fileImport.getActivityId() %}
@@ -128,6 +130,9 @@
                                            href="{{ relativeUrl(path('activity', {'activityId': activityId})) }}">
                                             {{ fileImport.getActivityName() }}
                                         </a>
+                                        {% if fileImport.getActivityStartDate() %}
+                                            <span class="block text-xs text-gray-500">{{ fileImport.getActivityStartDate()|formatDate() }}</span>
+                                        {% endif %}
                                     {% endif %}
                                 </td>
                                 <td class="narrow whitespace-nowrap sticky-actions">

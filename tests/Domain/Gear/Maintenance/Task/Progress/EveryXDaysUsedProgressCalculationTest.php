@@ -5,8 +5,10 @@ namespace App\Tests\Domain\Gear\Maintenance\Task\Progress;
 use App\Domain\Activity\ActivityId;
 use App\Domain\Activity\ActivityRepository;
 use App\Domain\Activity\ActivityWithRawData;
+use App\Domain\Activity\SportType\SportTypes;
 use App\Domain\Gear\GearId;
-use App\Domain\Gear\GearIds;
+use App\Domain\Gear\Maintenance\Installation\UsageWindow;
+use App\Domain\Gear\Maintenance\Installation\UsageWindows;
 use App\Domain\Gear\Maintenance\Task\IntervalUnit;
 use App\Domain\Gear\Maintenance\Task\Progress\EveryXDaysUsedProgressCalculation;
 use App\Domain\Gear\Maintenance\Task\Progress\MaintenanceTaskProgress;
@@ -89,13 +91,37 @@ class EveryXDaysUsedProgressCalculationTest extends ContainerTestCase
             ),
             $this->calculation->calculate(
                 ProgressCalculationContext::from(
-                    gearIds: GearIds::fromArray([GearId::fromUnprefixed('test')]),
+                    usageWindows: UsageWindows::fromArray([UsageWindow::create(gearId: GearId::fromUnprefixed('test'), from: null, until: null, sportTypes: SportTypes::empty())]),
                     lastTaggedOn: SerializableDateTime::fromString('01-01-2025'),
                     intervalUnit: IntervalUnit::EVERY_X_HOURS_USED,
                     intervalValue: 10,
                 )
             )
         );
+    }
+
+    public function testCalculateCountsEverythingInTheUsageWindowsWhenNeverTagged(): void
+    {
+        foreach ([['before-install', '2024-12-01 10:00:00'], ['after-install', '2025-01-10 10:00:00'], ['after-install-2', '2025-01-11 10:00:00']] as [$activityId, $startDateTime]) {
+            $this->getContainer()->get(ActivityRepository::class)->add(ActivityWithRawData::fromState(
+                ActivityBuilder::fromDefaults()
+                    ->withActivityId(ActivityId::fromUnprefixed($activityId))
+                    ->withGearId(GearId::fromUnprefixed('test'))
+                    ->withStartDateTime(SerializableDateTime::fromString($startDateTime))
+                    ->withMovingTimeInSeconds(3600)
+                    ->build(),
+                []
+            ));
+        }
+
+        $this->assertSame('2 days', $this->calculation->calculate(
+            ProgressCalculationContext::from(
+                usageWindows: UsageWindows::fromArray([UsageWindow::create(gearId: GearId::fromUnprefixed('test'), from: SerializableDateTime::fromString('2025-01-01'), until: null, sportTypes: SportTypes::empty())]),
+                lastTaggedOn: null,
+                intervalUnit: IntervalUnit::EVERY_X_DAYS_USED,
+                intervalValue: 1000,
+            )
+        )->getDescription());
     }
 
     #[\Override]

@@ -4,40 +4,40 @@ declare(strict_types=1);
 
 namespace App\Domain\Gear\Maintenance\Task\Progress;
 
-use App\Domain\Gear\GearIds;
+use App\Domain\Gear\Maintenance\Installation\UsageWindows;
 use App\Domain\Gear\Maintenance\Task\IntervalUnit;
 use App\Infrastructure\ValueObject\Time\SerializableDateTime;
 
 final readonly class ProgressCalculationContext
 {
     private function __construct(
-        private GearIds $gearIds,
-        private SerializableDateTime $lastTaggedOn,
+        private UsageWindows $usageWindows,
+        private ?SerializableDateTime $lastTaggedOn,
         private IntervalUnit $intervalUnit,
         private int $intervalValue,
     ) {
     }
 
     public static function from(
-        GearIds $gearIds,
-        SerializableDateTime $lastTaggedOn,
+        UsageWindows $usageWindows,
+        ?SerializableDateTime $lastTaggedOn,
         IntervalUnit $intervalUnit,
         int $intervalValue,
     ): self {
         return new self(
-            gearIds: $gearIds,
+            usageWindows: $usageWindows,
             lastTaggedOn: $lastTaggedOn,
             intervalUnit: $intervalUnit,
             intervalValue: $intervalValue,
         );
     }
 
-    public function getGearIds(): GearIds
+    public function getUsageWindows(): UsageWindows
     {
-        return $this->gearIds;
+        return $this->usageWindows;
     }
 
-    public function getLastTaggedOn(): SerializableDateTime
+    public function getLastTaggedOn(): ?SerializableDateTime
     {
         return $this->lastTaggedOn;
     }

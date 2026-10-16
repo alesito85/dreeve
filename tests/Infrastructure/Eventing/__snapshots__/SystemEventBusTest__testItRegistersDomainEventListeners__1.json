@@ -4,6 +4,7 @@
         "reactToActivityWasUpdated",
         "reactToActivityImagesHaveBeenUpdated",
         "reactToActivityRouteWasUpdated",
+        "reactToActivityExplorerTilesWereCalculated",
         "reactToActivityWasDeleted"
     ],
     "App\\Domain\\Theme\\RecalculateChartColorsListener": [
@@ -16,6 +17,18 @@
         "reactToSettingsWereUpdated",
         "recalculateChartColors",
         "recalculateChartColors"
+    ],
+    "App\\Domain\\Activity\\BestEffort\\RecalculateBestEffortsListener": [
+        "reactToActivitySportTypeWasChanged"
+    ],
+    "App\\Domain\\Activity\\Stream\\CombinedStream\\RecombineActivityStreamsListener": [
+        "reactToActivitySportTypeWasChanged"
+    ],
+    "App\\Domain\\Activity\\Stream\\Metric\\RecalculateStreamValueDistributionListener": [
+        "reactToActivitySportTypeWasChanged"
+    ],
+    "App\\Domain\\Segment\\SegmentEffort\\RescanCustomSegmentsListener": [
+        "reactToActivitySportTypeWasChanged"
     ],
     "App\\Domain\\Challenge\\ChallengeInvalidateCacheTagsListener": [
         "reactToChallengeWasImported"
@@ -30,10 +43,14 @@
     ],
     "App\\Domain\\Gear\\Maintenance\\GearMaintenanceInvalidateCacheTagsListener": [
         "reactToGearMaintenanceConfigWasUpdated",
+        "reactToGearComponentWasUpdated",
         "reactToGearMaintenanceLogWasUpdated"
     ],
     "App\\Domain\\Gear\\RecordingDevice\\RecordingDeviceInvalidateCacheTagsListener": [
         "reactToRecordingDeviceWasUpdated"
+    ],
+    "App\\Domain\\Import\\FileImportInvalidateCacheTagsListener": [
+        "reactToFileImportWasDeleted"
     ],
     "App\\Domain\\Segment\\SegmentInvalidateCacheTagsListener": [
         "reactToSegmentWasAdded",

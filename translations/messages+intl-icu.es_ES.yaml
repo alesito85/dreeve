@@ -4,6 +4,7 @@
 '< 1.5: Good variety in training': '< 1.5: Buena variedad en el entrenamiento'
 '> 2.0: High monotony, increased risk': '> 2.0: Alta monotonía, mayor riesgo'
 'A 6-hour week scores higher than a 5-hour week.': 'Una semana de 6 horas puntúa más alto que una semana de 5 horas.'
+'A cluster tile is a visited tile whose four neighbours are visited too': 'Una cuadrícula de clúster es una cuadrícula visitada cuyas cuatro vecinas también están visitadas'
 'A high intensity score means a larger share of your training is hard rather than easy.': 'Una puntuación de alta intensidad significa que una mayor parte de tu entrenamiento es dura en lugar de suave.'
 'A high score means you concentrate more training into fewer, heavier days.': 'Una puntuación alta significa que concentras más entrenamiento en menos días, más intensos.'
 'A:C Ratio': 'Ratio A:C'
@@ -12,6 +13,7 @@
 'ATL (Fatigue)': 'ATL (Fatiga)'
 'Accumulated fatigue': 'Fatiga acumulada'
 'Active days': 'Días activos'
+'Active gear': 'Active gear'
 Activities: Actividades
 Activity: Actividad
 'Activity count': 'Recuento de actividades'
@@ -34,6 +36,7 @@ Apr: Abr
 Aug: Ago
 Average: Media
 'Average gradient': 'Pendiente media'
+'Avg distance': 'Avg distance'
 'Avg gradient': 'Pendiente media'
 'Avg pace': 'Ritmo medio'
 'Avg speed': 'Velocidad media'
@@ -64,6 +67,7 @@ Challenges: Retos
 'Chronic Training Load (Fitness) - 42-day exponentially weighted average of your daily training load. Represents long-term training adaptation.': 'Carga de entrenamiento crónica (Forma física) - Media móvil ponderada exponencialmente a 42 días de tu carga de entrenamiento diaria. Representa la adaptación al entrenamiento a largo plazo.'
 'Clear all filters': 'Borrar todos los filtros'
 'Clear chat': 'Borrar chat'
+'Cluster tiles': 'Cuadrículas de clúster'
 Columns: Columnas
 Commute: Desplazamiento
 Commutes: Desplazamientos
@@ -76,6 +80,7 @@ Components: Componentes
 'Congrats! You achieved {numberOfPRs} PRs in this activity.': '¡Felicidades! Has conseguido {numberOfPRs} RP en esta actividad.'
 'Consider reducing load': 'Considera reducir la carga'
 Consistency: Consistencia
+Cost: Cost
 Country: País
 Cricket: Críquet
 Crossfit: Crossfit
@@ -90,7 +95,9 @@ Dance: Baile
 Dashboard: 'Panel de control'
 Date: Fecha
 Day: Día
+'Days completed': 'Days completed'
 'Days needed': 'Días necesarios'
+'Days to go': 'Days to go'
 'Daytime stats': 'Estadísticas diurnas'
 Dec: Dic
 'Decreased compared to yesterday': 'Disminuyó en comparación con ayer'
@@ -107,6 +114,7 @@ Distance: Distancia
 'Distance over time per gear': 'Distancia a lo largo del tiempo por equipamiento'
 'Distance per month per gear': 'Distancia por mes por equipamiento'
 'Doing a mix of cycling, running, swimming, and strength work increases your variety score.': 'Hacer una mezcla de ciclismo, carrera, natación y trabajo de fuerza aumenta tu puntuación de variedad.'
+Download: Download
 Duration: Duración
 'Dusting off the record books...': 'Desempolvando los libros de récords...'
 'E-Bike Ride': 'Ciclismo en e-bike'
@@ -135,6 +143,8 @@ Energy: Energía
 Evening: Noche
 'Excludes commutes': 'Excluye desplazamientos'
 'Excludes group activities': 'Excluye actividades en grupo'
+'Explorer tiles': 'Cuadrículas exploradas'
+'Explorer tiles include all your activities': 'Explorer tiles include all your activities'
 'FTP history': 'Historial de FTP'
 Fastest: 'Más rápido'
 Favourite: Favorito
@@ -160,8 +170,6 @@ Fri.: Vie.
 GAP: GAP
 Gear: Equipamiento
 'Gear maintenance': 'Mantenimiento del equipamiento'
-'Gear stats': 'Estadísticas del equipamiento'
-"Gear that hasn't been used in the last three months, is disabled by default.": 'El equipamiento que no se ha usado en los últimos tres meses está desactivado por defecto.'
 'Gear that is retired is disabled by default.': 'El equipamiento retirado está desactivado por defecto.'
 'Go to activity': 'Ir a la actividad'
 Goal: Objetivo
@@ -188,6 +196,7 @@ High: Alto
 'High fatigue levels may increase injury or burnout risk. Consider reducing load and prioritizing recovery': 'Los niveles altos de fatiga pueden aumentar el riesgo de lesión o agotamiento. Considera reducir la carga y priorizar la recuperación'
 'High monotony - increase variety': 'Alta monotonía - aumenta la variedad'
 'High risk': 'Alto riesgo'
+'Highlight explorer tiles': 'Destacar cuadrículas exploradas'
 'Highlight visited countries': 'Destacar países visitados'
 'Highly recovered and ready to perform': 'Altamente recuperado y listo para rendir'
 Hike: Senderismo
@@ -206,6 +215,7 @@ Imperial: Imperial
 'Increased compared to yesterday': 'Aumentó en comparación con ayer'
 'Individual thresholds vary based on fitness level.': 'Los umbrales individuales varían según el nivel de forma física.'
 'Inline Skate': 'Patinaje en línea'
+'Installed on {component}': 'Installed on {component}'
 Intensity: Intensidad
 Jan: Ene
 Jul: Jul
@@ -214,6 +224,7 @@ KOM: KOM
 Kayaking: Kayak
 'Kite Surf': Kitesurf
 Lap: Vuelta
+'Last 12 months': 'Last 12 months'
 'Last 30 days': 'Últimos 30 días'
 'Last 7 days training load': 'Carga de entrenamiento de los últimos 7 días'
 'Last activity': 'Última actividad'
@@ -221,6 +232,7 @@ Lap: Vuelta
 'Last effort date': 'Fecha del último esfuerzo'
 'Last maintenance': 'Último mantenimiento'
 'Last month': 'Mes pasado'
+'Last used': 'Last used'
 'Last week': 'Semana pasada'
 'Last {numberOfDays} days': 'Últimos {numberOfDays} días'
 Lifetime: 'Toda la vida'
@@ -244,9 +256,12 @@ Maintenance: Mantenimiento
 'Manage recording devices': 'Gestionar dispositivos de grabación'
 'Manage segments': 'Manage segments'
 'Map settings': 'Ajustes del mapa'
+'Map tiles at zoom level 14 that your activities passed through': 'Cuadrículas del mapa con nivel de zoom 14 por las que pasaron tus actividades'
 Mar: Mar
 Max: Máx
+'Max cluster': 'Mayor clúster'
 'Max gradient': 'Pendiente máxima'
+'Max square': 'Mayor cuadrado'
 May: May
 Medium: Medio
 Metric: Métrico
@@ -278,11 +293,14 @@ Neutral: Neutral
 Night: Noche
 'No activities': 'No hay actividades'
 'No data available': 'No hay datos disponibles'
+'No maintenance tasks': 'No maintenance tasks'
 'No milestones achieved yet': 'Aún no se han conseguido hitos'
 'No other options to compare with': 'No hay otras opciones con las que comparar'
+'No purchase price set': 'No purchase price set'
 None: Ninguno
 'Nordic Ski': 'Esquí nórdico'
 'Normalized power': 'Potencia normalizada'
+'Not fitted': 'Not fitted'
 'Not supported': 'No soportado'
 Nov: Nov
 Now: Ahora
@@ -297,6 +315,7 @@ Oct: Oct
 "Oops, looks like you've wandered off the map! 🗺️": '¡Vaya, parece que te has salido del mapa! 🗺️'
 'Open Water Swim': 'Natación en aguas abiertas'
 'Optimal training range': 'Rango de entrenamiento óptimo'
+'Original file': 'Original file'
 Other: Otro
 'Outdoor Sports': 'Deportes al aire libre'
 Over-fatigued: Sobre-fatigado
@@ -324,6 +343,7 @@ Power: Potencia
 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.': 'Impulsado por unas {caloriesBurned} calorías estimadas, o aproximadamente {numberOfPizzaSlices} porciones de pizza 🍕.'
 'Prev year': 'Año anterior'
 Previous: Anterior
+Progress: Progress
 'Purchase price': 'Precio de compra'
 Race: Carrera
 'Racing Score': 'Puntuación de carrera'
@@ -331,6 +351,8 @@ Race: Carrera
 'Racquet Ball': Racquetball
 Rank: Clasificación
 Ranking: Clasificación
+'Reached a max cluster of {tileCount} tiles': 'Reached a max cluster of {tileCount} tiles'
+'Reached a {size}×{size} max square': 'Reached a {size}×{size} max square'
 'Reached {threshold} hours total moving time': 'Alcanzadas {threshold} horas de tiempo total en movimiento'
 'Reached {threshold} total distance': 'Alcanzada {threshold} de distancia total'
 'Reached {threshold} total elevation': 'Alcanzado {threshold} de desnivel total'
@@ -339,17 +361,17 @@ Ranking: Clasificación
 'Recalculating your suffer score...': 'Recalculando tu puntuación de sufrimiento...'
 Recent: Reciente
 'Recent effort': 'Esfuerzo reciente'
+'Recording device': 'Recording device'
 'Recording devices': 'Dispositivos de grabación'
 'Recovery Timeline': 'Línea de tiempo de recuperación'
 'Recovery forecast': 'Pronóstico de recuperación'
 'Reduced carbon emission by commuting': 'Emisiones de carbono reducidas por desplazamientos'
 'Register maintenance': 'Registrar mantenimiento'
-'Relative cost': 'Coste relativo'
 'Rest Days': 'Días de descanso'
 'Rest days': 'Días de descanso'
 'Rest days in last 7 days': 'Días de descanso en los últimos 7 días'
 'Rest days vs. active days': 'Días de descanso vs. días activos'
-'Retired gear': 'Equipamiento retirado'
+Retired: Retired
 Rewind: Rewind
 'Rewind comparisons are only available on larger screens.': 'Las comparativas de Rewind solo están disponibles en pantallas más grandes.'
 Ride: Ciclismo
@@ -405,6 +427,7 @@ Surfing: Surf
 'TSB positive in': 'TSB positivo en'
 'Table Tennis': 'Tenis de mesa'
 'Taper sweet-spot (+15)': 'Punto dulce de tapering (+15)'
+Target: Target
 'Team Sports': 'Deportes de equipo'
 Temperature: Temperatura
 'Temperature sensor': 'Sensor de temperatura'
@@ -498,8 +521,11 @@ Tennis: Tenis
 "That's {number} days of at least {distance}": 'Eso son {number} días de al menos {distance}'
 "That's {percentage}% of all countries 🌍": 'Eso es el {percentage}% de todos los países 🌍'
 'The Eddington number in the context of cycling or running is defined as the maximum number E such that the athlete has covered at least E km on at least E days.': 'El número de Eddington en el contexto del ciclismo o la carrera se define como el número máximo E tal que el atleta ha cubierto al menos E km en al menos E días.'
+'The largest connected group of cluster tiles': 'The largest connected group of cluster tiles'
+'The largest square of visited tiles': 'The largest square of visited tiles'
 "The page you're looking for doesn't exist or may have been moved.": 'La página que buscas no existe o puede que se haya movido.'
 'These badges are dynamically created. You can use them in any &lt;img&gt; tag': 'Estas insignias se crean dinámicamente. Puedes usarlas en cualquier etiqueta &lt;img&gt;'
+'These components are not installed on any gear at the moment.': 'These components are not installed on any gear at the moment.'
 Thinking...: Pensando...
 'This chart summarizes how you train. Each axis reflects a different normalized training habit, so higher values mean stronger emphasis.': 'Este gráfico resume cómo entrenas. Cada eje refleja un hábito de entrenamiento normalizado diferente, por lo que valores más altos significan un mayor énfasis.'
 'This feature is currently disabled': 'Esta función está desactivada actualmente'
@@ -507,6 +533,7 @@ Thinking...: Pensando...
 'This week': 'Esta semana'
 Thu: Jue
 Thu.: Jue.
+'Tiles visited for the first time in this activity': 'Tiles visited for the first time in this activity'
 Time: Tiempo
 'Time in gear': 'Tiempo en equipamiento'
 'Time in zone': 'Tiempo en zona'
@@ -534,6 +561,8 @@ Tue.: Mar.
 'Unchanged compared to yesterday': 'Sin cambios en comparación con ayer'
 Unspecified: 'No especificado'
 'Upcoming maintenance': 'Próximo mantenimiento'
+'Upcoming numbers': 'Upcoming numbers'
+Usage: Usage
 'User badge': 'Insignia de usuario'
 'Velo Mobile': Velomóvil
 'Velo Mobiles': Velomóviles
@@ -547,6 +576,7 @@ Unspecified: 'No especificado'
 'Virtual Run': 'Carrera virtual'
 'Virtual Runs': 'Carreras virtuales'
 'Virtual workout assistant': 'Asistente de entrenamiento virtual'
+'Visited tiles': 'Cuadrículas visitadas'
 Volleyball: Voleibol
 Volume: Volumen
 Wakeboarding: Wakeboarding
@@ -647,6 +677,7 @@ workouts: entrenamientos
 '{numberOfResults} results': '{numberOfResults} resultados'
 '{numberOfResults} routes': '{numberOfResults} rutas'
 '{numberOfRoutes} nearby route(s)': '{numberOfRoutes} ruta(s) cercana(s)'
+'{numberOfTiles} new tile(s)': '{numberOfTiles} new tile(s)'
 '{numberOfWeeks} weeks': '{numberOfWeeks} semanas'
 '{threshold} hours using {gearName}': '{threshold} horas usando {gearName}'
 '{threshold} total distance using {gearName}': '{threshold} de distancia total usando {gearName}'

@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Tests\Domain\Gear\Maintenance;
 
+use App\Domain\Activity\SportType\SportType;
+use App\Domain\Activity\SportType\SportTypes;
 use App\Domain\Gear\GearId;
-use App\Domain\Gear\GearIds;
+use App\Domain\Gear\Maintenance\Installation\GearComponentInstallation;
+use App\Domain\Gear\Maintenance\Installation\GearComponentInstallations;
+use App\Domain\Gear\Maintenance\Installation\InstallationParent;
 use App\Domain\Gear\Maintenance\ParsesGearMaintenanceComponentPayload;
 use App\Domain\Gear\Maintenance\Task\IntervalUnit;
 use App\Domain\Gear\Maintenance\Task\MaintenanceTaskId;
 use App\Domain\Gear\Maintenance\Task\MaintenanceTasks;
 use App\Infrastructure\CQRS\Command\Deserialize\CouldNotDeserializeCommand;
 use App\Infrastructure\ValueObject\String\Name;
+use App\Infrastructure\ValueObject\Time\SerializableDateTime;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -59,48 +64,145 @@ class ParsesGearMaintenanceComponentPayloadTest extends TestCase
         ];
     }
 
-    public function testParseAttachedTo(): void
+    #[DataProvider('provideNotes')]
+    public function testParseNotes(array $payload, ?string $expectedNotes): void
+    {
+        $this->assertSame($expectedNotes, $this->parser->doParseNotes($payload));
+    }
+
+    /**
+     * @return iterable<string, array{array<string, mixed>, ?string}>
+     */
+    public static function provideNotes(): iterable
+    {
+        yield 'missing' => [[], null];
+        yield 'empty' => [['notes' => "  \n "], null];
+        yield 'trimmed' => [['notes' => "  Serial WH-123\nTubeless  "], "Serial WH-123\nTubeless"];
+    }
+
+    public function testParseNotesThrowsWhenNotAString(): void
+    {
+        $this->expectExceptionObject(CouldNotDeserializeCommand::invalidPayload('"notes" must be a string.'));
+
+        $this->parser->doParseNotes(['notes' => ['Serial']]);
+    }
+
+    public function testParseInstallations(): void
     {
         $this->assertEquals(
-            GearIds::fromArray([GearId::fromUnprefixed('b1'), GearId::fromUnprefixed('g2')]),
-            $this->parser->doParseAttachedTo(['attachedTo' => [' b1 ', 'g2']]),
+            GearComponentInstallations::fromArray([
+                GearComponentInstallation::create(
+                    parent: InstallationParent::gear(GearId::fromUnprefixed('b1')),
+                    from: null,
+                    until: SerializableDateTime::fromString('2025-03-15'),
+                    sportTypes: SportTypes::fromArray([SportType::RIDE, SportType::GRAVEL_RIDE]),
+                ),
+                GearComponentInstallation::create(
+                    parent: InstallationParent::gear(GearId::fromUnprefixed('g2')),
+                    from: SerializableDateTime::fromString('2025-03-15'),
+                    until: null,
+                    sportTypes: SportTypes::empty(),
+                ),
+            ]),
+            $this->parser->doParseInstallations(['installations' => [
+                ['parent' => 'gear:gear-b1', 'from' => '', 'until' => '2025-03-15', 'sportTypes' => ['Ride', 'GravelRide']],
+                ['parent' => 'gear:gear-g2', 'from' => '2025-03-15'],
+            ]]),
+        );
+    }
+
+    public function testParseInstallationsWhenThereAreNone(): void
+    {
+        $this->assertEquals(
+            GearComponentInstallations::empty(),
+            $this->parser->doParseInstallations([]),
         );
     }
 
     /**
      * @param array<string, mixed> $payload
      */
-    #[DataProvider('provideInvalidAttachedToPayloads')]
-    public function testParseAttachedToThrowsOnInvalidPayload(array $payload, string $expectedExceptionMessage): void
+    #[DataProvider('provideInvalidInstallationPayloads')]
+    public function testParseInstallationsThrowsOnInvalidPayload(array $payload, string $expectedExceptionMessage): void
     {
         $this->expectExceptionObject(CouldNotDeserializeCommand::invalidPayload($expectedExceptionMessage));
 
-        $this->parser->doParseAttachedTo($payload);
+        $this->parser->doParseInstallations($payload);
     }
 
     /**
      * @return iterable<string, array{array<string, mixed>, string}>
      */
-    public static function provideInvalidAttachedToPayloads(): iterable
+    public static function provideInvalidInstallationPayloads(): iterable
     {
-        yield 'attachedTo is missing' => [
-            [],
-            'An "attachedTo" array is required.',
+        yield 'installations is not an array' => [
+            ['installations' => 'b1'],
+            '"installations" must be an array.',
         ];
 
-        yield 'attachedTo is not an array' => [
-            ['attachedTo' => 'b1'],
-            'An "attachedTo" array is required.',
+        yield 'installation is not an object' => [
+            ['installations' => ['b1']],
+            'Each installation must be an object.',
         ];
 
-        yield 'attachedTo entry is not a string' => [
-            ['attachedTo' => [123]],
-            'Each "attachedTo" entry must be a non-empty string.',
+        yield 'parent is missing' => [
+            ['installations' => [['from' => '2025-01-01']]],
+            'A non-empty "parent" is required for each installation.',
         ];
 
-        yield 'attachedTo entry is empty' => [
-            ['attachedTo' => ['  ']],
-            'Each "attachedTo" entry must be a non-empty string.',
+        yield 'parent is empty' => [
+            ['installations' => [['parent' => '  ']]],
+            'A non-empty "parent" is required for each installation.',
+        ];
+
+        yield 'parent has an unknown type' => [
+            ['installations' => [['parent' => 'bike:b1']]],
+            'Invalid installation parent "bike:b1".',
+        ];
+
+        yield 'parent has no id' => [
+            ['installations' => [['parent' => 'gear:']]],
+            'Invalid installation parent "gear:".',
+        ];
+
+        yield 'parent component id is invalid' => [
+            ['installations' => [['parent' => 'component:wheelset']]],
+            'Invalid installation parent "component:wheelset".',
+        ];
+
+        yield 'from has the wrong format' => [
+            ['installations' => [['parent' => 'gear:gear-b1', 'from' => '01-01-2025']]],
+            'Each installation "from" date must be formatted as YYYY-MM-DD.',
+        ];
+
+        yield 'from does not exist' => [
+            ['installations' => [['parent' => 'gear:gear-b1', 'from' => '2025-02-30']]],
+            'Each installation "from" date must be formatted as YYYY-MM-DD.',
+        ];
+
+        yield 'until has the wrong format' => [
+            ['installations' => [['parent' => 'gear:gear-b1', 'until' => 'tomorrow']]],
+            'Each installation "until" date must be formatted as YYYY-MM-DD.',
+        ];
+
+        yield 'until is before from' => [
+            ['installations' => [['parent' => 'gear:gear-b1', 'from' => '2025-03-15', 'until' => '2025-03-01']]],
+            'The "until" date of an installation must be after its "from" date.',
+        ];
+
+        yield 'sportTypes is not an array' => [
+            ['installations' => [['parent' => 'gear:gear-b1', 'sportTypes' => 'Ride']]],
+            'The "sportTypes" of an installation must be an array.',
+        ];
+
+        yield 'sportTypes contains an unknown sport type' => [
+            ['installations' => [['parent' => 'gear:gear-b1', 'sportTypes' => ['Ride', 'Unicycle']]]],
+            'Invalid sport type "Unicycle".',
+        ];
+
+        yield 'until equals from' => [
+            ['installations' => [['parent' => 'gear:gear-b1', 'from' => '2025-03-15', 'until' => '2025-03-15']]],
+            'The "until" date of an installation must be after its "from" date.',
         ];
     }
 
@@ -137,6 +239,24 @@ class ParsesGearMaintenanceComponentPayloadTest extends TestCase
     /**
      * @param array<string, mixed> $payload
      */
+    #[DataProvider('providePayloadsWithoutMaintenanceTasks')]
+    public function testParseMaintenanceTasksWhenThereAreNone(array $payload): void
+    {
+        $this->assertTrue($this->parser->doParseMaintenanceTasks($payload, generateMissingIds: true)->isEmpty());
+    }
+
+    /**
+     * @return iterable<string, array{array<string, mixed>}>
+     */
+    public static function providePayloadsWithoutMaintenanceTasks(): iterable
+    {
+        yield 'maintenanceTasks is missing' => [[]];
+        yield 'maintenanceTasks is empty' => [['maintenanceTasks' => []]];
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
     #[DataProvider('provideInvalidMaintenanceTaskPayloads')]
     public function testParseMaintenanceTasksThrowsOnInvalidPayload(array $payload, bool $generateMissingIds, string $expectedExceptionMessage): void
     {
@@ -150,16 +270,10 @@ class ParsesGearMaintenanceComponentPayloadTest extends TestCase
      */
     public static function provideInvalidMaintenanceTaskPayloads(): iterable
     {
-        yield 'maintenanceTasks is missing' => [
-            [],
+        yield 'maintenanceTasks is not an array' => [
+            ['maintenanceTasks' => 'nope'],
             true,
-            'At least one maintenance task is required.',
-        ];
-
-        yield 'maintenanceTasks is empty' => [
-            ['maintenanceTasks' => []],
-            true,
-            'At least one maintenance task is required.',
+            '"maintenanceTasks" must be an array.',
         ];
 
         yield 'task is not an object' => [
@@ -243,9 +357,14 @@ class ParsesGearMaintenanceComponentPayloadTest extends TestCase
                 return self::parseLabel($payload);
             }
 
-            public function doParseAttachedTo(array $payload): GearIds
+            public function doParseNotes(array $payload): ?string
             {
-                return self::parseAttachedTo($payload);
+                return self::parseNotes($payload);
+            }
+
+            public function doParseInstallations(array $payload): GearComponentInstallations
+            {
+                return self::parseInstallations($payload);
             }
 
             public function doParseMaintenanceTasks(array $payload, bool $generateMissingIds): MaintenanceTasks

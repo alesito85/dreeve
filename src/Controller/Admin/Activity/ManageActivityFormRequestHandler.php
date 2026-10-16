@@ -17,6 +17,7 @@ use App\Domain\Gear\GearId;
 use App\Domain\Gear\GearRepository;
 use App\Domain\Gear\RecordingDevice\RecordingDeviceRepository;
 use App\Domain\Import\ImportMode;
+use App\Domain\Settings\ActivityExclusion;
 use App\Domain\Settings\SettingsRepository;
 use App\Infrastructure\Http\HtmlResponse;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -85,6 +86,13 @@ final readonly class ManageActivityFormRequestHandler
             'gears' => $gears,
             'gearIsReadOnly' => $gearIsReadOnly,
             'recordingDevices' => $this->recordingDeviceRepository->findAll(),
+            'exclusions' => array_map(
+                fn (ActivityExclusion $exclusion): array => [
+                    'exclusion' => $exclusion,
+                    'isExcluded' => $this->settingsRepository->activityExclusions()->getExcludedActivityIds($exclusion)->has($activity->getId()),
+                ],
+                ActivityExclusion::cases(),
+            ),
         ]));
     }
 

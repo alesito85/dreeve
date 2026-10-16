@@ -1,0 +1,77 @@
+{
+  "enabled": true,
+  "ignoreRetiredGear": false,
+  "components": [
+    {
+      "id": "gearComponent-winter-wheelset",
+      "label": "Winter wheelset",
+      "localImagePath": null,
+      "isRetired": false,
+      "notes": "Serial WH-123\nTubeless ready",
+      "installations": [
+        {
+          "parent": "gear:gear-b1",
+          "from": "2024-11-01",
+          "until": "2025-03-15",
+          "sportTypes": [
+            "Ride",
+            "GravelRide"
+          ]
+        },
+        {
+          "parent": "gear:gear-b1",
+          "from": "2025-11-01",
+          "until": null,
+          "sportTypes": []
+        },
+        {
+          "parent": "gear:gear-b2",
+          "from": null,
+          "until": "2024-11-01",
+          "sportTypes": [
+            "VirtualRide"
+          ]
+        }
+      ],
+      "maintenance": [
+        {
+          "id": "maintenanceTask-hub-service",
+          "label": "Hub service",
+          "interval": {
+            "value": 5000,
+            "unit": "km"
+          }
+        }
+      ],
+      "purchasePrice": {
+        "amountInCents": 45000,
+        "currency": "EUR"
+      }
+    },
+    {
+      "id": "gearComponent-winter-tyres",
+      "label": "Winter tyres",
+      "localImagePath": null,
+      "isRetired": true,
+      "notes": null,
+      "installations": [
+        {
+          "parent": "component:gearComponent-winter-wheelset",
+          "from": null,
+          "until": null,
+          "sportTypes": []
+        }
+      ],
+      "maintenance": [
+        {
+          "id": "maintenanceTask-winter-tyres-replace",
+          "label": "Replace",
+          "interval": {
+            "value": 3000,
+            "unit": "km"
+          }
+        }
+      ]
+    }
+  ]
+}

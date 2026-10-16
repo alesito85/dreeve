@@ -7,20 +7,20 @@ AM/PM: AM/PM
 'API key': API-sleutel
 Actions: Acties
 Active: Actief
-'Activities excluded from peak power outputs': 'Activiteiten uitgesloten van piekvermogens'
 'Activities scanned': 'Gescande activiteiten'
 'Activities to skip during import': 'Over te slaan activiteiten bij het importeren'
 'Activities to update': 'Bij te werken activiteiten'
 'Activities will appear here once they are imported.': 'Activiteiten verschijnen hier zodra ze geïmporteerd zijn.'
 Activity: Activiteit
 'Activity ID': Activiteits-ID
-'Activity IDs to exclude when calculating peak power outputs.': "Activiteits-ID's die uitgesloten worden bij het berekenen van piekvermogens."
+'Activity description': 'Beschrijving activiteit'
 'Activity management': Activiteitenbeheer
 'Activity name': 'Naam activiteit'
 'Activity visibilities to import': 'Te importeren zichtbaarheden van activiteiten'
 'Add Eddington': 'Eddington toevoegen'
 'Add FTP': 'FTP toevoegen'
 'Add a component to start tracking maintenance.': 'Voeg een onderdeel toe om onderhoud bij te houden.'
+'Add a row for every period the component was fitted. Leave the end date empty while it is still fitted.': 'Add a row for every period the component was fitted. Leave the end date empty while it is still fitted.'
 'Add a rule to start automating your activity details.': 'Voeg een regel toe om je activiteitsgegevens automatisch in te vullen.'
 'Add a widget': 'Een widget toevoegen'
 'Add action': 'Actie toevoegen'
@@ -32,6 +32,7 @@ Activity: Activiteit
 'Add condition': 'Voorwaarde toevoegen'
 'Add gear': 'Uitrusting toevoegen'
 'Add goal': 'Doel toevoegen'
+'Add installation': 'Add installation'
 'Add max heart rate': 'Maximale hartslag toevoegen'
 'Add resting heart rate': 'Rusthartslag toevoegen'
 'Add rule': 'Regel toevoegen'
@@ -51,6 +52,7 @@ Admin: Beheer
 'All efforts on this segment are deleted as well. This action cannot be undone.': 'All efforts on this segment are deleted as well. This action cannot be undone.'
 'All sport types': 'Alle sporttypes'
 'All sport types must belong to the same activity type.': 'Alle sporttypes moeten tot hetzelfde activiteitstype behoren.'
+'Allow visitors to download original activity files': 'Allow visitors to download original activity files'
 'Allowed IP addresses for the admin panel': 'Toegestane IP-adressen voor het beheerpaneel'
 'Also exposes the workout assistant in the web interface. Requires the AI integration above to be enabled. Use caution when enabling this if your app is publicly accessible.': 'Maakt de trainingsassistent ook beschikbaar in de webinterface. Vereist dat de AI-integratie hierboven ingeschakeld is. Wees voorzichtig als je app publiek toegankelijk is.'
 'Any IP address': 'Eender welk IP-adres'
@@ -82,6 +84,7 @@ Apply: Toepassen
 'Base URI': Basis-URI
 'Before you can use the app, we need to know a few things about you. These are used to calculate your heart rate zones and training load. You can fine-tune all other settings later on.': 'Voor je de app kan gebruiken, moeten we een paar dingen over je weten. Die worden gebruikt om je hartslagzones en trainingsbelasting te berekenen. Alle andere instellingen kan je later nog verfijnen.'
 Birthday: Geboortedatum
+'By default only you can download the original FIT, TCX or GPX file from an activity page. Original files can contain more detail than the page shows.': 'By default only you can download the original FIT, TCX or GPX file from an activity page. Original files can contain more detail than the page shows.'
 'Calculate energy (kJ)': 'Energie berekenen (kJ)'
 Cancel: Annuleren
 'Challenge name': 'Naam uitdaging'
@@ -161,6 +164,9 @@ Endpoint: Endpoint
 'Enter your password': 'Geef je wachtwoord in'
 'Enter your username': 'Geef je gebruikersnaam in'
 Every: Elke
+'Exclude from': 'Exclude from'
+'Excluded activities are left out of these statistics, but still show up everywhere else.': 'Excluded activities are left out of these statistics, but still show up everywhere else.'
+'Excluded from': 'Excluded from'
 FTP: FTP
 'FTP history (cycling)': 'FTP-historiek (fietsen)'
 'FTP history (running)': 'FTP-historiek (lopen)'
@@ -216,6 +222,7 @@ Import: Importeren
 'Imports new Strava activities.': 'Importeert nieuwe Strava-activiteiten.'
 'Include retired gear': 'Uitrusting buiten gebruik meenemen'
 Info: Info
+'Installed on': 'Installed on'
 Integrations: Integraties
 'Intro text': Introtekst
 'Invalid CSRF token.': 'Ongeldig CSRF-token.'
@@ -277,6 +284,8 @@ Monday: Maandag
 'No unit': 'Geen eenheid'
 'Normal date format': 'Normaal datumformaat'
 'Not configured, the API is closed': 'Niet geconfigureerd, de API is gesloten'
+'Not fitted': 'Not fitted'
+Notes: Notes
 'Notification services': Meldingsdiensten
 'Notify when an import was successful': 'Melden wanneer een import geslaagd is'
 'Number of activities to display': 'Aantal te tonen activiteiten'
@@ -329,6 +338,7 @@ Remove: Verwijderen
 'Remove command': 'Commando verwijderen'
 'Remove condition': 'Voorwaarde verwijderen'
 'Remove goal': 'Doel verwijderen'
+'Remove installation': 'Remove installation'
 'Remove task': 'Taak verwijderen'
 'Remove tile layer': 'Tegellaag verwijderen'
 'Remove widget': 'Widget verwijderen'
@@ -344,6 +354,7 @@ Resetting...: 'Aan het terugzetten...'
 'Resting heart rate formula': 'Formule rusthartslag'
 'Restrict to date range': 'Beperken tot datumbereik'
 Retired: 'Buiten gebruik'
+'Retired components keep their history, but are hidden and no longer tracked.': 'Retired components keep their history, but are hidden and no longer tracked.'
 'Retry weather and reverse geocoding': 'Weer en reverse geocoding opnieuw proberen'
 'Return to app': 'Terug naar de app'
 Ride: Rit
@@ -369,6 +380,7 @@ Security: Beveiliging
 'Select at least one sensor.': 'Selecteer minstens één sensor.'
 'Select at least one sport type.': 'Selecteer minstens één sporttype.'
 'Select at least one weekday.': 'Selecteer minstens één weekdag.'
+'Select gear or component': 'Select gear or component'
 'Select gear...': 'Selecteer uitrusting...'
 'Select sensors': 'Sensoren selecteren'
 'Select sport types': 'Sporttypes selecteren'
@@ -378,6 +390,7 @@ Security: Beveiliging
 'Sends a notification when gear maintenance is due. Requires a configured notification service.': 'Stuurt een melding wanneer onderhoud van uitrusting nodig is. Vereist een geconfigureerde meldingsdienst.'
 Sensors: Sensoren
 'Sensors are only recorded for activities imported from FIT files. Activities from Strava, GPX or TCX never match this condition.': 'Sensoren worden enkel geregistreerd voor activiteiten die geïmporteerd zijn uit FIT-bestanden. Activiteiten van Strava, GPX of TCX voldoen nooit aan deze voorwaarde.'
+'Serial number, size, where you bought it, ...': 'Serial number, size, where you bought it, ...'
 'Set description': 'Beschrijving instellen'
 'Set its status to Retired instead to hide it from your active gear.': 'Zet de status op Buiten gebruik om het te verbergen tussen je actieve uitrusting.'
 'Set name': 'Naam instellen'
@@ -497,6 +510,7 @@ URL: URL
 Unit: Eenheid
 'Unit system': Eenhedenstelsel
 'Unsupported file type': 'Niet-ondersteund bestandstype'
+Until: Until
 'Upload activity files': 'Activiteitsbestanden uploaden'
 'Upload failed': 'Upload mislukt'
 'Upload files': 'Bestanden uploaden'

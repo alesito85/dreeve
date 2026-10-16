@@ -7,20 +7,20 @@ AM/PM: AM/PM
 'API key': API-kulcs
 Actions: Actions
 Active: Aktív
-'Activities excluded from peak power outputs': 'A csúcsteljesítményből kizárt tevékenységek'
 'Activities scanned': 'Átvizsgált tevékenységek'
 'Activities to skip during import': 'Importáláskor kihagyandó tevékenységek'
 'Activities to update': 'Frissítendő tevékenységek'
 'Activities will appear here once they are imported.': 'A tevékenységek itt jelennek meg, miután importáltad őket.'
 Activity: Tevékenység
 'Activity ID': Tevékenység-azonosító
-'Activity IDs to exclude when calculating peak power outputs.': 'A csúcsteljesítmény számításakor kizárandó tevékenység-azonosítók.'
+'Activity description': 'Tevékenység leírása'
 'Activity management': 'Tevékenységek kezelése'
 'Activity name': 'Tevékenység neve'
 'Activity visibilities to import': 'Importálandó tevékenység-láthatóságok'
 'Add Eddington': 'Eddington hozzáadása'
 'Add FTP': 'FTP hozzáadása'
 'Add a component to start tracking maintenance.': 'Adj hozzá egy komponenst a karbantartás követésének megkezdéséhez.'
+'Add a row for every period the component was fitted. Leave the end date empty while it is still fitted.': 'Add a row for every period the component was fitted. Leave the end date empty while it is still fitted.'
 'Add a rule to start automating your activity details.': 'Adj hozzá egy szabályt a tevékenység-adatok automatizálásának megkezdéséhez.'
 'Add a widget': 'Widget hozzáadása'
 'Add action': 'Művelet hozzáadása'
@@ -32,6 +32,7 @@ Activity: Tevékenység
 'Add condition': 'Feltétel hozzáadása'
 'Add gear': 'Felszerelés hozzáadása'
 'Add goal': 'Cél hozzáadása'
+'Add installation': 'Add installation'
 'Add max heart rate': 'Maximális pulzus hozzáadása'
 'Add resting heart rate': 'Nyugalmi pulzus hozzáadása'
 'Add rule': 'Szabály hozzáadása'
@@ -51,6 +52,7 @@ Admin: Admin
 'All efforts on this segment are deleted as well. This action cannot be undone.': 'All efforts on this segment are deleted as well. This action cannot be undone.'
 'All sport types': 'Minden sporttípus'
 'All sport types must belong to the same activity type.': 'Minden sporttípusnak ugyanahhoz a tevékenységtípushoz kell tartoznia.'
+'Allow visitors to download original activity files': 'Allow visitors to download original activity files'
 'Allowed IP addresses for the admin panel': 'Az adminfelülethez engedélyezett IP-címek'
 'Also exposes the workout assistant in the web interface. Requires the AI integration above to be enabled. Use caution when enabling this if your app is publicly accessible.': 'Emellett elérhetővé teszi az edzésasszisztenst a webes felületen. Ehhez a fenti AI-integrációnak bekapcsolva kell lennie. Óvatosan használd, ha az alkalmazásod nyilvánosan elérhető.'
 'Any IP address': 'Bármely IP-cím'
@@ -82,6 +84,7 @@ Apply: Alkalmaz
 'Base URI': 'Alap URI'
 'Before you can use the app, we need to know a few things about you. These are used to calculate your heart rate zones and training load. You can fine-tune all other settings later on.': 'Mielőtt használni tudnád az alkalmazást, néhány dolgot tudnunk kell rólad. Ezeket a pulzuszónáid és edzésterhelésed kiszámításához használjuk. A többi beállítást később finomhangolhatod.'
 Birthday: Születésnap
+'By default only you can download the original FIT, TCX or GPX file from an activity page. Original files can contain more detail than the page shows.': 'By default only you can download the original FIT, TCX or GPX file from an activity page. Original files can contain more detail than the page shows.'
 'Calculate energy (kJ)': 'Energia számítása (kJ)'
 Cancel: Mégse
 'Challenge name': 'Kihívás neve'
@@ -161,6 +164,9 @@ Endpoint: Végpont
 'Enter your password': 'Add meg a jelszavad'
 'Enter your username': 'Add meg a felhasználóneved'
 Every: Minden
+'Exclude from': 'Exclude from'
+'Excluded activities are left out of these statistics, but still show up everywhere else.': 'Excluded activities are left out of these statistics, but still show up everywhere else.'
+'Excluded from': 'Excluded from'
 FTP: FTP
 'FTP history (cycling)': 'FTP-előzmények (kerékpározás)'
 'FTP history (running)': 'FTP-előzmények (futás)'
@@ -216,6 +222,7 @@ Import: Importálás
 'Imports new Strava activities.': 'Importálja az új Strava-tevékenységeket.'
 'Include retired gear': 'Nyugdíjazott felszerelés belefoglalása'
 Info: Infó
+'Installed on': 'Installed on'
 Integrations: Integrációk
 'Intro text': 'Bevezető szöveg'
 'Invalid CSRF token.': 'Érvénytelen CSRF-token.'
@@ -277,6 +284,8 @@ Monday: Hétfő
 'No unit': 'Nincs mértékegység'
 'Normal date format': 'Normál dátumformátum'
 'Not configured, the API is closed': 'Nincs beállítva, az API zárva van'
+'Not fitted': 'Not fitted'
+Notes: Notes
 'Notification services': 'Értesítési szolgáltatások'
 'Notify when an import was successful': 'Értesítés sikeres importáláskor'
 'Number of activities to display': 'Megjelenítendő tevékenységek száma'
@@ -329,6 +338,7 @@ Remove: Eltávolítás
 'Remove command': 'Parancs eltávolítása'
 'Remove condition': 'Feltétel eltávolítása'
 'Remove goal': 'Cél eltávolítása'
+'Remove installation': 'Remove installation'
 'Remove task': 'Feladat eltávolítása'
 'Remove tile layer': 'Csempe-réteg eltávolítása'
 'Remove widget': 'Widget eltávolítása'
@@ -344,6 +354,7 @@ Resetting...: Visszaállítás...
 'Resting heart rate formula': 'Nyugalmi pulzus képlete'
 'Restrict to date range': 'Korlátozás dátumtartományra'
 Retired: Nyugdíjazott
+'Retired components keep their history, but are hidden and no longer tracked.': 'Retired components keep their history, but are hidden and no longer tracked.'
 'Retry weather and reverse geocoding': 'Retry weather and reverse geocoding'
 'Return to app': 'Vissza az alkalmazáshoz'
 Ride: Kerékpározás
@@ -369,6 +380,7 @@ Security: Biztonság
 'Select at least one sensor.': 'Válassz legalább egy érzékelőt.'
 'Select at least one sport type.': 'Válassz legalább egy sporttípust.'
 'Select at least one weekday.': 'Válassz legalább egy napot.'
+'Select gear or component': 'Select gear or component'
 'Select gear...': 'Válassz felszerelést...'
 'Select sensors': 'Érzékelők kiválasztása'
 'Select sport types': 'Sporttípusok kiválasztása'
@@ -378,6 +390,7 @@ Security: Biztonság
 'Sends a notification when gear maintenance is due. Requires a configured notification service.': 'Értesítést küld, ha esedékes a felszerelés karbantartása. Beállított értesítési szolgáltatást igényel.'
 Sensors: Érzékelők
 'Sensors are only recorded for activities imported from FIT files. Activities from Strava, GPX or TCX never match this condition.': 'Az érzékelők csak a FIT-fájlokból importált tevékenységeknél kerülnek rögzítésre. A Stravából, GPX- vagy TCX-fájlokból származó tevékenységek soha nem illeszkednek erre a feltételre.'
+'Serial number, size, where you bought it, ...': 'Serial number, size, where you bought it, ...'
 'Set description': 'Leírás beállítása'
 'Set its status to Retired instead to hide it from your active gear.': 'Állítsd inkább Nyugdíjazott státuszra, hogy elrejtsd az aktív felszerelések közül.'
 'Set name': 'Név beállítása'
@@ -497,6 +510,7 @@ URL: URL
 Unit: Mértékegység
 'Unit system': Mértékegységrendszer
 'Unsupported file type': 'Nem támogatott fájltípus'
+Until: Until
 'Upload activity files': 'Tevékenységfájlok feltöltése'
 'Upload failed': 'A feltöltés sikertelen'
 'Upload files': 'Fájlok feltöltése'

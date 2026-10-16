@@ -4,6 +4,7 @@
 '< 1.5: Good variety in training': '< 1.5: Goede variatie in training'
 '> 2.0: High monotony, increased risk': '> 2.0: Hoge monotonie, verhoogd risico'
 'A 6-hour week scores higher than a 5-hour week.': 'Een week van 6 uur scoort hoger dan een week van 5 uur.'
+'A cluster tile is a visited tile whose four neighbours are visited too': 'Een clustertegel is een bezochte tegel waarvan de vier buren ook bezocht zijn'
 'A high intensity score means a larger share of your training is hard rather than easy.': 'Een hoge intensiteitsscore betekent dat een groter deel van je training zwaar is in plaats van licht.'
 'A high score means you concentrate more training into fewer, heavier days.': 'Een hoge score betekent dat je meer training concentreert in minder, zwaardere dagen.'
 'A:C Ratio': 'A:C-ratio'
@@ -12,6 +13,7 @@
 'ATL (Fatigue)': 'ATL (Vermoeidheid)'
 'Accumulated fatigue': 'Opgebouwde vermoeidheid'
 'Active days': 'Actieve dagen'
+'Active gear': 'Active gear'
 Activities: Activiteiten
 Activity: Activiteit
 'Activity count': 'Aantal activiteiten'
@@ -34,6 +36,7 @@ Apr: Apr
 Aug: Aug
 Average: Gemiddeld
 'Average gradient': 'Gemiddelde helling'
+'Avg distance': 'Avg distance'
 'Avg gradient': 'Gem. helling'
 'Avg pace': 'Gem. tempo'
 'Avg speed': 'Gem. snelheid'
@@ -64,6 +67,7 @@ Challenges: Uitdagingen
 'Chronic Training Load (Fitness) - 42-day exponentially weighted average of your daily training load. Represents long-term training adaptation.': 'Chronic Training Load (Fitheid) - exponentieel gewogen gemiddelde over 42 dagen van je dagelijkse trainingsbelasting. Geeft de trainingsaanpassing op lange termijn weer.'
 'Clear all filters': 'Alle filters wissen'
 'Clear chat': 'Chat wissen'
+'Cluster tiles': Clustertegels
 Columns: Kolommen
 Commute: Woon-werk
 Commutes: Woon-werkritten
@@ -76,6 +80,7 @@ Components: Onderdelen
 'Congrats! You achieved {numberOfPRs} PRs in this activity.': "Proficiat! Je behaalde {numberOfPRs} PR's in deze activiteit."
 'Consider reducing load': 'Overweeg de belasting te verminderen'
 Consistency: Consistentie
+Cost: Cost
 Country: Land
 Cricket: Cricket
 Crossfit: Crossfit
@@ -90,7 +95,9 @@ Dance: Dansen
 Dashboard: Dashboard
 Date: Datum
 Day: Dag
+'Days completed': 'Days completed'
 'Days needed': 'Dagen nodig'
+'Days to go': 'Days to go'
 'Daytime stats': 'Daytime statistieken'
 Dec: Dec
 'Decreased compared to yesterday': 'Gedaald ten opzichte van gisteren'
@@ -107,6 +114,7 @@ Distance: Afstand
 'Distance over time per gear': 'Afstand in tijd per gear'
 'Distance per month per gear': 'Afstand per maand per gear'
 'Doing a mix of cycling, running, swimming, and strength work increases your variety score.': 'Een mix van fietsen, lopen, zwemmen en krachttraining verhoogt je variatiescore.'
+Download: Download
 Duration: Duur
 'Dusting off the record books...': 'De recordboeken aan het afstoffen...'
 'E-Bike Ride': E-bikerit
@@ -135,6 +143,8 @@ Energy: Energie
 Evening: Avond
 'Excludes commutes': 'Zonder woon-werkritten'
 'Excludes group activities': 'Zonder groepsactiviteiten'
+'Explorer tiles': Explorer-tegels
+'Explorer tiles include all your activities': 'Explorer tiles include all your activities'
 'FTP history': FTP-historiek
 Fastest: Snelste
 Favourite: Favoriet
@@ -160,8 +170,6 @@ Fri.: Vr.
 GAP: GAP
 Gear: Uitrusting
 'Gear maintenance': 'Onderhoud van uitrusting'
-'Gear stats': Uitrustingsstatistieken
-"Gear that hasn't been used in the last three months, is disabled by default.": 'Uitrusting die de afgelopen drie maanden niet is gebruikt, wordt standaard uitgeschakeld.'
 'Gear that is retired is disabled by default.': 'Uitrusting die niet meer actief is, wordt standaard uitgeschakeld.'
 'Go to activity': 'Naar activiteit'
 Goal: Doel
@@ -188,6 +196,7 @@ High: Hoog
 'High fatigue levels may increase injury or burnout risk. Consider reducing load and prioritizing recovery': 'Een hoge vermoeidheid kan het risico op blessures of burn-out verhogen. Overweeg de belasting te verminderen en voorrang te geven aan herstel'
 'High monotony - increase variety': 'Hoge monotonie - zorg voor meer variatie'
 'High risk': 'Hoog risico'
+'Highlight explorer tiles': 'Explorer-tegels markeren'
 'Highlight visited countries': 'Bezochte landen markeren'
 'Highly recovered and ready to perform': 'Goed hersteld en klaar om te presteren'
 Hike: Hike
@@ -206,6 +215,7 @@ Imperial: Imperiaal
 'Increased compared to yesterday': 'Gestegen ten opzichte van gisteren'
 'Individual thresholds vary based on fitness level.': 'Individuele drempels verschillen naargelang het fitheidsniveau.'
 'Inline Skate': Inlineskaten
+'Installed on {component}': 'Installed on {component}'
 Intensity: Intensiteit
 Jan: Jan
 Jul: Jul
@@ -214,6 +224,7 @@ KOM: KOM
 Kayaking: Kajakken
 'Kite Surf': Kitesurfen
 Lap: Ronde
+'Last 12 months': 'Last 12 months'
 'Last 30 days': 'Laatste 30 dagen'
 'Last 7 days training load': 'Trainingsbelasting laatste 7 dagen'
 'Last activity': 'Laatste activiteit'
@@ -221,6 +232,7 @@ Lap: Ronde
 'Last effort date': 'Datum laatste prestatie'
 'Last maintenance': 'Laatste onderhoud'
 'Last month': 'Vorige maand'
+'Last used': 'Last used'
 'Last week': 'Vorige week'
 'Last {numberOfDays} days': 'Laatste {numberOfDays} dagen'
 Lifetime: 'Sinds het begin'
@@ -244,9 +256,12 @@ Maintenance: Onderhoud
 'Manage recording devices': 'Registratietoestellen beheren'
 'Manage segments': 'Manage segments'
 'Map settings': Kaartinstellingen
+'Map tiles at zoom level 14 that your activities passed through': 'Kaarttegels op zoomniveau 14 waar je activiteiten doorheen gingen'
 Mar: Mrt
 Max: Max
+'Max cluster': 'Grootste cluster'
 'Max gradient': 'Max. helling'
+'Max square': 'Grootste vierkant'
 May: Mei
 Medium: Gemiddeld
 Metric: Metrisch
@@ -278,11 +293,14 @@ Neutral: Neutraal
 Night: Nacht
 'No activities': 'Geen activiteiten'
 'No data available': 'Geen gegevens beschikbaar'
+'No maintenance tasks': 'No maintenance tasks'
 'No milestones achieved yet': 'Nog geen mijlpalen behaald'
 'No other options to compare with': 'Geen andere opties om mee te vergelijken'
+'No purchase price set': 'No purchase price set'
 None: Geen
 'Nordic Ski': Langlaufen
 'Normalized power': 'Genormaliseerd vermogen'
+'Not fitted': 'Not fitted'
 'Not supported': 'Niet ondersteund'
 Nov: Nov
 Now: Nu
@@ -297,6 +315,7 @@ Oct: Okt
 "Oops, looks like you've wandered off the map! 🗺️": 'Oeps, het lijkt erop dat je van de kaart bent afgedwaald! 🗺️'
 'Open Water Swim': Openwaterzwemmen
 'Optimal training range': 'Optimaal trainingsbereik'
+'Original file': 'Original file'
 Other: Andere
 'Outdoor Sports': Buitensporten
 Over-fatigued: Oververmoeid
@@ -324,6 +343,7 @@ Power: Kracht
 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.': 'Aangedreven door naar schatting {caloriesBurned} calorieën, of ongeveer {numberOfPizzaSlices} pizzapunten 🍕.'
 'Prev year': 'Vorig jaar'
 Previous: Vorige
+Progress: Progress
 'Purchase price': Aankoopprijs
 Race: Wedstrijd
 'Racing Score': 'Racing Score'
@@ -331,6 +351,8 @@ Race: Wedstrijd
 'Racquet Ball': Racquetball
 Rank: Rang
 Ranking: Rangschikking
+'Reached a max cluster of {tileCount} tiles': 'Reached a max cluster of {tileCount} tiles'
+'Reached a {size}×{size} max square': 'Reached a {size}×{size} max square'
 'Reached {threshold} hours total moving time': '{threshold} uur totale beweegtijd bereikt'
 'Reached {threshold} total distance': '{threshold} totale afstand bereikt'
 'Reached {threshold} total elevation': '{threshold} totale hoogtemeters bereikt'
@@ -339,17 +361,17 @@ Ranking: Rangschikking
 'Recalculating your suffer score...': 'Je suffer score aan het herberekenen...'
 Recent: Recent
 'Recent effort': 'Recente prestatie'
+'Recording device': 'Recording device'
 'Recording devices': Registratietoestellen
 'Recovery Timeline': Hersteltijdlijn
 'Recovery forecast': Herstelprognose
 'Reduced carbon emission by commuting': 'Verminderde CO₂-uitstoot door woon-werkverkeer'
 'Register maintenance': 'Onderhoud registreren'
-'Relative cost': 'Relatieve kost'
 'Rest Days': Rustdagen
 'Rest days': Rustdagen
 'Rest days in last 7 days': 'Rustdagen in de laatste 7 dagen'
 'Rest days vs. active days': 'Rustdagen vs. actieve dagen'
-'Retired gear': 'Uitrusting buiten gebruik'
+Retired: Retired
 Rewind: Terugblik
 'Rewind comparisons are only available on larger screens.': 'Terugblikvergelijkingen zijn enkel beschikbaar op grotere schermen.'
 Ride: Rit
@@ -405,6 +427,7 @@ Surfing: Surfen
 'TSB positive in': 'TSB positief binnen'
 'Table Tennis': Tafeltennis
 'Taper sweet-spot (+15)': 'Taper-sweetspot (+15)'
+Target: Target
 'Team Sports': Teamsporten
 Temperature: Temperatuur
 'Temperature sensor': Temperatuursensor
@@ -498,8 +521,11 @@ Tennis: Tennis
 "That's {number} days of at least {distance}": 'Dat zijn {number} dagen van minstens {distance}'
 "That's {percentage}% of all countries 🌍": 'Dat is {percentage}% van alle landen 🌍'
 'The Eddington number in the context of cycling or running is defined as the maximum number E such that the athlete has covered at least E km on at least E days.': 'Het Eddington-getal bij fietsen of lopen is het grootste getal E waarvoor de atleet op minstens E dagen minstens E km heeft afgelegd.'
+'The largest connected group of cluster tiles': 'The largest connected group of cluster tiles'
+'The largest square of visited tiles': 'The largest square of visited tiles'
 "The page you're looking for doesn't exist or may have been moved.": 'De pagina die je zoekt bestaat niet of is mogelijk verplaatst.'
 'These badges are dynamically created. You can use them in any &lt;img&gt; tag': 'Deze badges worden dynamisch aangemaakt. Je kan ze gebruiken in eender welke &lt;img&gt;-tag'
+'These components are not installed on any gear at the moment.': 'These components are not installed on any gear at the moment.'
 Thinking...: 'Aan het nadenken...'
 'This chart summarizes how you train. Each axis reflects a different normalized training habit, so higher values mean stronger emphasis.': 'Deze grafiek vat samen hoe je traint. Elke as geeft een andere genormaliseerde trainingsgewoonte weer, dus hogere waarden betekenen een sterkere nadruk.'
 'This feature is currently disabled': 'Deze functie is momenteel uitgeschakeld'
@@ -507,6 +533,7 @@ Thinking...: 'Aan het nadenken...'
 'This week': 'Deze week'
 Thu: Do
 Thu.: Do.
+'Tiles visited for the first time in this activity': 'Tiles visited for the first time in this activity'
 Time: Tijd
 'Time in gear': 'Tijd per versnelling'
 'Time in zone': 'Tijd in zone'
@@ -534,6 +561,8 @@ Tue.: Di.
 'Unchanged compared to yesterday': 'Onveranderd ten opzichte van gisteren'
 Unspecified: 'Niet gespecificeerd'
 'Upcoming maintenance': 'Komend onderhoud'
+'Upcoming numbers': 'Upcoming numbers'
+Usage: Usage
 'User badge': Gebruikersbadge
 'Velo Mobile': Velomobiel
 'Velo Mobiles': Velomobielen
@@ -547,6 +576,7 @@ Unspecified: 'Niet gespecificeerd'
 'Virtual Run': 'Virtuele loop'
 'Virtual Runs': 'Virtuele loopsessies'
 'Virtual workout assistant': 'Virtuele trainingsassistent'
+'Visited tiles': 'Bezochte tegels'
 Volleyball: Volleybal
 Volume: Volume
 Wakeboarding: Wakeboarden
@@ -647,6 +677,7 @@ workouts: trainingen
 '{numberOfResults} results': '{numberOfResults} resultaten'
 '{numberOfResults} routes': '{numberOfResults} routes'
 '{numberOfRoutes} nearby route(s)': '{numberOfRoutes} route(s) in de buurt'
+'{numberOfTiles} new tile(s)': '{numberOfTiles} new tile(s)'
 '{numberOfWeeks} weeks': '{numberOfWeeks} weken'
 '{threshold} hours using {gearName}': '{threshold} uur met {gearName}'
 '{threshold} total distance using {gearName}': '{threshold} totale afstand met {gearName}'

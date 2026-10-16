@@ -2,8 +2,10 @@
 
 namespace App\Tests\Domain\Gear\Maintenance\Task\Progress;
 
+use App\Domain\Activity\SportType\SportTypes;
 use App\Domain\Gear\GearId;
-use App\Domain\Gear\GearIds;
+use App\Domain\Gear\Maintenance\Installation\UsageWindow;
+use App\Domain\Gear\Maintenance\Installation\UsageWindows;
 use App\Domain\Gear\Maintenance\Task\IntervalUnit;
 use App\Domain\Gear\Maintenance\Task\Progress\EveryXDaysProgressCalculation;
 use App\Domain\Gear\Maintenance\Task\Progress\MaintenanceTaskProgress;
@@ -28,13 +30,48 @@ class EveryXDaysProgressCalculationTest extends ContainerTestCase
             ),
             $this->calculation->calculate(
                 ProgressCalculationContext::from(
-                    gearIds: GearIds::fromArray([GearId::fromUnprefixed('test')]),
+                    usageWindows: UsageWindows::fromArray([UsageWindow::create(gearId: GearId::fromUnprefixed('test'), from: null, until: null, sportTypes: SportTypes::empty())]),
                     lastTaggedOn: SerializableDateTime::fromString('2025-01-03'),
                     intervalUnit: IntervalUnit::EVERY_X_DAYS,
                     intervalValue: 4,
                 )
             )
         );
+    }
+
+    public function testCalculateCountsFromTheEarliestInstallationWhenNeverTagged(): void
+    {
+        $this->assertEquals(
+            MaintenanceTaskProgress::from(
+                elapsed: 3,
+                interval: 4,
+                elapsedDescription: '3 days',
+                remainingDescription: '1 days',
+            ),
+            $this->calculation->calculate(
+                ProgressCalculationContext::from(
+                    usageWindows: UsageWindows::fromArray([
+                        UsageWindow::create(gearId: GearId::fromUnprefixed('test'), from: SerializableDateTime::fromString('2024-12-30'), until: null, sportTypes: SportTypes::empty()),
+                        UsageWindow::create(gearId: GearId::fromUnprefixed('other'), from: SerializableDateTime::fromString('2024-12-29'), until: SerializableDateTime::fromString('2024-12-30'), sportTypes: SportTypes::empty()),
+                    ]),
+                    lastTaggedOn: null,
+                    intervalUnit: IntervalUnit::EVERY_X_DAYS,
+                    intervalValue: 4,
+                )
+            )
+        );
+    }
+
+    public function testCalculateWhenNeverTaggedAndTheInstallationIsNotDated(): void
+    {
+        $this->assertNull($this->calculation->calculate(
+            ProgressCalculationContext::from(
+                usageWindows: UsageWindows::fromArray([UsageWindow::create(gearId: GearId::fromUnprefixed('test'), from: null, until: null, sportTypes: SportTypes::empty())]),
+                lastTaggedOn: null,
+                intervalUnit: IntervalUnit::EVERY_X_DAYS,
+                intervalValue: 4,
+            )
+        ));
     }
 
     #[\Override]

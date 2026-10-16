@@ -4,6 +4,7 @@
 '< 1.5: Good variety in training': '< 1,5: Jó változatosság az edzésben'
 '> 2.0: High monotony, increased risk': '> 2,0: Magas monotonitás, fokozott kockázat'
 'A 6-hour week scores higher than a 5-hour week.': 'Egy 6 órás hét magasabb pontszámot ér el, mint egy 5 órás.'
+'A cluster tile is a visited tile whose four neighbours are visited too': 'A klasztercsempe olyan meglátogatott csempe, amelynek mind a négy szomszédja is meglátogatott'
 'A high intensity score means a larger share of your training is hard rather than easy.': 'A magas intenzitási pontszám azt jelenti, hogy az edzéseid nagyobb része nehéz, nem könnyű.'
 'A high score means you concentrate more training into fewer, heavier days.': 'A magas pontszám azt jelenti, hogy több edzést koncentrálsz kevesebb, de nehezebb napra.'
 'A:C Ratio': 'A:C arány'
@@ -12,6 +13,7 @@
 'ATL (Fatigue)': 'ATL (Fáradtság)'
 'Accumulated fatigue': 'Felhalmozott fáradtság'
 'Active days': 'Aktív napok'
+'Active gear': 'Active gear'
 Activities: Tevékenységek
 Activity: Tevékenység
 'Activity count': 'Tevékenységek száma'
@@ -34,6 +36,7 @@ Apr: Ápr
 Aug: Aug
 Average: Átlag
 'Average gradient': 'Átlagos lejtés'
+'Avg distance': 'Avg distance'
 'Avg gradient': 'Átl. emelkedő'
 'Avg pace': 'Átl. tempó'
 'Avg speed': 'Átl. sebesség'
@@ -64,6 +67,7 @@ Challenges: Kihívások
 'Chronic Training Load (Fitness) - 42-day exponentially weighted average of your daily training load. Represents long-term training adaptation.': 'Krónikus edzésterhelés (Fitnesz) – a napi edzésterhelés 42 napos exponenciálisan súlyozott átlaga. A hosszú távú edzésadaptációt mutatja.'
 'Clear all filters': 'Összes szűrő törlése'
 'Clear chat': 'Chat törlése'
+'Cluster tiles': Klasztercsempék
 Columns: Oszlopok
 Commute: Ingázás
 Commutes: Ingázások
@@ -76,6 +80,7 @@ Components: Komponensek
 'Congrats! You achieved {numberOfPRs} PRs in this activity.': 'Gratulálunk! {numberOfPRs} egyéni rekordot értél el ebben a tevékenységben.'
 'Consider reducing load': 'Fontold meg a terhelés csökkentését'
 Consistency: Következetesség
+Cost: Cost
 Country: Ország
 Cricket: Krikett
 Crossfit: Crossfit
@@ -90,7 +95,9 @@ Dance: Tánc
 Dashboard: Irányítópult
 Date: Dátum
 Day: Nap
+'Days completed': 'Days completed'
 'Days needed': 'Szükséges napok'
+'Days to go': 'Days to go'
 'Daytime stats': 'Napszaki statisztikák'
 Dec: Dec
 'Decreased compared to yesterday': 'Csökkent a tegnapihoz képest'
@@ -107,6 +114,7 @@ Distance: Távolság
 'Distance over time per gear': 'Távolság időben felszerelésenkén'
 'Distance per month per gear': 'Havi távolság felszerelésenkén'
 'Doing a mix of cycling, running, swimming, and strength work increases your variety score.': 'A kerékpározás, futás, úszás és erőedzés vegyítése növeli a változatossági pontszámodat.'
+Download: Download
 Duration: Időtartam
 'Dusting off the record books...': 'Rekordkönyvek leporolása...'
 'E-Bike Ride': 'E-bike kerékpározás'
@@ -135,6 +143,8 @@ Energy: Energia
 Evening: Este
 'Excludes commutes': 'Ingázások nélkül'
 'Excludes group activities': 'A csoportos tevékenységek kivételével'
+'Explorer tiles': 'Felfedezett csempék'
+'Explorer tiles include all your activities': 'Explorer tiles include all your activities'
 'FTP history': 'FTP előzmények'
 Fastest: Leggyorsabb
 Favourite: Kedvenc
@@ -160,8 +170,6 @@ Fri.: Pén.
 GAP: GAP
 Gear: Felszerelés
 'Gear maintenance': 'Felszerelés karbantartás'
-'Gear stats': 'Felszerelés statisztikák'
-"Gear that hasn't been used in the last three months, is disabled by default.": 'Az elmúlt három hónapban nem használt felszerelés alapértelmezés szerint le van tiltva.'
 'Gear that is retired is disabled by default.': 'A visszavont felszerelés alapértelmezés szerint le van tiltva.'
 'Go to activity': 'Ugrás a tevékenységhez'
 Goal: Cél
@@ -188,6 +196,7 @@ High: Magas
 'High fatigue levels may increase injury or burnout risk. Consider reducing load and prioritizing recovery': 'A magas fáradtsági szint növelheti a sérülés vagy kiégés kockázatát. Fontold meg a terhelés csökkentését és a regeneráció előtérbe helyezését'
 'High monotony - increase variety': 'Magas monotonitás – növeld a változatosságot'
 'High risk': 'Magas kockázat'
+'Highlight explorer tiles': 'Felfedezett csempék kiemelése'
 'Highlight visited countries': 'Meglátogatott országok kiemelése'
 'Highly recovered and ready to perform': 'Teljesen regenerálódva, készen a teljesítésre'
 Hike: Túra
@@ -206,6 +215,7 @@ Imperial: Angolszász
 'Increased compared to yesterday': 'Nőtt a tegnapihoz képest'
 'Individual thresholds vary based on fitness level.': 'Az egyéni küszöbértékek a fitnesz szinttől függően változnak.'
 'Inline Skate': Görkorcsolya
+'Installed on {component}': 'Installed on {component}'
 Intensity: Intenzitás
 Jan: Jan
 Jul: Júl
@@ -214,6 +224,7 @@ KOM: KOM
 Kayaking: Kajak
 'Kite Surf': 'Sárkányos szörfözés'
 Lap: Kör
+'Last 12 months': 'Last 12 months'
 'Last 30 days': 'Utolsó 30 nap'
 'Last 7 days training load': 'Utolsó 7 nap edzésterhelése'
 'Last activity': 'Utolsó tevékenység'
@@ -221,6 +232,7 @@ Lap: Kör
 'Last effort date': 'Utolsó teljesítmény dátuma'
 'Last maintenance': 'Utolsó karbantartás'
 'Last month': 'Előző hónap'
+'Last used': 'Last used'
 'Last week': 'Előző hét'
 'Last {numberOfDays} days': 'Utolsó {numberOfDays} nap'
 Lifetime: 'Teljes időszak'
@@ -244,9 +256,12 @@ Maintenance: Karbantartás
 'Manage recording devices': 'Rögzítő eszközök kezelése'
 'Manage segments': 'Manage segments'
 'Map settings': 'Térkép beállításai'
+'Map tiles at zoom level 14 that your activities passed through': 'A 14-es nagyítási szintű térképcsempék, amelyeken az aktivitásaid áthaladtak'
 Mar: Már
 Max: Max
+'Max cluster': 'Legnagyobb klaszter'
 'Max gradient': 'Max. lejtés'
+'Max square': 'Legnagyobb négyzet'
 May: Máj
 Medium: Közepes
 Metric: Metrikus
@@ -278,11 +293,14 @@ Neutral: Semleges
 Night: Éjjel
 'No activities': 'Nincsenek tevékenységek'
 'No data available': 'Nincs elérhető adat'
+'No maintenance tasks': 'No maintenance tasks'
 'No milestones achieved yet': 'Még nincsenek elért mérföldkövek'
 'No other options to compare with': 'Nincs más összehasonlítási lehetőség'
+'No purchase price set': 'No purchase price set'
 None: 'Egyik sem'
 'Nordic Ski': Sífutás
 'Normalized power': 'Normalizált teljesítmény'
+'Not fitted': 'Not fitted'
 'Not supported': 'Nem támogatott'
 Nov: Nov
 Now: Most
@@ -297,6 +315,7 @@ Oct: Okt
 "Oops, looks like you've wandered off the map! 🗺️": 'Hoppá, úgy tűnik, letértél a térképről! 🗺️'
 'Open Water Swim': 'Nyíltvízi úszás'
 'Optimal training range': 'Optimális edzéstartomány'
+'Original file': 'Original file'
 Other: Egyéb
 'Outdoor Sports': 'Szabadtéri sportok'
 Over-fatigued: Túlterhelve
@@ -324,6 +343,7 @@ Power: Teljesítmény
 'Powered by an estimated {caloriesBurned} calories, or roughly {numberOfPizzaSlices} slices of pizza 🍕.': 'Ezt becsült {caloriesBurned} kalória hajtotta, ami nagyjából {numberOfPizzaSlices} szelet pizza.'
 'Prev year': 'Előző év'
 Previous: Előző
+Progress: Progress
 'Purchase price': Vételár
 Race: Verseny
 'Racing Score': Versenypontszám
@@ -331,6 +351,8 @@ Race: Verseny
 'Racquet Ball': 'Squash labda'
 Rank: Helyezés
 Ranking: Ranglista
+'Reached a max cluster of {tileCount} tiles': 'Reached a max cluster of {tileCount} tiles'
+'Reached a {size}×{size} max square': 'Reached a {size}×{size} max square'
 'Reached {threshold} hours total moving time': '{threshold} óra összes mozgásidő elérve'
 'Reached {threshold} total distance': '{threshold} összes távolság elérve'
 'Reached {threshold} total elevation': '{threshold} összes szintemelkedés elérve'
@@ -339,17 +361,17 @@ Ranking: Ranglista
 'Recalculating your suffer score...': 'Szenvedéspontszám újraszámítása...'
 Recent: Legutóbbi
 'Recent effort': 'Közelmúltbeli teljesítmény'
+'Recording device': 'Recording device'
 'Recording devices': 'Rögzítő eszközök'
 'Recovery Timeline': 'Regenerációs idővonal'
 'Recovery forecast': 'Regenerációs előrejelzés'
 'Reduced carbon emission by commuting': 'Csökkentett szén-dioxid kibocsátás ingázással'
 'Register maintenance': 'Karbantartás rögzítése'
-'Relative cost': 'Relatív költség'
 'Rest Days': Pihenőnapok
 'Rest days': Pihenőnapok
 'Rest days in last 7 days': 'Pihenőnapok az utolsó 7 napban'
 'Rest days vs. active days': 'Pihenőnapok vs. aktív napok'
-'Retired gear': 'Visszavont felszerelés'
+Retired: Retired
 Rewind: Visszatekintő
 'Rewind comparisons are only available on larger screens.': 'A visszatekintő összehasonlítások csak nagyobb képernyőkön érhetők el.'
 Ride: Kerékpározás
@@ -405,6 +427,7 @@ Surfing: Szörfözés
 'TSB positive in': 'TSB pozitív ezután:'
 'Table Tennis': Asztalitenisz
 'Taper sweet-spot (+15)': 'Taper édes pont (+15)'
+Target: Target
 'Team Sports': Csapatsportok
 Temperature: Hőmérséklet
 'Temperature sensor': Hőmérséklet-szenzor
@@ -498,8 +521,11 @@ Tennis: Tenisz
 "That's {number} days of at least {distance}": 'Ez {number} nap legalább {distance}-vel'
 "That's {percentage}% of all countries 🌍": 'Ez az összes ország {percentage}%-a 🌍'
 'The Eddington number in the context of cycling or running is defined as the maximum number E such that the athlete has covered at least E km on at least E days.': 'Az Eddington-szám kerékpározás vagy futás esetén az a legnagyobb E szám, amelyre igaz, hogy a sportoló legalább E napon legalább E km-t tett meg.'
+'The largest connected group of cluster tiles': 'The largest connected group of cluster tiles'
+'The largest square of visited tiles': 'The largest square of visited tiles'
 "The page you're looking for doesn't exist or may have been moved.": 'A keresett oldal nem létezik, vagy áthelyezték.'
 'These badges are dynamically created. You can use them in any &lt;img&gt; tag': 'Ezek a kitűzők dinamikusan jönnek létre. Bármely &lt;img&gt; tagben használhatod őket'
+'These components are not installed on any gear at the moment.': 'These components are not installed on any gear at the moment.'
 Thinking...: Gondolkodás...
 'This chart summarizes how you train. Each axis reflects a different normalized training habit, so higher values mean stronger emphasis.': 'Ez a diagram összefoglalja, hogyan edzel. Minden tengely különböző normalizált edzési szokást tükröz, így a magasabb értékek erősebb hangsúlyt jelentenek.'
 'This feature is currently disabled': 'Ez a funkció jelenleg le van tiltva'
@@ -507,6 +533,7 @@ Thinking...: Gondolkodás...
 'This week': 'Ez a hét'
 Thu: Cs
 Thu.: Csüt.
+'Tiles visited for the first time in this activity': 'Tiles visited for the first time in this activity'
 Time: Idő
 'Time in gear': 'Idő a felszereléssel'
 'Time in zone': 'Idő a zónában'
@@ -534,6 +561,8 @@ Tue.: Kedd
 'Unchanged compared to yesterday': 'Változatlan a tegnapihoz képest'
 Unspecified: Meghatározatlan
 'Upcoming maintenance': 'Közelgő karbantartás'
+'Upcoming numbers': 'Upcoming numbers'
+Usage: Usage
 'User badge': 'Felhasználói kitűző'
 'Velo Mobile': Velomobil
 'Velo Mobiles': Velomobil
@@ -547,6 +576,7 @@ Unspecified: Meghatározatlan
 'Virtual Run': 'Virtuális futás'
 'Virtual Runs': 'Virtuális futások'
 'Virtual workout assistant': 'Virtuális edzési asszisztens'
+'Visited tiles': 'Meglátogatott csempék'
 Volleyball: Röplabda
 Volume: Mennyiség
 Wakeboarding: Wakeboarding
@@ -647,6 +677,7 @@ workouts: edzések
 '{numberOfResults} results': '{numberOfResults} találat'
 '{numberOfResults} routes': '{numberOfResults} útvonal'
 '{numberOfRoutes} nearby route(s)': '{numberOfRoutes} nearby route(s)'
+'{numberOfTiles} new tile(s)': '{numberOfTiles} new tile(s)'
 '{numberOfWeeks} weeks': '{numberOfWeeks} hét'
 '{threshold} hours using {gearName}': '{threshold} óra {gearName} felhasználásával'
 '{threshold} total distance using {gearName}': '{threshold} össztávolság {gearName} felhasználásával'

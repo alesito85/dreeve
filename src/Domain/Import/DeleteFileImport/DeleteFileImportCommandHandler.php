@@ -7,6 +7,7 @@ namespace App\Domain\Import\DeleteFileImport;
 use App\Domain\Import\FileImportRepository;
 use App\Infrastructure\CQRS\Command\Command;
 use App\Infrastructure\CQRS\Command\CommandHandler;
+use App\Infrastructure\Exception\EntityNotFound;
 
 final readonly class DeleteFileImportCommandHandler implements CommandHandler
 {
@@ -19,6 +20,13 @@ final readonly class DeleteFileImportCommandHandler implements CommandHandler
     {
         assert($command instanceof DeleteFileImport);
 
-        $this->fileImportRepository->delete($command->getFileImportId());
+        try {
+            $fileImport = $this->fileImportRepository->find($command->getFileImportId());
+        } catch (EntityNotFound) {
+            return;
+        }
+
+        $fileImport->delete();
+        $this->fileImportRepository->delete($fileImport);
     }
 }

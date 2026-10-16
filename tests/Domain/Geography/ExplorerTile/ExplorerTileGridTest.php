@@ -1,0 +1,69 @@
+<?php
+
+namespace App\Tests\Domain\Geography\ExplorerTile;
+
+use App\Domain\Geography\ExplorerTile\ExplorerTileGrid;
+use App\Infrastructure\Serialization\Json;
+use App\Infrastructure\ValueObject\Geography\EncodedPolyline;
+use PHPUnit\Framework\TestCase;
+use Spatie\Snapshots\MatchesSnapshots;
+
+class ExplorerTileGridTest extends TestCase
+{
+    use MatchesSnapshots;
+
+    public function testTilesForReferencePoints(): void
+    {
+        $this->assertSame(
+            [
+                ExplorerTileGrid::tileKey(0, ExplorerTileGrid::TILES_PER_AXIS - 1),
+                ExplorerTileGrid::tileKey(8192, 8192),
+                ExplorerTileGrid::tileKey(8361, 5481),
+                ExplorerTileGrid::tileKey(15073, 9831),
+                ExplorerTileGrid::tileKey(ExplorerTileGrid::TILES_PER_AXIS - 1, 0),
+            ],
+            ExplorerTileGrid::tilesFor([
+                [0.0, 0.0],
+                [51.0543, 3.7174],
+                [-33.8568, 151.2153],
+                [90.0, 180.0],
+                [-90.0, -180.0],
+            ])->toArray()
+        );
+    }
+
+    public function testTilesForAStreamWithGaps(): void
+    {
+        $this->assertSame(
+            [
+                ExplorerTileGrid::tileKey(8361, 5481),
+                ExplorerTileGrid::tileKey(8362, 5481),
+                ExplorerTileGrid::tileKey(8363, 5481),
+                ExplorerTileGrid::tileKey(8364, 5481),
+                ExplorerTileGrid::tileKey(8364, 5482),
+                ExplorerTileGrid::tileKey(8365, 5482),
+            ],
+            ExplorerTileGrid::tilesFor([
+                null,
+                [51.048301, 3.724365],
+                null,
+                [51.0545],
+                [51.048301, 3.790283],
+                [51.033104, 3.812256],
+            ])->toArray()
+        );
+
+        $tiles = ExplorerTileGrid::tilesFor([]);
+        $this->assertTrue($tiles->isEmpty());
+        $this->assertSame(0, $tiles->count());
+    }
+
+    public function testTilesForARoute(): void
+    {
+        $tiles = ExplorerTileGrid::tilesFor(
+            EncodedPolyline::fromString((string) file_get_contents(__DIR__.'/../fixtures/route-be-nl.txt'))->decodeAndPairLatLng()
+        );
+
+        $this->assertMatchesJsonSnapshot(Json::encode($tiles->toArray()));
+    }
+}

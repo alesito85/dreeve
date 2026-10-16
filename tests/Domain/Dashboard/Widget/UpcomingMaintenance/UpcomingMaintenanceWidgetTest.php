@@ -14,12 +14,7 @@ use App\Domain\Gear\GearRepository;
 use App\Domain\Gear\Maintenance\Log\GearMaintenanceLog;
 use App\Domain\Gear\Maintenance\Log\GearMaintenanceLogRepository;
 use App\Domain\Gear\Maintenance\Task\MaintenanceTaskId;
-use App\Infrastructure\KeyValue\Key;
-use App\Infrastructure\KeyValue\KeyValue;
-use App\Infrastructure\KeyValue\KeyValueStore;
-use App\Infrastructure\KeyValue\Value;
 use App\Infrastructure\Measurement\Length\Kilometer;
-use App\Infrastructure\Serialization\Json;
 use App\Infrastructure\ValueObject\Time\SerializableDateTime;
 use App\Tests\ContainerTestCase;
 use App\Tests\Domain\Activity\ActivityBuilder;
@@ -67,7 +62,7 @@ class UpcomingMaintenanceWidgetTest extends ContainerTestCase
         $this->assertStringNotContainsString('Charge', $render);
     }
 
-    public function testRenderDoesNotIncludeTasksThatWereNeverPerformed(): void
+    public function testRenderIncludesTasksThatWereNeverPerformed(): void
     {
         $this->importGearMaintenanceConfig();
         $this->provideMaintenanceHistory();
@@ -78,8 +73,7 @@ class UpcomingMaintenanceWidgetTest extends ContainerTestCase
             configuration: WidgetConfiguration::empty()->add('numberOfTasksToDisplay', 5),
         );
 
-        // "Clean" has no maintenance log, so there is no anchor date to count down from.
-        $this->assertStringNotContainsString('Clean', $render);
+        $this->assertStringContainsString('Some cool chain &middot; Clean', $render);
     }
 
     public function testRenderWhenTheFeatureIsNotEnabled(): void
@@ -105,7 +99,8 @@ class UpcomingMaintenanceWidgetTest extends ContainerTestCase
             configuration: WidgetConfiguration::empty()->add('numberOfTasksToDisplay', 5),
         );
 
-        $this->assertNull($render);
+        $this->assertStringContainsString('Some cool chain &middot; Lube', (string) $render);
+        $this->assertStringContainsString('500 km left', (string) $render);
     }
 
     public function testRenderWhenTheOnlyComponentIsAttachedToRetiredGear(): void
@@ -171,24 +166,23 @@ class UpcomingMaintenanceWidgetTest extends ContainerTestCase
 
     private function importGearMaintenanceConfigAttachedToRetiredGearOnly(): void
     {
-        $this->getContainer()->get(KeyValueStore::class)->save(KeyValue::fromState(
-            key: Key::GEAR_MAINTENANCE,
-            value: Value::fromString(Json::encode(Yaml::parse(<<<YML
+        $this->importGearMaintenanceConfigFromArray(Yaml::parse(<<<YML
 enabled: true
 ignoreRetiredGear: true
 components:
   - id: gearComponent-chain
     label: Some cool chain
-    attachedTo:
-      - retired
+    isRetired: false
+    notes: null
+    installations:
+      - { parent: 'gear:gear-retired', from: null, until: null, sportTypes: [] }
     maintenance:
       - id: maintenanceTask-chain-lubed
         label: Lube
         interval:
           value: 500
           unit: km
-YML))),
-        ));
+YML));
     }
 
     #[\Override]

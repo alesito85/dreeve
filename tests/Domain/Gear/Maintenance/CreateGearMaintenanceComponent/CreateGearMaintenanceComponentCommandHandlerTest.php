@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Domain\Gear\Maintenance\CreateGearMaintenanceComponent;
 
 use App\Domain\Gear\Maintenance\CreateGearMaintenanceComponent\CreateGearMaintenanceComponent;
+use App\Domain\Gear\Maintenance\GearComponentRepository;
 use App\Infrastructure\CQRS\Command\Bus\CommandBus;
-use App\Infrastructure\KeyValue\Key;
-use App\Infrastructure\KeyValue\KeyValueStore;
 use App\Infrastructure\Serialization\Json;
 use App\Tests\ContainerTestCase;
 use App\Tests\ProvideGearMaintenanceConfig;
@@ -18,7 +17,6 @@ class CreateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
     use ProvideGearMaintenanceConfig;
 
     private CommandBus $commandBus;
-    private KeyValueStore $keyValueStore;
     private FilesystemOperator $fileStorage;
 
     public function testItCreatesComponentAndPreservesExistingOnes(): void
@@ -27,7 +25,8 @@ class CreateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
 
         $this->commandBus->dispatch(CreateGearMaintenanceComponent::fromPayload([
             'label' => 'Brake pads',
-            'attachedTo' => ['b1', 'g2'],
+            'notes' => ' Shimano B05S ',
+            'installations' => [['parent' => 'gear:gear-b1', 'from' => '2025-01-01', 'until' => '2025-03-15', 'sportTypes' => ['Ride', 'VirtualRide']], ['parent' => 'gear:gear-g2', 'from' => '2025-03-15', 'until' => '']],
             'purchasePriceAmount' => '49.99',
             'purchasePriceCurrency' => 'EUR',
             'maintenanceTasks' => [
@@ -35,15 +34,20 @@ class CreateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
             ],
         ]));
 
-        $config = Json::decode((string) $this->keyValueStore->find(Key::GEAR_MAINTENANCE));
+        $components = Json::decode(Json::encode($this->getContainer()->get(GearComponentRepository::class)->findAll()));
 
-        $this->assertCount(3, $config['components']);
+        $this->assertCount(3, $components);
 
-        $created = $this->findComponentByLabel($config['components'], 'Brake pads');
+        $created = $this->findComponentByLabel($components, 'Brake pads');
         $this->assertNotNull($created);
         $this->assertNotEmpty($created['id']);
-        $this->assertSame(['b1', 'g2'], $created['attachedTo']);
+        $this->assertSame([
+            ['parent' => 'gear:gear-b1', 'from' => '2025-01-01', 'until' => '2025-03-15', 'sportTypes' => ['Ride', 'VirtualRide']],
+            ['parent' => 'gear:gear-g2', 'from' => '2025-03-15', 'until' => null, 'sportTypes' => []],
+        ], $created['installations']);
         $this->assertNull($created['localImagePath']);
+        $this->assertFalse($created['isRetired']);
+        $this->assertSame('Shimano B05S', $created['notes']);
         $this->assertSame(4999, $created['purchasePrice']['amountInCents']);
         $this->assertSame('EUR', $created['purchasePrice']['currency']);
         $this->assertCount(1, $created['maintenance']);
@@ -51,11 +55,25 @@ class CreateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
         $this->assertNotEmpty($created['maintenance'][0]['id']);
     }
 
+    public function testItCreatesComponentWithoutMaintenanceTasks(): void
+    {
+        $this->commandBus->dispatch(CreateGearMaintenanceComponent::fromPayload([
+            'label' => 'Wheelset',
+            'installations' => [['parent' => 'gear:gear-b1']],
+        ]));
+
+        $components = Json::decode(Json::encode($this->getContainer()->get(GearComponentRepository::class)->findAll()));
+
+        $this->assertCount(1, $components);
+        $this->assertSame('Wheelset', $components[0]['label']);
+        $this->assertSame([], $components[0]['maintenance']);
+    }
+
     public function testItCreatesComponentWithImage(): void
     {
         $this->commandBus->dispatch(CreateGearMaintenanceComponent::fromPayload([
             'label' => 'Brake pads',
-            'attachedTo' => ['b1'],
+            'installations' => [['parent' => 'gear:gear-b1']],
             'localImagePath' => json_encode([
                 ['status' => 'new', 'filename' => 'brakes.png', 'content' => base64_encode('image-content')],
             ]),
@@ -64,9 +82,9 @@ class CreateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
             ],
         ]));
 
-        $config = Json::decode((string) $this->keyValueStore->find(Key::GEAR_MAINTENANCE));
+        $components = Json::decode(Json::encode($this->getContainer()->get(GearComponentRepository::class)->findAll()));
 
-        $this->assertSame('files/gear-maintenance/0025176c-5652-11ee-923d-02424dd627d5.png', $config['components'][0]['localImagePath']);
+        $this->assertSame('files/gear-maintenance/0025176c-5652-11ee-923d-02424dd627d5.png', $components[0]['localImagePath']);
         $this->assertTrue($this->fileStorage->fileExists('gear-maintenance/0025176c-5652-11ee-923d-02424dd627d5.png'));
         $this->assertSame('image-content', $this->fileStorage->read('gear-maintenance/0025176c-5652-11ee-923d-02424dd627d5.png'));
     }
@@ -75,18 +93,18 @@ class CreateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
     {
         $this->commandBus->dispatch(CreateGearMaintenanceComponent::fromPayload([
             'label' => 'Brake pads',
-            'attachedTo' => ['b1'],
+            'installations' => [['parent' => 'gear:gear-b1']],
             'maintenanceTasks' => [
                 ['label' => 'Replace', 'interval' => ['value' => 2000, 'unit' => 'km']],
             ],
         ]));
 
-        $config = Json::decode((string) $this->keyValueStore->find(Key::GEAR_MAINTENANCE));
+        $components = Json::decode(Json::encode($this->getContainer()->get(GearComponentRepository::class)->findAll()));
 
-        $this->assertCount(1, $config['components']);
-        $this->assertSame('Brake pads', $config['components'][0]['label']);
-        $this->assertNull($config['components'][0]['localImagePath']);
-        $this->assertArrayNotHasKey('purchasePrice', $config['components'][0]);
+        $this->assertCount(1, $components);
+        $this->assertSame('Brake pads', $components[0]['label']);
+        $this->assertNull($components[0]['localImagePath']);
+        $this->assertArrayNotHasKey('purchasePrice', $components[0]);
     }
 
     /**
@@ -111,7 +129,6 @@ class CreateGearMaintenanceComponentCommandHandlerTest extends ContainerTestCase
         parent::setUp();
 
         $this->commandBus = $this->getContainer()->get(CommandBus::class);
-        $this->keyValueStore = $this->getContainer()->get(KeyValueStore::class);
         $this->fileStorage = $this->getContainer()->get('file.storage');
     }
 }

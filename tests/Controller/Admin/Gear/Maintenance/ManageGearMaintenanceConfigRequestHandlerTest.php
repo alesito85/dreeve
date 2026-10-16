@@ -4,9 +4,11 @@ namespace App\Tests\Controller\Admin\Gear\Maintenance;
 
 use App\Domain\Gear\GearId;
 use App\Domain\Gear\GearRepository;
+use App\Infrastructure\Serialization\Json;
 use App\Tests\Controller\Admin\AdminWebTestCase;
 use App\Tests\Domain\Gear\GearBuilder;
 use App\Tests\ProvideGearMaintenanceConfig;
+use Symfony\Component\DomCrawler\Crawler;
 
 class ManageGearMaintenanceConfigRequestHandlerTest extends AdminWebTestCase
 {
@@ -48,6 +50,34 @@ class ManageGearMaintenanceConfigRequestHandlerTest extends AdminWebTestCase
         $warningText = $crawler->filter('.alert.alert--warning')->text();
         $this->assertStringContainsString('Gear "g1233776" is attached to one of your components, but does not exist', $warningText);
         $this->assertStringNotContainsString('10130856', $warningText);
+    }
+
+    public function testItMarksComponentsThatAreNotFitted(): void
+    {
+        $this->importGearMaintenanceConfigFromArray(Json::decode((string) file_get_contents(__DIR__.'/fixtures/gear-maintenance-with-not-fitted-component.json')));
+        $this->getContainer()->get(GearRepository::class)->add(
+            GearBuilder::fromDefaults()
+                ->withGearId(GearId::fromUnprefixed('g10130856'))
+                ->withName('Road bike')
+                ->build()
+        );
+
+        $this->client->loginUser($this->adminUser());
+
+        $crawler = $this->client->request('GET', '/admin/gear/maintenance-config');
+
+        $this->assertResponseIsSuccessful();
+        $rows = $crawler->filter('table.data-table tbody tr');
+        $this->assertSame(
+            ['Old chain', 'Summer wheelset', 'Winter wheelset'],
+            $rows->each(static fn (Crawler $row): string => $row->filter('td')->first()->text()),
+        );
+        $this->assertCount(1, $rows->eq(0)->filter('.pill--danger'));
+        $this->assertCount(0, $rows->eq(0)->filter('.pill--warning'));
+        $this->assertCount(1, $rows->eq(1)->filter('.pill--warning'));
+        $this->assertStringNotContainsString('Road bike', $rows->eq(1)->text());
+        $this->assertCount(0, $rows->eq(2)->filter('.pill--warning'));
+        $this->assertStringContainsString('Road bike', $rows->eq(2)->text());
     }
 
     public function testItRendersTheEmptyStateWhenThereAreNoComponents(): void

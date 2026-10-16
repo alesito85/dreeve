@@ -15,6 +15,8 @@ use App\Domain\Activity\EnrichedActivityRepository;
 use App\Domain\Activity\GpxFileName;
 use App\Domain\Activity\Lap\ActivityLapRepository;
 use App\Domain\Activity\LeafletMap;
+use App\Domain\Activity\Shifting\ActivityDrivetrainUsageRepository;
+use App\Domain\Activity\Shifting\ActivityDrivetrainUsages;
 use App\Domain\Activity\Split\ActivitySplitRepository;
 use App\Domain\Activity\Stream\ActivityHeartRateRepository;
 use App\Domain\Activity\Stream\ActivityStreamRepository;
@@ -22,6 +24,7 @@ use App\Domain\Activity\Stream\CombinedStream\CombinedActivityStreamRepository;
 use App\Domain\Activity\Stream\CombinedStream\CombinedStreamProfileCharts;
 use App\Domain\Activity\Stream\CombinedStream\CombinedStreamType;
 use App\Domain\Activity\Stream\StreamType;
+use App\Domain\Import\FileImportRepository;
 use App\Domain\Settings\SettingsRepository;
 use App\Infrastructure\Cache\Cacheability;
 use App\Infrastructure\Cache\Context\AuthenticatedCacheContext;
@@ -32,7 +35,7 @@ use App\Infrastructure\Cache\Tag\RootCacheTag;
 use App\Infrastructure\Exception\EntityNotFound;
 use App\Infrastructure\Http\HtmlResponse;
 use App\Infrastructure\Measurement\ProvideMeasurementFormats;
-use App\Infrastructure\Security\TrustedVisitor;
+use App\Infrastructure\Security\Visitor;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
@@ -54,11 +57,13 @@ final readonly class ActivityRequestHandler
         private CombinedActivityStreamRepository $combinedActivityStreamRepository,
         private ActivitySplitRepository $activitySplitRepository,
         private ActivityLapRepository $activityLapRepository,
+        private ActivityDrivetrainUsageRepository $activityDrivetrainUsageRepository,
         private SettingsRepository $settingsRepository,
         private TranslatorInterface $translator,
         private PageRenderer $pageRenderer,
         private UrlGeneratorInterface $urlGenerator,
-        private TrustedVisitor $trustedVisitor,
+        private Visitor $visitor,
+        private FileImportRepository $fileImportRepository,
         private Environment $twig,
     ) {
     }
@@ -82,6 +87,7 @@ final readonly class ActivityRequestHandler
                 cacheTags: CacheTags::of(
                     ActivityCacheTag::for($activityId),
                     RootCacheTag::GEAR,
+                    RootCacheTag::SETTINGS_SECURITY,
                 ),
                 cacheContexts: CacheContexts::of(AuthenticatedCacheContext::class, TrustedVisitorCacheContext::class),
             ),
@@ -138,6 +144,8 @@ final readonly class ActivityRequestHandler
             ] : null,
             'hasGpxLink' => $this->activityStreamRepository->hasOneForActivityAndStreamType($activityId, StreamType::LAT_LNG),
             'gpxFileName' => GpxFileName::for($activity),
+            'hasOriginalFileLink' => $this->visitor->canDownloadOriginalFiles()
+                && $this->fileImportRepository->hasFileContentsForActivity($activityId),
             'distributionCharts' => $this->distributionChartsBuilder->buildFor($activity),
             'splits' => $this->activitySplitRepository->findBy(
                 activityId: $activityId,
@@ -150,7 +158,10 @@ final readonly class ActivityRequestHandler
             ),
             'hasProfileChart' => $numberOfProfileChartLanes > 0,
             'heartRateZones' => $timeInHeartRateZones,
-            'showStartTime' => $this->trustedVisitor->isTrusted(),
+            'showStartTime' => $this->visitor->isTrusted(),
+            'drivetrainUsages' => $activity->getSportType()->supportsShiftingStats()
+                ? $this->activityDrivetrainUsageRepository->findByActivity($activityId)
+                : ActivityDrivetrainUsages::empty(),
         ]);
     }
 }

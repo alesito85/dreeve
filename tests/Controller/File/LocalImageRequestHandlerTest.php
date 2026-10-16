@@ -3,8 +3,9 @@
 namespace App\Tests\Controller\File;
 
 use App\Controller\File\LocalImageRequestHandler;
+use App\Domain\Settings\SettingsRepository;
 use App\Infrastructure\Config\DemoMode;
-use App\Infrastructure\Security\TrustedVisitor;
+use App\Infrastructure\Security\Visitor;
 use App\Tests\ContainerTestCase;
 use League\Flysystem\FilesystemOperator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -160,9 +161,10 @@ class LocalImageRequestHandlerTest extends ContainerTestCase
 
         return new LocalImageRequestHandler(
             $this->fileStorage,
-            new TrustedVisitor(
-                DemoMode::fromString($demoModeIsEnabled ? '1' : '0'),
+            new Visitor(
                 $security,
+                DemoMode::fromString($demoModeIsEnabled ? '1' : '0'),
+                $this->createStub(SettingsRepository::class),
             ),
         );
     }

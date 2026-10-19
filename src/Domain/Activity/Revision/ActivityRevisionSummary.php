@@ -48,6 +48,14 @@ final readonly class ActivityRevisionSummary implements \JsonSerializable
     {
         $streamSamples = [];
         foreach (StreamType::cases() as $streamType) {
+            if (StreamType::MOVING === $streamType) {
+                // MOVING is rebuilt from the timeline after every merge, so it
+                // tells you nothing about a version. It also lives in the stored
+                // streams but never in a merge result, which would make every
+                // merge look like a change, even one that changed nothing.
+                continue;
+            }
+
             $stream = $streams->filterOnType($streamType);
             if (!$stream instanceof ActivityStream) {
                 continue;
@@ -81,6 +89,12 @@ final readonly class ActivityRevisionSummary implements \JsonSerializable
         $streamSamples = [];
         if (is_array($values['streamSamples'] ?? null)) {
             foreach ($values['streamSamples'] as $streamType => $sampleCount) {
+                if (StreamType::MOVING->value === (string) $streamType) {
+                    // Versions written before MOVING was dropped still carry it,
+                    // and have to compare equal to the ones written after.
+                    continue;
+                }
+
                 $streamSamples[(string) $streamType] = (int) $sampleCount;
             }
         }

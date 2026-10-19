@@ -196,13 +196,36 @@ class ActivityRequestHandlerTest extends AdminWebTestCase
             generatedByFileImportId: FileImportId::fromUnprefixed('the-first-import'),
             createdOn: SerializableDateTime::fromString('2023-10-17 14:00:00'),
         ));
+        // The second version is the one a newer file made, and it knows about one
+        // series more than the version it replaced. It has no import row of its own,
+        // which is what a version that came from the Strava API looks like: readable,
+        // but with no bytes to replay.
+        $this->getContainer()->get(DbalActivityRevisionRepository::class)->add(ActivityRevision::create(
+            activityId: $activityId,
+            revisionNumber: 2,
+            summary: ActivityRevisionSummary::fromArray([
+                'startedOn' => '2023-08-31 16:35:00',
+                'distanceInMetres' => 1200,
+                'elapsedTimeInSeconds' => 300,
+                'movingTimeInSeconds' => 290,
+                'averagePower' => 190,
+                'streamSamples' => [StreamType::TIME->value => 300, StreamType::HEART_RATE->value => 300, StreamType::WATTS->value => 300],
+            ]),
+            generatedByFileImportId: null,
+            createdOn: SerializableDateTime::fromString('2023-10-17 15:00:00'),
+        ));
 
         $crawler = $this->client->request('GET', '/activities/activity-9756441741');
 
         $this->assertResponseIsSuccessful();
         $this->assertCount(1, $crawler->filter('#activity-versions'));
-        $this->assertCount(1, $crawler->filter('#activity-versions .pill'));
+        $this->assertCount(2, $crawler->filter('#activity-versions .pill--neutral'));
         $this->assertStringContainsString('Afternoon_Ride.fit', $crawler->filter('#activity-versions')->text());
+        // The newest version is the one that gained a series, and it is the only row
+        // that can say so: the oldest has nothing to be compared against.
+        $chip = $crawler->filter('#activity-versions .pill--info');
+        $this->assertCount(1, $chip);
+        $this->assertStringContainsString('data series', (string) $chip->text());
         // An anonymous visitor can read the history but has nothing to switch with.
         $this->assertCount(0, $crawler->filter('#activity-versions form'));
 
@@ -210,8 +233,10 @@ class ActivityRequestHandlerTest extends AdminWebTestCase
         $crawler = $this->client->request('GET', '/activities/activity-9756441741');
 
         $this->assertResponseIsSuccessful();
-        $form = $crawler->filter('#activity-versions form');
-        $this->assertCount(1, $form);
+        // A version with no stored bytes has no button: there is nothing to replay.
+        $forms = $crawler->filter('#activity-versions form');
+        $this->assertCount(1, $forms);
+        $form = $forms->first();
         $this->assertSame(
             SwitchActivityRevision::getCommandName(),
             $form->attr('data-dispatch-command'),

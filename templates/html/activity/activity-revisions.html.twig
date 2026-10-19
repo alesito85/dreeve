@@ -1,22 +1,21 @@
 {% if not revisions.isEmpty() %}
-    {# Build the rows oldest first, so each one can be compared to the version it
-       replaced, and show them newest first, which is how a history is read. #}
+    {# Build the rows oldest first, turn them around, and only then work out what
+       each one gained: the version a row replaced is its neighbour in this list,
+       and a neighbour is read straight out of the list instead of a map keyed by
+       revision number, because the merge filter renumbers numeric keys and a map
+       built that way never has the key it is asked for. #}
     {% set rows = [] %}
-    {% set summaries = {} %}
     {% for revision in revisions %}
-        {% set summary = revision.getSummary() %}
         {% set file = revisionFiles[revision.getRevisionNumber()] ?? null %}
-        {% set previous = summaries[revision.getRevisionNumber() - 1] ?? null %}
         {% set rows = rows|merge([{
             'number': revision.getRevisionNumber(),
             'createdOn': revision.getCreatedOn(),
-            'summary': summary,
+            'summary': revision.getSummary(),
             'fileName': file is null ? null : file.fileName,
             'restorable': file is null ? false : file.restorable,
-            'gained': previous is null ? [] : summary.streamTypesGainedComparedTo(previous),
         }]) %}
-        {% set summaries = summaries|merge({(revision.getRevisionNumber()): summary}) %}
     {% endfor %}
+    {% set ordered = rows|reverse %}
     <section id="activity-versions">
         <div class="bg-white border border-gray-200 shadow-xs rounded-lg p-4">
             <div class="flex items-start gap-2.5 mb-3">
@@ -33,7 +32,9 @@
                 </div>
             </div>
             <div class="grid grid-cols-1 gap-2">
-                {% for row in rows|reverse %}
+                {% for row in ordered %}
+                    {% set previous = loop.last ? null : ordered[loop.index0 + 1].summary %}
+                    {% set gained = previous is null ? [] : row.summary.streamTypesGainedComparedTo(previous) %}
                     <div class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
                         <span class="pill pill--neutral text-xs shrink-0">
                             {{ "Version {number}"|trans({'{number}': row.number}) }}
@@ -54,12 +55,15 @@
                                 </span>
                             {% endif %}
                         </div>
-                        {% if row.gained is not empty %}
+                        {% if gained is not empty %}
                             <span class="pill pill--info text-xs" title="{{ "Data this version has that the one before it does not"|trans }}">
-                                {{ "+{count} data series"|trans({'{count}': row.gained|length}) }}
+                                {{ "+{count} data series"|trans({'{count}': gained|length}) }}
                             </span>
                         {% endif %}
-                        {% if isAuthenticated() %}
+                        {# A version made by the Strava API has no file behind it, so
+                           it is shown and never offered for switching: replaying bytes
+                           it does not have would only fail. #}
+                        {% if row.restorable and isAuthenticated() %}
                             {# The command endpoint and its token normally live in the head of an
                                admin page, which this page is not, so the form carries them. The
                                token is a stateless one, so it is the same for every visitor and

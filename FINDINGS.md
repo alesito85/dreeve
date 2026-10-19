@@ -198,6 +198,14 @@ produces and equal means no row. Otherwise a re-export of the same ride that onl
 author line (the bytes differ, so it is not the identical-file skip, but the ride is the same) would
 put a version in the history and leave the user a list to read for no reason.
 
+That guard did not hold at first, and the rendered check is what showed it. MOVING, the derived
+series that says whether the athlete was moving, sits in the stored streams but never in a merge
+result, because `CalculateMovingStream` rebuilds it from the timeline afterwards. Every comparison
+between a retired state and a merge result therefore differed on that one key, and importing the
+same file under three names produced three byte-identical versions of one ride. MOVING is left out
+of a summary now, both when one is written and when one is read back, so the history already on disk
+keeps comparing equal to the history written from here on.
+
 Restoring a version replays the bytes that `FileImport` already stores compressed, forced to win
 regardless of timestamps, and appends the state it replaced as a new revision so history stays
 linear. It deliberately replays rather than re-imports: no automation rules, no weather lookup, no
@@ -207,12 +215,27 @@ consequences worth stating: a version whose source was the Strava API has no byt
 listed but not restored, and a parser change can make a replay differ slightly from the original
 import.
 
+A third consequence was decided while checking this in the running app. A value the replayed file
+cannot state goes blank instead of keeping what a later file brought in, because keeping it is what
+made a restore a half truth: restoring a summary-only workout after a fuller file had merged into it
+left the newer file's average power on the activity with none of the samples behind it, right next to
+a version row that said nothing about power. Blanking belongs to the same decision as replaying: the
+activity shows what that version knew, the numbers return with the version whose file reported them,
+and the derived rows are rebuilt by the next metrics run, which is the same self-selecting pending
+work the invalidation sweep relies on. In the rendered check the combined stream, the MOVING stream
+and the six stream metrics came back on the next `app:import:files`; splits and best efforts select
+themselves the same way, on an activity too short to have any they simply stay absent. So kilojoules go
+blank for a version made by a TCX, which never states work done, even though its watts series is
+there; that is exactly what importing that file on its own would have stored.
+
 ### Where this shows up
 
 The activity page grows an "Activity versions" panel as soon as an activity has history: one row per
 version, newest first, with the moment it was made, the file it came from, its distance, time and
-average power, and a chip for the data series this version has and the one before it does not. Each
-row can be switched to. Switching posts a command to the same `/admin/dispatch-command` endpoint the
+average power, and a chip for the data series this version has and the one before it does not. Every
+row whose file is archived offers a switch; a version made by the Strava API is listed without one,
+because there is nothing to replay. Switching posts a command to the same
+`/admin/dispatch-command` endpoint the
 admin pages use. That endpoint and its token are metas in the head of an admin page, and the activity
 page is not an admin page, so the form carries both itself and the command helper reads them from the
 form when the head does not offer them. The token is one of the stateless ones listed in
@@ -277,6 +300,37 @@ row from start to finish:
 That activity ends up with `left_pedal_smoothness` and `right_pedal_smoothness` on the same 3674
 sample axis as everything else, 3470 of them carrying a value, which is the data whose absence
 started this.
+
+The last row is the case that needed the fix described above. With MOVING still inside a version
+summary that import appended a third version identical to the second; with the derived stream left
+out it left the history at two rows, which is what "it added nothing" is supposed to mean.
+
+### The same checks in the rendered app
+
+Docker is unusable on this machine, so the rendered check ran the checkout directly:
+`php -S 127.0.0.1:8081 -t public public/index.php` with the env the container would have been given,
+and `DEV_MODE_IS_ENABLED=1` so a render cache cannot hide a template change. Everything below is a
+real request to localhost, a real login through `/admin/login`, and a real command POST to
+`/admin/dispatch-command`. The database is scratch and was reset afterwards.
+
+A pair of hand-written TCX files stands in for the fuller-and-partial case, because a truncated FIT
+no longer decodes and byte surgery on `session.avg_power` turns out to touch record fields instead:
+one file reports only a summary, the other tells the same 300 seconds in full.
+
+| Step | What the page and the database showed |
+| --- | --- |
+| the summary-only file | one activity, 1875 m, 300 s, average heart rate 125, no data series at all |
+| the fuller file for the same ride | merged into that same row through the content gate: 8 series of 300 samples, average power 163 W, and version 1 holding the summary-only state with the file that made it linked |
+| the activity page logged out | both version rows, no buttons |
+| the same page logged in | a "Switch to this version" form per row, carrying the endpoint, the stateless token and both hidden fields |
+| switching to version 1 | series gone, power blank, version 2 appended for the state it replaced, still exactly one activity row |
+| the next import run | combined stream, MOVING and the six stream metrics back on their own |
+| switching to version 2 | 8 series and 163 W back, version 3 appended, still one activity row |
+
+Two defects only this check could surface, both fixed here: identical re-imports writing phantom
+versions, and the "+N data series" chip never rendering, because the map it compared against was built
+by merging one entry per revision number into an accumulator and `merge` renumbers numeric keys, so
+the keys were 0, 1, 2 while the lookup asked for a revision number.
 
 One requirement this has: the `fit-tool` on PATH must be built from this branch. The gzip sniff is
 new, so a binary from before it fails on a `.fit.gz`. CI and both docker images compile it from

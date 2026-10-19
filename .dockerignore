@@ -33,6 +33,8 @@ package-lock.json
 package.json
 README.md
 CHANGELOG.md
+FINDINGS.md
+CLAUDE.md
 symfony.lock
 tailwind.config.js
 logo.xcf

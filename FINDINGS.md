@@ -314,8 +314,8 @@ and the history stays empty, which is what "it added nothing" is supposed to mea
 
 ### The same checks in the rendered app
 
-Docker is unusable on this machine, so the rendered check ran the checkout directly:
-`php -S 127.0.0.1:8081 -t public public/index.php` with the env the container would have been given,
+The rendered check ran the checkout directly under
+`php -S 127.0.0.1:8081 -t public public/index.php`, with the env the container would have been given
 and `DEV_MODE_IS_ENABLED=1` so a render cache cannot hide a template change. Everything below is a
 real request to localhost, a real login through `/admin/login`, and a real command POST to
 `/admin/dispatch-command`. The database is scratch and was reset afterwards.
@@ -338,6 +338,23 @@ Two defects only this check could surface, both fixed here: identical re-imports
 versions, and the "+N data series" chip never rendering, because the map it compared against was built
 by merging one entry per revision number into an accumulator and `merge` renumbers numeric keys, so
 the keys were 0, 1, 2 while the lookup asked for a revision number.
+
+### And once more inside the published image
+
+The same three imports, run inside the arm64 image rather than the checkout, so the shipped
+`fit-tool`, the compiled migrations and the production container graph are what is being tested and
+not the host's. The image is built as an overlay on `robiningelbrecht/dreeve:v5.6.0`, the published
+runtime that matches the version in `AppVersion`, because the layers below the code are the ones the
+code was released against: the PHP and FrankenPHP builds with their extensions, the Shoutrrr release,
+and the Caddy config, which upstream installs outside `/var/www` and the overlay therefore never
+replaces. An overlay on an older tag would ship an older runtime under newer code and say nothing
+about it.
+
+The import line, then the skip, then the merge, each its own run of `app:import:files`: one activity
+row, "Afternoon Ride", 21599 m over 3684 s at 182 W, device reference `289-2-22701926`, three
+`FileImport` rows, no version written, thirteen series on the 3674 sample axis including both
+pedal-smoothness sides, and nothing left in the watch directory. Which is the same outcome the
+checkout produced, from the bytes a user would pull.
 
 One requirement this has: the `fit-tool` on PATH must be built from this branch. The gzip sniff is
 new, so a binary from before it fails on a `.fit.gz`. CI and both docker images compile it from

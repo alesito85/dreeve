@@ -293,17 +293,24 @@ row from start to finish:
 
 | Imported | What happened |
 | --- | --- |
-| `21741882933.fit` | Imported as "Afternoon Ride - 14-10-2026", 21599 m, 3684 s, start 2026-10-14 12:31:02, device reference `289-2-22701926` |
+| `21741882933.fit` | A new activity named "Afternoon Ride", 21599 m, 3684 s elapsed, start 2026-10-14 12:31:02, device reference `289-2-22701926` |
 | `Afternoon_Ride (4).fit`, the same bytes under another name | SKIPPED, "activity was already imported", the checksum layer matched |
 | the same bytes again as a `.fit.gz`, so a different checksum | MERGED into that same activity by the device layer, and no version recorded because it added nothing |
 
-That activity ends up with `left_pedal_smoothness` and `right_pedal_smoothness` on the same 3674
-sample axis as everything else, 3470 of them carrying a value, which is the data whose absence
-started this.
+The name the import line prints is the stored name and the date written together, "Afternoon Ride -
+14-10-2026", which is one more reason a filename can never be identity: a re-export and a rename do
+not agree on what the ride is called, the device reference and the start instant do.
 
-The last row is the case that needed the fix described above. With MOVING still inside a version
-summary that import appended a third version identical to the second; with the derived stream left
-out it left the history at two rows, which is what "it added nothing" is supposed to mean.
+That activity ends up with `left_pedal_smoothness` and `right_pedal_smoothness` on the same 3674
+sample axis as everything else, which is the data whose absence started this. The FIT records carry
+the field for 3470 samples, and the stored series is gap filled over the rest, so a smoothness series
+holds a number at every sample, including the zeros at the start, and the gap filling caveat in the
+last section applies to it like it applies to everything else.
+
+The last row is the case that needed the fix described above. With MOVING inside a version summary
+that merge appended a version, because the state being retired listed the derived stream and a merge
+result never does. With the derived stream left out the merge adds nothing, no version is written,
+and the history stays empty, which is what "it added nothing" is supposed to mean.
 
 ### The same checks in the rendered app
 

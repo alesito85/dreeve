@@ -92,6 +92,13 @@ class SwitchActivityRevisionCommandHandlerTest extends ContainerTestCase
         $activity = $this->activityRepository->find($activityId);
         $this->assertEquals(Kilometer::from(0.05), $activity->getDistance());
         $this->assertSame(10, $activity->getElapsedTimeInSeconds());
+        // A value the replayed file cannot state goes blank instead of keeping what
+        // a fuller file brought in, so the activity shows the version that is live
+        // and not a mix of it and the one that was dropped. A TCX never states work
+        // done, so the kilojoules are gone until the version that had them returns.
+        $this->assertNull($activity->getKilojoules());
+        // And a value it does state wins outright, stored value or not.
+        $this->assertSame(81, $activity->getAverageCadence());
 
         $streams = $this->activityStreamRepository->findByActivityId($activityId);
         $this->assertSame([0, 10], $streams->filterOnType(StreamType::TIME)?->getData());
@@ -111,6 +118,11 @@ class SwitchActivityRevisionCommandHandlerTest extends ContainerTestCase
         $this->assertSame(2, $retired->getRevisionNumber());
         $this->assertSame(90, $retired->getSummary()->getDistanceInMetres());
         $this->assertSame(20, $retired->getSummary()->getElapsedTimeInSeconds());
+        $this->assertArrayNotHasKey(
+            StreamType::MOVING->value,
+            $retired->getSummary()->getStreamSamples(),
+            'MOVING is rebuilt from the timeline, so it is not part of what a version is made of'
+        );
         $this->assertEquals(
             FileImportId::fromUnprefixed('the-later-import'),
             $retired->getGeneratedByFileImportId(),
@@ -202,6 +214,8 @@ class SwitchActivityRevisionCommandHandlerTest extends ContainerTestCase
                 ->withDistance(Kilometer::from(0.09))
                 ->withElapsedTimeInSeconds(20)
                 ->withMovingTimeInSeconds(20)
+                ->withKilojoules(240)
+                ->withAverageCadence(60)
                 ->withImportSource(ImportSource::TCX_FILE)
                 ->build(),
             ['raw' => 'data'],
